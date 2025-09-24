@@ -1,4 +1,4 @@
-#include "include/utils/map.h"
+#include "../../include/utils/map.h"
 #include <stdlib.h>
 
 unsigned long hash_string(const void* str) {
@@ -32,6 +32,7 @@ HashMap* hashmap_create(
     map->cmp_func = cmp_func;
     map->free_key = free_key;
     map->free_val = free_val;
+    return map;
 }
 
 void hashmap_insert(HashMap* map, void* key, void* val) {
