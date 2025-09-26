@@ -33,6 +33,7 @@ void hashmap_insert(HashMap* map, void* key, void* val);
 void* hashmap_get(HashMap* map, void* key);
 //void hashmap_remove(HashMap* map, void* key);
 void hashmap_destroy(HashMap* map);
+void hashmap_resize(HashMap* map, size_t new_capacity);
 
 
 #endif MAP_H

@@ -35,9 +35,35 @@ HashMap* hashmap_create(
     return map;
 }
 
+void hashmap_resize(HashMap* map, size_t new_capacity) {
+    HashNode** new_buckets = calloc(new_capacity, sizeof(HashNode*));
+    
+    if (!new_buckets) {
+        // Allocation failed → keep old map unchanged
+        fprintf(stderr, "hashmap_resize: failed to allocate %zu buckets\n", new_capacity);
+        return;
+    }
+
+    for (size_t i = 0; i < map->capacity; i++) {
+        HashNode* node = map->buckets[i];
+        while (node) {
+            HashNode* next = node->next;
+            unsigned long hash = map->hash_func(node->key);
+            size_t new_index = hash % new_capacity;
+            node->next = new_buckets[new_index];
+            new_buckets[new_index] = node;
+            node = next;
+        }
+    }
+    // free buckets array
+    free(map->buckets);
+    map->buckets = new_buckets;
+    map->capacity = new_capacity;
+}
+
 void hashmap_insert(HashMap* map, void* key, void* val) {
     unsigned long hash = map->hash_func(key);
-    size_t index = hash % map->capacity; // don't understand this part ?
+    size_t index = hash % map->capacity; 
 
     HashNode* node = map->buckets[index];
     while (node) {
@@ -55,6 +81,11 @@ void hashmap_insert(HashMap* map, void* key, void* val) {
     new_node->next = map->buckets[index];
     map->buckets[index] = new_node;
     map->size++;
+
+    // resize to keep faster lookup operatoin
+    if ((float)map->size / (float)map->capacity > 0.75) {
+        hashmap_resize(map, map->capacity * 2);
+    }
 }
 
 void* hashmap_get(HashMap* map, void* key) {
