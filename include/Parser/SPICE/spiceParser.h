@@ -5,7 +5,17 @@
 
 typedef struct spiceParser
 {
-    /* data */
+    HashMap* devices;
+    HashMap* options;
+    HashMap* analyses;
 } spiceParser;
 
-#endif SPICE_PARSER
+spiceParser* parse_netlist(char* netlist_path);
+char* read_netlist_file(char* netlist_path);
+char* remove_comments(char* netlist_text);
+char* parse_options(spiceParser* parser, char* netlist_text);
+char* parse_analyses(spiceParser* parser, char* netlist_text);
+char* parse_devices(spiceParser* parser, char* netlist_text);
+
+
+#endif

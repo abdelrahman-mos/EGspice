@@ -36,4 +36,4 @@ void hashmap_destroy(HashMap* map);
 void hashmap_resize(HashMap* map, size_t new_capacity);
 
 
-#endif MAP_H
+#endif

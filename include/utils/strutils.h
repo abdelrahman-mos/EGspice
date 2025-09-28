@@ -4,4 +4,4 @@
 #include <string.h>
 
 char *my_strdup(const char *s);
-#endif STR_UTILS_H
+#endif

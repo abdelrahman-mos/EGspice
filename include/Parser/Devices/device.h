@@ -3,4 +3,4 @@
 #include "Resistor.h"
 #include "Vsource.h"
 #include "Isource.h"
-#endif DEVICE_H
+#endif
