@@ -16,6 +16,7 @@ char* remove_comments(char* netlist_text);
 char* parse_options(spiceParser* parser, char* netlist_text);
 char* parse_analyses(spiceParser* parser, char* netlist_text);
 char* parse_devices(spiceParser* parser, char* netlist_text);
+void free_parser(spiceParser* parser);
 
 
 #endif

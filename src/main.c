@@ -20,6 +20,17 @@ int main() {
     // printf("age: %d\n", *(int*) hashmap_get(my_map, "age"));
 
     // hashmap_destroy(my_map);
-    spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
+
+    // spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
+    // free_parser(parsed_netlist);
+    char* my_text = "Hello my name is abdelrahman mostafa";
+    char** my_text_split = splittext(my_text, " ");
+    if (my_text_split == NULL) {
+        printf("null output\n");
+        return 0;
+    }
+    for (int i = 0; my_text_split[i] != '\0'; i++) {
+        printf("index %d: %s", i, my_text_split[i]);
+    }
     return 0;
 }
