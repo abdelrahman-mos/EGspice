@@ -1,5 +1,5 @@
 *
-* this is the next voltage source
+    * this is the next voltage source
 V1 1 0 10
 * first resistor
 R1 1 2 1k

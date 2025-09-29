@@ -30,10 +30,14 @@ char** splittext(const char s[], char split_token[]) {
         char tmp = s[i];
         if (tmp == split_token[0]) num_tokens++;
     }
-    if (num_tokens == 0) return NULL;
+    char** tokens = calloc(num_tokens+2, sizeof(char*));
+    if (num_tokens == 0) {
+        tokens[0] = s;
+        tokens[1] = NULL;
+        return tokens;
+    }
 
     char* tmp_string = my_strdup(s);
-    char** tokens = calloc(num_tokens+2, sizeof(char*));
     char* token = strtok(tmp_string, split_token);
     int iter = 0;
 
@@ -65,6 +69,25 @@ void remove_char_element(char** text_arr, int index) {
 
     for (int i = index; text_arr[i] != NULL; i++) {
         text_arr[i] = text_arr[i+1];
+    }
+}
+
+char* strntondup(const char* src, int start, int end) {
+    if (end <= start) return NULL;
+    char* out = malloc(sizeof(char)*(end-start));
+    for (int i = start; i < end; i++) {
+        out[i-start] = src[i];
+    }
+    return out;
+}
+
+void lower_str_in_place(char* s) {
+    size_t len = strlen(s);
+    for (size_t i = 0; i < len; i++) {
+        char tmp = s[i];
+        if (isupper(tmp)) {
+            s[i] = tolower(tmp);
+        }
     }
 }
 
