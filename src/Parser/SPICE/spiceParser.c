@@ -1,6 +1,5 @@
 #include "../../../include/Parser/SPICE/spiceParser.h"
 #include "../../../include/utils/strutils.h"
-#include <stdlib.h>
 #include <ctype.h>
 
 spiceParser* parse_netlist(char* netlist_path) {

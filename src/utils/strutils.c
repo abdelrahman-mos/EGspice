@@ -32,3 +32,48 @@ char** splittext(const char s[], char split_token[]) {
     free(tmp_string);
     return tokens;
 }
+
+char* _regex_replace_compiled(const regex_t* regex, const char* text, const char* replacement) {
+    regmatch_t match;
+    size_t repl_len = strlen(replacement);
+    size_t out_size = 1; // for '\0'
+    char* out = malloc(out_size);
+    if (!out) return NULL;
+    out[0] = '\0';
+
+    const char* cursor = text;
+    // replacement for all matches
+    while (regexec(regex, cursor, 1, &match, 0) == 0) {
+        size_t before_len = match.rm_so;
+        size_t old_len = strlen(out);
+        size_t new_size = old_len + before_len + repl_len + 1;
+
+        out = realloc(out, new_size);
+        if (!out) return NULL;
+
+        strncat(out, cursor, before_len);
+        strcat(out, replacement);
+        cursor += match.rm_eo;
+    }
+
+    // add the remaining
+    size_t old_len = strlen(out);
+    size_t tail_len = strlen(cursor);
+    out = realloc(out, old_len + tail_len + 1);
+    if (!out) return NULL;
+    strcat(out, cursor);
+
+    return out;
+}
+
+char* regex_replace(const char* pattern, const char* text, const char* replacement) {
+    regex_t regex;
+    if (regcomp(&regex, pattern, REG_EXTENDED)) {
+        fprintf(stderr, "Invalid regex: %s\n", pattern);
+        return NULL;
+    }
+    
+    char* result = _regex_replace_compiled(&regex, text, replacement);
+    regfree(&regex);
+    return result;
+}
