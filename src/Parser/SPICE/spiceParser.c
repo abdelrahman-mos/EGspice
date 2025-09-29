@@ -10,17 +10,22 @@ spiceParser* parse_netlist(char* netlist_path) {
     remove_char_element(netlist_text_split, 0);
     char** netlist_text_split_no_comments = remove_comments(netlist_text_split);
     char** netlist_text_split_no_analyses = parse_analyses(parsed_netlist, netlist_text_split_no_comments);
+    printf("parsed analyses");
     char** netlist_text_split_no_options = parse_options(parsed_netlist, netlist_text_split_no_analyses);
     parse_devices(parsed_netlist, netlist_text_split_no_options);
 
-    // printf("returned split text\n");
-    // for (int i = 0; netlist_text_split[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split[i]);
-    // }
-    // printf("text with no comments\n");
-    // for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
-    // }
+    printf("returned split text\n");
+    for (int i = 0; netlist_text_split[i] != NULL; i++) {
+        printf("index %d: %s\n", i, netlist_text_split[i]);
+    }
+    printf("text with no comments\n");
+    for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
+        printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
+    }
+    printf("text with no comments nor analyses\n");
+    for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
+        printf("index %d: %s\n", i, netlist_text_split_no_analyses[i]);
+    }
 
     free_split_text(netlist_text_split);
     free_split_text(netlist_text_split_no_comments);
@@ -88,8 +93,8 @@ char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
         char** curr_line_splitted = splittext(curr_line, " ");
         for (int i = 0; curr_line_splitted[i] != NULL; i++) {
         printf("index %d: %s\n", i, curr_line_splitted[i]);
-    }
-        char* analysis = curr_line_splitted[0];
+        }
+        char* analysis = my_strdup(curr_line_splitted[0]);
         if (!analysis) return NULL;
         lower_str_in_place(analysis);
 
@@ -100,8 +105,10 @@ char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
         } 
 
         printf("current line is a supported analysis %s\n", analysis);
-        hashmap_insert(parser->analyses, "an1", analysis);
-        free(analysis);
+        hashmap_insert(parser->analyses, my_strdup("an1"), analysis);
+        printf("inserted analysis\n");
+        remove_char_element(netlist_text_split_no_analyses, i);
+        
     }
     return netlist_text_split_no_analyses;
 }
