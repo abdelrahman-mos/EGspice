@@ -21,8 +21,8 @@ int main() {
 
     // hashmap_destroy(my_map);
 
-    // spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
-    // free_parser(parsed_netlist);
+    spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
+    free_parser(parsed_netlist);
     // char my_text[] = "Hello my name is abdelrahman mostafa";
     // char** my_text_split = splittext(my_text, " ");
     // if (my_text_split == NULL) {
@@ -37,13 +37,13 @@ int main() {
     // }
     // free(my_text_split[i]);
     // free(my_text_split);
-    char* my_text = "  x   =  22n hello";
-    char* output_text = regex_replace("\\s*=\\s*", my_text, "=");
+    // char* my_text = "  x   =  22n hello";
+    // char* output_text = regex_replace("\\s*=\\s*", my_text, "=");
 
-    if (output_text) {
-        printf("Original: %s\n", my_text);
-        printf("Output: %s\n", output_text);
-        free(output_text);
-    }
+    // if (output_text) {
+    //     printf("Original: %s\n", my_text);
+    //     printf("Output: %s\n", output_text);
+    //     free(output_text);
+    // }
     return 0;
 }

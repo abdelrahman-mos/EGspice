@@ -9,6 +9,21 @@ char* my_strdup(const char *s) {
     return copy;
 }
 
+char** strdup_arr(const char** s) {
+    if (s == NULL) return;
+    char** copy = NULL;
+    int i;
+    for (i = 0; s[i] != NULL; i++) {
+        copy = realloc(copy, (i+1)*sizeof(char*));
+        if (!copy) return NULL;
+        copy[i] = my_strdup(s[i]);
+    }
+    copy = realloc(copy, (i+1)*sizeof(char*));
+    if (!copy) return NULL;
+    copy[i] = NULL;
+    return copy;
+}
+
 char** splittext(const char s[], char split_token[]) {
     int num_tokens = 0;
     for (size_t i = 0; i < strlen(s); i++) {
@@ -34,12 +49,23 @@ char** splittext(const char s[], char split_token[]) {
 }
 
 void free_split_text(char** split_text) {
+    if (split_text == NULL) return;
     int i;
     for (i = 0; split_text[i] != NULL; i++) {
         free(split_text[i]);
     }
     free(split_text[i]);
     free(split_text);
+}
+
+void remove_char_element(char** text_arr, int index) {
+    if (!text_arr) return;
+
+    free(text_arr[index]);
+
+    for (int i = index; text_arr[i] != NULL; i++) {
+        text_arr[i] = text_arr[i+1];
+    }
 }
 
 char* _regex_replace_compiled(const regex_t* regex, const char* text, const char* replacement) {
