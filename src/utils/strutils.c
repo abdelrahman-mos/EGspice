@@ -33,6 +33,15 @@ char** splittext(const char s[], char split_token[]) {
     return tokens;
 }
 
+void free_split_text(char** split_text) {
+    int i;
+    for (i = 0; split_text[i] != NULL; i++) {
+        free(split_text[i]);
+    }
+    free(split_text[i]);
+    free(split_text);
+}
+
 char* _regex_replace_compiled(const regex_t* regex, const char* text, const char* replacement) {
     regmatch_t match;
     size_t repl_len = strlen(replacement);

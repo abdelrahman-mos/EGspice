@@ -9,17 +9,17 @@ spiceParser* parse_netlist(char* netlist_path) {
     char** netlist_text_split = splittext(netlist_text, "\n");
     printf("input netlist:\n%s\n", netlist_text);
     char** netlist_text_split_no_comments = remove_comments(netlist_text_split);
+    char** netlist_text_split_no_analyses = parse_analyses(parsed_netlist, netlist_text_split_no_comments);
+    char** netlist_text_split_no_options = parse_options(parsed_netlist, netlist_text_split_no_analyses);
+    parse_devices(parsed_netlist, netlist_text_split_no_options);
     printf("returned split text\n");
-    int i;
-    for (i = 0; netlist_text_split[i] != NULL; i++) {
+    for (int i = 0; netlist_text_split[i] != NULL; i++) {
         printf("index %d: %s\n", i, netlist_text_split[i]);
     }
-    for (i = 0; netlist_text_split[i] != NULL; i++) {
-        free(netlist_text_split[i]);
-    }
-    free(netlist_text_split[i]);
-    free(netlist_text_split);
-    // free(netlist_text_split_no_comments);
+    free_split_text(netlist_text_split);
+    free_split_text(netlist_text_split_no_comments);
+    free_split_text(netlist_text_split_no_analyses);
+    free_split_text(netlist_text_split_no_options);
     return parsed_netlist;
 }
 
@@ -61,16 +61,16 @@ char** remove_comments(char** netlist_text_split) {
     return netlist_text_split;
 }
 
-char* parse_options(spiceParser* parser, char* netlist_text) {
-    return;
+char* parse_options(spiceParser* parser, char** netlist_text_split) {
+    return my_strdup(netlist_text_split);
 }
 
-char* parse_analyses(spiceParser* parser, char* netlist_text) {
-    return;
+char* parse_analyses(spiceParser* parser, char** netlist_text_split) {
+    return my_strdup(netlist_text_split);
 }
 
-char* parse_devices(spiceParser* parser, char* netlist_text) {
-    return;
+void parse_devices(spiceParser* parser, char** netlist_text_split) {
+    return my_strdup(netlist_text_split);
 }
 
 void free_parser(spiceParser* parser) {
