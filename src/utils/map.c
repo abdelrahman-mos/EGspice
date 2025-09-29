@@ -101,6 +101,9 @@ void* hashmap_get(HashMap* map, void* key) {
 }
 
 void hashmap_destroy(HashMap* map) {
+    if (map == NULL) {
+        return;
+    }
     for (size_t i = 0; i < map->capacity; i++) {
         HashNode* node = map->buckets[i];
         while (node) {

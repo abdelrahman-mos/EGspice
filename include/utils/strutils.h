@@ -5,5 +5,5 @@
 #include <string.h>
 
 char *my_strdup(const char *s);
-char** splittext(const char* s, char* token);
+char** splittext(const char s[], char split_token[]);
 #endif

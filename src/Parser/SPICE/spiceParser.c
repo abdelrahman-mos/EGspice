@@ -1,6 +1,7 @@
 #include "../../../include/Parser/SPICE/spiceParser.h"
 #include "../../../include/utils/strutils.h"
 #include <stdlib.h>
+#include <ctype.h>
 
 spiceParser* parse_netlist(char* netlist_path) {
     spiceParser* parsed_netlist = malloc(sizeof(spiceParser));
@@ -8,6 +9,18 @@ spiceParser* parse_netlist(char* netlist_path) {
     
     char** netlist_text_split = splittext(netlist_text, "\n");
     printf("input netlist:\n%s\n", netlist_text);
+    char** netlist_text_split_no_comments = remove_comments(netlist_text_split);
+    printf("returned split text\n");
+    int i;
+    for (i = 0; netlist_text_split[i] != NULL; i++) {
+        printf("index %d: %s\n", i, netlist_text_split[i]);
+    }
+    for (i = 0; netlist_text_split[i] != NULL; i++) {
+        free(netlist_text_split[i]);
+    }
+    free(netlist_text_split[i]);
+    free(netlist_text_split);
+    // free(netlist_text_split_no_comments);
     return parsed_netlist;
 }
 
@@ -35,9 +48,18 @@ char* read_netlist_file(char* netlist_path) {
     return netlist_text;
 }
 
-char* remove_comments(char* netlist_text) {
-
-    return;
+char** remove_comments(char** netlist_text_split) {
+    for (int i = 0; netlist_text_split[i] != NULL; i++) {
+        int j = 0;
+        char* tmp_text = netlist_text_split[i];
+        while (isspace(tmp_text[j])) {
+            j++;
+        }
+        if (tmp_text[j] == '*') {
+            printf("This is a comment: %s\n", tmp_text);
+        }
+    }
+    return netlist_text_split;
 }
 
 char* parse_options(spiceParser* parser, char* netlist_text) {
