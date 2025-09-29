@@ -23,14 +23,19 @@ int main() {
 
     // spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
     // free_parser(parsed_netlist);
-    char* my_text = "Hello my name is abdelrahman mostafa";
+    char my_text[] = "Hello my name is abdelrahman mostafa";
     char** my_text_split = splittext(my_text, " ");
     if (my_text_split == NULL) {
         printf("null output\n");
         return 0;
     }
-    for (int i = 0; my_text_split[i] != '\0'; i++) {
-        printf("index %d: %s", i, my_text_split[i]);
+    for (int i = 0; my_text_split[i] != NULL; i++) {
+        printf("index %d: %s\n", i, my_text_split[i]);
     }
+    for (int i = 0; my_text_split[i] != NULL; i++) {
+        free(my_text_split[i]);
+    }
+    // free(my_text_split[i]);
+    free(my_text_split);
     return 0;
 }

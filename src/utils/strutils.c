@@ -1,6 +1,6 @@
 #include "../../include/utils/strutils.h"
 
-char *my_strdup(const char *s) {
+char* my_strdup(const char *s) {
     size_t len = strlen(s) + 1;
     char* copy = malloc(len);
     if (copy) {
@@ -9,29 +9,26 @@ char *my_strdup(const char *s) {
     return copy;
 }
 
-char** splittext(const char* s, const char split_token) {
-    printf("inside splittext\n");
+char** splittext(const char s[], char split_token[]) {
     int num_tokens = 0;
-    for (int i = 0; i < strlen(s); i++) {
+    for (size_t i = 0; i < strlen(s); i++) {
         char tmp = s[i];
-        printf("tmp char = %c\n", tmp);
-        if (tmp == split_token) num_tokens++;
+        if (tmp == split_token[0]) num_tokens++;
     }
     if (num_tokens == 0) return NULL;
-    printf("got number of tokens = %d\n", num_tokens);
+
+    char* tmp_string = my_strdup(s);
     char** tokens = calloc(num_tokens+2, sizeof(char*));
-    printf("allocated memory for tokens\n");
-    char* token = strtok(s, split_token);
-    printf("split the first token\n");
+    char* token = strtok(tmp_string, split_token);
     int iter = 0;
+
     while (token != NULL)
     {
-        printf("token: %s\n", token);
-        size_t len = strlen(token) + 1;
-        memcpy(tokens[iter++], token, len);
+        tokens[iter++] = my_strdup(token);
         token = strtok(NULL, split_token);
     }
-    printf("iter: %d\n", iter);
-    tokens[iter] = "\0";
+
+    tokens[iter] = NULL;
+    free(tmp_string);
     return tokens;
 }
