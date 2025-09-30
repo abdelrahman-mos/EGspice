@@ -108,12 +108,20 @@ void hashmap_destroy(HashMap* map) {
         HashNode* node = map->buckets[i];
         while (node) {
             HashNode* next = node->next;
-            if (map->free_key) map->free_key(node->key);
-            if (map->free_val) map->free_val(node->val);
+            if (map->free_key) {
+                map->free_key(node->key);
+                node->key = NULL;
+            }
+            if (map->free_val) {
+                map->free_val(node->val);
+                node->val = NULL;
+            }
             free(node);
             node = next;
         }
     }
     free(map->buckets);
+    map->buckets = NULL;
     free(map);
+    map = NULL;
 }

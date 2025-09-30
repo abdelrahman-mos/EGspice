@@ -22,6 +22,8 @@ int main() {
     // hashmap_destroy(my_map);
 
     spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
+    char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
+    printf("analysis: %s\n", analysis);
     free_parser(parsed_netlist);
     // char my_text[] = "Hello my name is abdelrahman mostafa";
     // char** my_text_split = splittext(my_text, " ");

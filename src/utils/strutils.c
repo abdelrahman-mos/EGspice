@@ -57,9 +57,12 @@ void free_split_text(char** split_text) {
     int i;
     for (i = 0; split_text[i] != NULL; i++) {
         free(split_text[i]);
+        split_text[i] = NULL;
     }
     free(split_text[i]);
+    split_text[i] = NULL;
     free(split_text);
+    split_text = NULL;
 }
 
 void remove_char_element(char** text_arr, int index) {
