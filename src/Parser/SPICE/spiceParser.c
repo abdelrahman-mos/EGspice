@@ -85,7 +85,6 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
     
     for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
         char* curr_line = regex_replace("\\s*=\\s*", netlist_text_split_no_options[i], "=");
-        printf("current line is %s\n", curr_line);
         int j = 0;
         while(isspace(curr_line[j])) j++;
         if (curr_line[j] != '.') continue;
@@ -102,11 +101,19 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
             continue;
         } 
 
-        for (int i = 0; curr_line_splitted[i] != NULL; i++) {
+        for (int i = 1; curr_line_splitted[i] != NULL; i++) {
             option = curr_line_splitted[i];
             printf("current line is a supported option %s\n", option);
-            hashmap_insert(parser->options, my_strdup("an1"), my_strdup(curr_line));
-            printf("inserted option\n");
+            char flag = 0;
+            for (int j = 0; j < strlen(option); j++) {
+                if (option[j] == '=') flag = 1;
+            }
+            if (flag) {
+                char** option_split = splittext(option, "=");
+                hashmap_insert(parser->options, option_split[0], option_split[1]);
+            } else {
+                hashmap_insert(parser->options, option, my_strdup(""));  
+            }     
         }
         remove_char_element(netlist_text_split_no_options, i);
         
