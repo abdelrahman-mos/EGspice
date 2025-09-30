@@ -11,25 +11,24 @@ spiceParser* parse_netlist(char* netlist_path) {
     char** netlist_text_split_no_comments = remove_comments(netlist_text_split);
     char** netlist_text_split_no_analyses = parse_analyses(parsed_netlist, netlist_text_split_no_comments);
     char** netlist_text_split_no_options = parse_options(parsed_netlist, netlist_text_split_no_analyses);
-    printf("parsed options\n");
     parse_devices(parsed_netlist, netlist_text_split_no_options);
 
-    printf("returned split text\n");
-    for (int i = 0; netlist_text_split[i] != NULL; i++) {
-        printf("index %d: %s\n", i, netlist_text_split[i]);
-    }
-    printf("text with no comments\n");
-    for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
-        printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
-    }
-    printf("text with no comments nor analyses\n");
-    for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
-        printf("index %d: %s\n", i, netlist_text_split_no_analyses[i]);
-    }
-    printf("text with no comments nor analyses nor options\n");
-    for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
-        printf("index %d: %s\n", i, netlist_text_split_no_options[i]);
-    }
+    // printf("returned split text\n");
+    // for (int i = 0; netlist_text_split[i] != NULL; i++) {
+    //     printf("index %d: %s\n", i, netlist_text_split[i]);
+    // }
+    // printf("text with no comments\n");
+    // for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
+    //     printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
+    // }
+    // printf("text with no comments nor analyses\n");
+    // for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
+    //     printf("index %d: %s\n", i, netlist_text_split_no_analyses[i]);
+    // }
+    // printf("text with no comments nor analyses nor options\n");
+    // for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
+    //     printf("index %d: %s\n", i, netlist_text_split_no_options[i]);
+    // }
     free_split_text(netlist_text_split);
     free_split_text(netlist_text_split_no_comments);
     free_split_text(netlist_text_split_no_analyses);
@@ -89,9 +88,7 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
         while(isspace(curr_line[j])) j++;
         if (curr_line[j] != '.') continue;
         char** curr_line_splitted = splittext(curr_line, " ");
-        for (int i = 0; curr_line_splitted[i] != NULL; i++) {
-        printf("index %d: %s\n", i, curr_line_splitted[i]);
-        }
+
         char* option = curr_line_splitted[0];
         if (!option) return NULL;
         lower_str_in_place(option);
@@ -103,7 +100,6 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
 
         for (int i = 1; curr_line_splitted[i] != NULL; i++) {
             option = curr_line_splitted[i];
-            printf("current line is a supported option %s\n", option);
             char flag = 0;
             for (int j = 0; j < strlen(option); j++) {
                 if (option[j] == '=') flag = 1;
@@ -149,7 +145,77 @@ char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
 }
 
 void parse_devices(spiceParser* parser, char** netlist_text_split) {
-    return strdup_arr(netlist_text_split);
+    char** netlist_text_split_no_devices = strdup_arr(netlist_text_split);
+    parser->devices = hashmap_create(16, hash_string, cmp_func, free, free);
+    for (int i = 0; netlist_text_split_no_devices[i] != NULL; i++) {
+        char* curr_line = netlist_text_split_no_devices[i];
+        lower_str_in_place(curr_line);
+        int j = 0;
+        while(isspace(curr_line[j])) j++;
+        if ((curr_line[j] != 'v') && (curr_line[j] != 'r') && (curr_line[j] != 'i')) {
+            fprintf(stderr, "unsupported device %s\n", curr_line);
+            return;
+        }
+        device_type type;
+        switch (curr_line[j])
+        {
+        case 'v':
+            type = VSOURCE;
+            break;
+        case 'i':
+            type = ISOURCE;
+            break;
+        case 'r':
+            type = RESISTOR;
+            break;
+        }
+        parse_two_terminal_device(parser->devices, curr_line, type);
+    }
+}
+
+void parse_two_terminal_device(HashMap* devices_map, char* line, device_type type) {
+    char** line_split = splittext(line, " ");
+    int line_len = 0;
+    for (line_len = 0; line_split[line_len] != NULL; line_len++);
+    if (line_len != 4) {
+        fprintf(stderr, "Incorrect device definition %s", line);
+        return;
+    }
+    
+    char* device_name = line_split[0];
+    // need to support non-number node names
+    int node_1 = atoi(line_split[1]);
+    int node_2 = atoi(line_split[2]); 
+    // need to support postfix removal and replacing
+    // 1v -> 1
+    // 1a -> 1e-18
+    // 1k -> 1000
+    // 1m -> 0.001
+    // 1meg -> 1000000
+    double val = atof(line_split[3]);
+    if (type == VSOURCE) {
+        Vsource* device = malloc(sizeof(Vsource));
+        device->name = device_name;
+        device->node1 = node_1;
+        device->node2 = node_2;
+        device->val = val;
+        hashmap_insert(devices_map, device_name, device);
+    } else if (type == ISOURCE)
+    {
+        Isource* device = malloc(sizeof(Isource));
+        device->name = device_name;
+        device->node1 = node_1;
+        device->node2 = node_2;
+        device->val = val;
+        hashmap_insert(devices_map, device_name, device);
+    } else if (type == RESISTOR) {
+        Resistor* device = malloc(sizeof(Resistor));
+        device->name = device_name;
+        device->node1 = node_1;
+        device->node2 = node_2;
+        device->val = val;
+        hashmap_insert(devices_map, device_name, device);
+    }
 }
 
 void free_parser(spiceParser* parser) {

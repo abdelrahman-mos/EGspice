@@ -2,9 +2,9 @@
     * this is the next voltage source
 V1 1 0 10
 * first resistor
-R1 1 2 1k
+R1 1 2 1000
     ** second resistor
-R2 2 0 1k
+R2 2 0 1000
 
 * analyses
 .OP
