@@ -34,6 +34,7 @@ void* hashmap_get(HashMap* map, void* key);
 //void hashmap_remove(HashMap* map, void* key);
 void hashmap_destroy(HashMap* map);
 void hashmap_resize(HashMap* map, size_t new_capacity);
+char** hashmap_keys(HashMap* map);
 
 
 #endif

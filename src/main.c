@@ -24,6 +24,23 @@ int main() {
     spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
     char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     printf("analysis: %s\n", analysis);
+    char** devices_names = hashmap_keys(parsed_netlist->devices);
+    for (int i = 0; devices_names[i] != NULL; i++) {
+        char* device_name = devices_names[i];
+        Device* device = hashmap_get(parsed_netlist->devices, device_name);
+        if (device->type == VSOURCE) {
+            Vsource* device_data = (Vsource*) device->device_data;
+            print_device(device_data);
+        } else if (device->type == ISOURCE)
+        {
+            Isource* device_data = (Isource*) device->device_data;
+            print_device(device_data);
+        } else if (device->type == RESISTOR)
+        {
+            Resistor* device_data = (Resistor*) device->device_data;
+            print_device(device_data);
+        }        
+    }
     free_parser(parsed_netlist);
     // char my_text[] = "Hello my name is abdelrahman mostafa";
     // char** my_text_split = splittext(my_text, " ");

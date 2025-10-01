@@ -194,26 +194,35 @@ void parse_two_terminal_device(HashMap* devices_map, char* line, device_type typ
     // 1meg -> 1000000
     double val = atof(line_split[3]);
     if (type == VSOURCE) {
-        Vsource* device = malloc(sizeof(Vsource));
-        device->name = device_name;
-        device->node1 = node_1;
-        device->node2 = node_2;
-        device->val = val;
+        Device* device = malloc(sizeof(Device));
+        device->type = VSOURCE;
+        Vsource* device_data = (Vsource*) malloc(sizeof(Vsource));
+        device_data->name = device_name;
+        device_data->node1 = node_1;
+        device_data->node2 = node_2;
+        device_data->val = val;
+        device->device_data = device_data;
         hashmap_insert(devices_map, device_name, device);
     } else if (type == ISOURCE)
     {
-        Isource* device = malloc(sizeof(Isource));
-        device->name = device_name;
-        device->node1 = node_1;
-        device->node2 = node_2;
-        device->val = val;
+        Device* device = malloc(sizeof(Device));
+        device->type = ISOURCE;
+        Isource* device_data = malloc(sizeof(Isource));
+        device_data->name = device_name;
+        device_data->node1 = node_1;
+        device_data->node2 = node_2;
+        device_data->val = val;
+        device->device_data = device_data;
         hashmap_insert(devices_map, device_name, device);
     } else if (type == RESISTOR) {
-        Resistor* device = malloc(sizeof(Resistor));
-        device->name = device_name;
-        device->node1 = node_1;
-        device->node2 = node_2;
-        device->val = val;
+        Device* device = malloc(sizeof(Device));
+        device->type = RESISTOR;
+        Resistor* device_data = malloc(sizeof(Resistor));
+        device_data->name = device_name;
+        device_data->node1 = node_1;
+        device_data->node2 = node_2;
+        device_data->val = val;
+        device->device_data = device_data;
         hashmap_insert(devices_map, device_name, device);
     }
 }

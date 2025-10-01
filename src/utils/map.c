@@ -100,6 +100,24 @@ void* hashmap_get(HashMap* map, void* key) {
     return NULL;
 }
 
+char** hashmap_keys(HashMap* map) {
+    char** keys = malloc((map->size + 1) * sizeof(char*));
+    size_t index = 0;
+
+    for (size_t i = 0; i < map->capacity; i++) {
+        HashNode* node = map->buckets[i];
+        while (node)
+        {
+            keys[index++] = node->key;
+            node = node->next;
+        }
+        
+    }
+
+    keys[index] = NULL;
+    return keys;
+}
+
 void hashmap_destroy(HashMap* map) {
     if (map == NULL) {
         return;
