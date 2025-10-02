@@ -85,6 +85,7 @@ void normal_mul(Matrix* mat_A, Matrix* mat_B, Matrix* output) {
 }
 
 // still not implemented
+// not valid in this use case lol
 void strassen_mul(Matrix* mat_A, Matrix* mat_B, Matrix* output) {
     return normal_mul(mat_A, mat_B, output);
 }
@@ -99,4 +100,32 @@ Matrix* mat_transpose(Matrix* mat) {
     return output;
 }
 
-double mat_determinant(Matrix* mat);
+// implemented using gaussian elimination (might use same algorithm for solve)
+double mat_determinant(Matrix* mat) {
+    double det = 1.0;
+    if (mat->nCols != mat->nRows) {
+        fprintf(stderr, "matrix must be a square to calculate determinant, matrix size %dx%d", mat->nCols, mat->nRows);
+        return -INFINITY;
+    }
+
+    Matrix* tmp = copy_matrix(mat);
+    for (int i = 0; i < tmp->nCols; i++) {
+        int pivot = i;
+        for (int row = i+1; row < tmp->nRows; row++) {
+            if (fabs(tmp->pValues[row][i]) > fabs(tmp->pValues[pivot][i])) pivot = row;
+        }
+
+        if (fabs(tmp->pValues[pivot][i]) < MX_ATOL) {
+            // matrix is singular
+            det = 0.0;
+            break;
+        }
+
+        if (pivot != i) {
+            // we need to swap rows here
+        }
+    }
+
+    free(tmp);
+    return det;
+}

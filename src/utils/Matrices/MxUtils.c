@@ -35,6 +35,16 @@ Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
     return output;
 }
 
+Matrix* copy_matrix(Matrix* matrix) {
+    Matrix* output = create_matrix(matrix->nRows, matrix->nCols, MFT_NONE);
+    for (int i = 0; i < matrix->nRows; i++) {
+        for (int j = 0; j < matrix->nCols; j++) {
+            output->pValues[i][j] = matrix->pValues[i][j];
+        }
+    }
+    return output;
+}
+
 void destroy_matrix(Matrix* matrix) {
     if (!matrix) return;
     for (int r = 0; r < matrix->nRows; r++) {
