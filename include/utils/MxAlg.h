@@ -1,6 +1,9 @@
 #ifndef MXALG_H
 #define MXALG_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct
 {
     int nRows;
@@ -15,6 +18,7 @@ void destroy_matrix(Matrix* matrix);
 void print_matrix(Matrix* matrix);
 Matrix* mat_add(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_sub(Matrix* mat_A, Matrix* mat_B);
+Matrix* mat_sum(int num, ...);
 Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_transpose(Matrix* mat);
 double mat_determinant(Matrix* mat);

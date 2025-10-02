@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "../../../include/utils/MxAlg.h"
 
 Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
@@ -23,7 +21,7 @@ Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
                     output->pValues[r][c] = 1;
                     break;
                 case MFT_RAND:
-                    output->pValues[r][c] = (rand()%10000000)/10000000.0;
+                    output->pValues[r][c] = rand()/(double)RAND_MAX;
                     break;
                 case MFT_IDENTITY:
                     output->pValues[r][c] = (r == c) ? 1 : 0;
@@ -38,6 +36,7 @@ Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
 }
 
 void destroy_matrix(Matrix* matrix) {
+    if (!matrix) return;
     for (int r = 0; r < matrix->nRows; r++) {
         free(matrix->pValues[r]);
     }
@@ -46,6 +45,7 @@ void destroy_matrix(Matrix* matrix) {
 }
 
 void print_matrix(Matrix* matrix) {
+    if (!matrix) return;
     for (int r = 0; r < matrix->nRows; r++) {
         for (int c = 0; c < matrix->nCols; c++) {
             printf("%.15lf\t", matrix->pValues[r][c]);

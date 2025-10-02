@@ -67,7 +67,32 @@ int main() {
     // }
 
     Matrix* mat = create_matrix(4, 4, MFT_RAND);
+    Matrix* mat2 = create_matrix(4, 4, MFT_ONES);
+    Matrix* mat3 = create_matrix(2, 4, MFT_IDENTITY);
+    Matrix* mat5 = create_matrix(4, 4, MFT_IDENTITY);
+    printf("matrix1:\n");
     print_matrix(mat);
+    printf("matrix2:\n");
+    print_matrix(mat2);
+    printf("matrix3:\n");
+    print_matrix(mat5);
+    Matrix* mat4 = mat_add(mat, mat2);
+    printf("matrix1 + matrix2:\n");
+    print_matrix(mat4);
+    Matrix* mat6 = mat_add(mat2, mat5);
+    printf("matrix2 + matrix3:\n");
+    print_matrix(mat6);
+    Matrix* mat7 = mat_sum(3, mat, mat2, mat5);
+    printf("matrix1 + matrix2 + matrix3:\n");
+    print_matrix(mat7);
+    mat_add(mat, mat3);
     destroy_matrix(mat);
+    destroy_matrix(mat2);
+    destroy_matrix(mat3);
+    destroy_matrix(mat4);
+    destroy_matrix(mat5);
+    destroy_matrix(mat6);
+    destroy_matrix(mat7);
+    
     return 0;
 }
