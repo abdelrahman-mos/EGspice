@@ -1,6 +1,7 @@
 #include "../include/utils/map.h"
 #include "../include/utils/strutils.h"
 #include "../include/Parser/SPICE/spiceParser.h"
+#include "../include/utils/MxAlg.h"
 
 // int cmp_func(const void* a, const void* b) {
 //     return strcmp((const char *) a, (const char *) b);
@@ -21,27 +22,27 @@ int main() {
 
     // hashmap_destroy(my_map);
 
-    spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
-    char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
-    printf("analysis: %s\n", analysis);
-    char** devices_names = hashmap_keys(parsed_netlist->devices);
-    for (int i = 0; devices_names[i] != NULL; i++) {
-        char* device_name = devices_names[i];
-        Device* device = hashmap_get(parsed_netlist->devices, device_name);
-        if (device->type == VSOURCE) {
-            Vsource* device_data = (Vsource*) device->device_data;
-            print_device(device_data);
-        } else if (device->type == ISOURCE)
-        {
-            Isource* device_data = (Isource*) device->device_data;
-            print_device(device_data);
-        } else if (device->type == RESISTOR)
-        {
-            Resistor* device_data = (Resistor*) device->device_data;
-            print_device(device_data);
-        }        
-    }
-    free_parser(parsed_netlist);
+    // spiceParser* parsed_netlist = parse_netlist("test_netlists/voltage_divider.cir");
+    // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
+    // printf("analysis: %s\n", analysis);
+    // char** devices_names = hashmap_keys(parsed_netlist->devices);
+    // for (int i = 0; devices_names[i] != NULL; i++) {
+    //     char* device_name = devices_names[i];
+    //     Device* device = hashmap_get(parsed_netlist->devices, device_name);
+    //     if (device->type == VSOURCE) {
+    //         Vsource* device_data = (Vsource*) device->device_data;
+    //         print_device(device_data);
+    //     } else if (device->type == ISOURCE)
+    //     {
+    //         Isource* device_data = (Isource*) device->device_data;
+    //         print_device(device_data);
+    //     } else if (device->type == RESISTOR)
+    //     {
+    //         Resistor* device_data = (Resistor*) device->device_data;
+    //         print_device(device_data);
+    //     }        
+    // }
+    // free_parser(parsed_netlist);
     // char my_text[] = "Hello my name is abdelrahman mostafa";
     // char** my_text_split = splittext(my_text, " ");
     // if (my_text_split == NULL) {
@@ -64,5 +65,9 @@ int main() {
     //     printf("Output: %s\n", output_text);
     //     free(output_text);
     // }
+
+    Matrix* mat = create_matrix(4, 4, MFT_RAND);
+    print_matrix(mat);
+    destroy_matrix(mat);
     return 0;
 }
