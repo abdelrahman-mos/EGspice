@@ -66,17 +66,33 @@ int main() {
     //     free(output_text);
     // }
 
-    Matrix* mat = create_matrix(2, 2, MFT_RAND);
-    Matrix* mat_t = mat_transpose(mat);
+    Matrix* mat_A = create_matrix(3, 3, MFT_NONE);
+    Matrix* mat_B = create_matrix(3, 1, MFT_NONE);
+    double A[3][3] = {
+        {2.0, 1.0, -1.0},
+        {-3.0, -1.0, 2.0},
+        {-2.0, 1.0, 2.0}
+    };
+    double B[3][1] = {
+        {8},
+        {-11},
+        {-3}
+    };
+    for(int i = 0; i < 3; i++) {
+        memcpy(mat_A->pValues[i], A[i], 3*sizeof(double));
+    }
+    for(int i = 0; i < 3; i++) {
+        memcpy(mat_B->pValues[i], B[i], sizeof(double));
+    }
     // Matrix* mat2 = create_matrix(4, 4, MFT_ONES);
     // Matrix* mat3 = create_matrix(2, 4, MFT_IDENTITY);
     // Matrix* mat5 = create_matrix(4, 4, MFT_IDENTITY);
-    printf("matrix1:\n");
-    print_matrix(mat);
-    printf("matrix_t:\n");
-    print_matrix(mat_t);
-    Matrix* output = mat_mul(mat, mat_t);
-    printf("matrix1 * matrix2:\n");
+    printf("matrix A:\n");
+    print_matrix(mat_A);
+    printf("matrix B:\n");
+    print_matrix(mat_B);
+    Matrix* output = solve_matrix(mat_A, mat_B);
+    printf("variables:\n");
     print_matrix(output);
     // printf("matrix3:\n");
     // print_matrix(mat5);
@@ -90,9 +106,10 @@ int main() {
     // printf("matrix1 + matrix2 + matrix3:\n");
     // print_matrix(mat7);
     // mat_add(mat, mat3);
-    destroy_matrix(mat);
-    destroy_matrix(mat_t);
+    destroy_matrix(mat_A);
+    destroy_matrix(mat_B);
     destroy_matrix(output);
+    // destroy_matrix(mat3);
     // destroy_matrix(mat2);
     // destroy_matrix(mat3);
     // destroy_matrix(mat4);
