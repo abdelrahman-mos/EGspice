@@ -100,18 +100,25 @@ Matrix* mat_transpose(Matrix* mat) {
     return output;
 }
 
+Matrix* back_substitution(Matrix* matA, Matrix* matB) {
+    Matrix* output = create_matrix(matB->nRows, 1, MFT_ZEROS);
+    return output;
+}
+
 // takes a mutable matrix that will change
 // do not use matrices that you don't want to change
-void gaussian_elimination(Matrix* mat, double* det) {
-    for (int i = 0; i < mat->nCols; i++) {
-        printf("matrix now:\n");
-        print_matrix(mat);
+void gaussian_elimination(Matrix* matA, Matrix* matB, double* det) {
+    for (int i = 0; i < matA->nCols; i++) {
+        printf("matrix A now:\n");
+        print_matrix(matA);
+        printf("matrix B now:\n");
+        print_matrix(matB);
         int pivot = i;
-        for (int row = i+1; row < mat->nRows; row++) {
-            if (fabs(mat->pValues[row][i]) > fabs(mat->pValues[pivot][i])) pivot = row;
+        for (int row = i+1; row < matA->nRows; row++) {
+            if (fabs(matA->pValues[row][i]) > fabs(matA->pValues[pivot][i])) pivot = row;
         }
 
-        if (fabs(mat->pValues[pivot][i]) < MX_ATOL) {
+        if (fabs(matA->pValues[pivot][i]) < MX_ATOL) {
             // matrix is singular
             if (det) *det = 0.0;
             break;
@@ -119,22 +126,55 @@ void gaussian_elimination(Matrix* mat, double* det) {
 
         if (pivot != i) {
             // we need to swap rows here
-            double* tmp_arr = mat->pValues[i];
-            mat->pValues[i] = mat->pValues[pivot];
-            mat->pValues[pivot] = tmp_arr;
+            double* tmp_arr = matA->pValues[i];
+            matA->pValues[i] = matA->pValues[pivot];
+            matA->pValues[pivot] = tmp_arr;
             if (det) *det = -*det; // swapping a row flips the sign
+            if (matB) {
+                tmp_arr = matB->pValues[i];
+                matB->pValues[i] = matB->pValues[pivot];
+                matB->pValues[pivot] = tmp_arr;
+            }
         }
 
-        if (det) *det *= mat->pValues[i][i]; // multiply diagonal elements
+        if (det) *det *= matA->pValues[i][i]; // multiply diagonal elements
 
         // eliminate row below
-        for (int row = i+1; row < mat->nRows; row++) {
-            double factor = mat->pValues[row][i] / mat->pValues[i][i];
-            for (int col = i; col < mat->nCols; col++) {
-                mat->pValues[row][col] -= factor * mat->pValues[i][col];
+        for (int row = i+1; row < matA->nRows; row++) {
+            double factor = matA->pValues[row][i] / matA->pValues[i][i];
+            if (matB) {
+                matB->pValues[row][0] -= factor * matB->pValues[i][0];
+            }
+            for (int col = i; col < matA->nCols; col++) {
+                matA->pValues[row][col] -= factor * matA->pValues[i][col];
             }
         }
     }
+}
+
+Matrix* solve_matrix(Matrix* matA, Matrix* matB) {
+    if ((matA != NULL) && (matA->nRows != matA->nCols)) {
+        fprintf(stderr, "Matrix A is not square, thus number of equations is not equal to the number of variables. Matrix\
+            A of size %dx%d", matA->nRows, matA->nCols);
+    }
+    if ((matB != NULL) && (matB->nCols != 1)) {
+        fprintf(stderr, "Free term matrix cannot have more than one column, matrix B of size %dx%d\n",
+        matB->nRows, matB->nCols);
+        return NULL;
+    }
+    if ((matB != NULL) && (matA->nCols != matB->nRows)) {
+        fprintf(stderr, "Inconsistent number of equations vs number of free terms.\n",
+        matB->nRows, matB->nCols);
+        return NULL;
+    }
+    Matrix* coefficients = copy_matrix(matA);
+    Matrix* free_terms = copy_matrix(matB);
+    gaussian_elimination(coefficients, free_terms, NULL);
+    // make gaussian elimination then return the back substitution output
+    Matrix* output = back_substitution(coefficients, free_terms);
+    destroy_matrix(coefficients);
+    destroy_matrix(free_terms);
+    return output;
 }
 
 // implemented using gaussian elimination (might use same algorithm for solve)
@@ -146,7 +186,7 @@ double mat_determinant(Matrix* mat) {
 
     double det = 1.0;
     Matrix* tmp = copy_matrix(mat);
-    gaussian_elimination(mat, &det);
+    gaussian_elimination(mat, NULL, &det);
 
     destroy_matrix(tmp);
     return det;

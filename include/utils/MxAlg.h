@@ -24,6 +24,7 @@ Matrix* mat_sub(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_sum(int num, ...);
 Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_transpose(Matrix* mat);
+Matrix* solve_matrix(Matrix* matA, Matrix* matB);
 double mat_determinant(Matrix* mat);
 
 #endif

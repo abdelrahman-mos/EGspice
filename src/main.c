@@ -91,9 +91,9 @@ int main() {
     print_matrix(mat_A);
     printf("matrix B:\n");
     print_matrix(mat_B);
-    Matrix* mat3 = mat_mul(mat_A, mat_B);
-    printf("matrix A * matrix B:\n");
-    print_matrix(mat3);
+    Matrix* output = solve_matrix(mat_A, mat_B);
+    printf("variables:\n");
+    print_matrix(output);
     // printf("matrix3:\n");
     // print_matrix(mat5);
     // Matrix* mat4 = mat_add(mat, mat2);
@@ -108,7 +108,8 @@ int main() {
     // mat_add(mat, mat3);
     destroy_matrix(mat_A);
     destroy_matrix(mat_B);
-    destroy_matrix(mat3);
+    destroy_matrix(output);
+    // destroy_matrix(mat3);
     // destroy_matrix(mat2);
     // destroy_matrix(mat3);
     // destroy_matrix(mat4);
