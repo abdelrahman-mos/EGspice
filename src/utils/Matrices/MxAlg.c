@@ -124,6 +124,7 @@ void gaussian_elimination(Matrix* matA, Matrix* matB, double* det) {
         if (fabs(matA->pValues[pivot][i]) < MX_ATOL) {
             // matrix is singular
             if (det) *det = 0.0;
+            fprintf(stderr, "matrix A is singular, cannot solve");
             break;
         }
 
@@ -159,6 +160,7 @@ Matrix* solve_matrix(Matrix* matA, Matrix* matB) {
     if ((matA != NULL) && (matA->nRows != matA->nCols)) {
         fprintf(stderr, "Matrix A is not square, thus number of equations is not equal to the number of variables. Matrix\
             A of size %dx%d", matA->nRows, matA->nCols);
+            return NULL;
     }
     if ((matB != NULL) && (matB->nCols != 1)) {
         fprintf(stderr, "Free term matrix cannot have more than one column, matrix B of size %dx%d\n",
