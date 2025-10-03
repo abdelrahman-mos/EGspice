@@ -52,24 +52,6 @@ Matrix* mat_sum(int num, ...) {
     return output;
 }
 
-Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B) {
-    if (mat_A->nCols != mat_B->nRows) {
-        fprintf(stderr, "matrices inner dimensions don't match. mat A of size %dx%d, mat B of size %dx%d\n", 
-            mat_A->nRows, mat_A->nCols, mat_B->nRows, mat_B->nCols);
-        return NULL;
-    }
-
-    Matrix* output = create_matrix(mat_A->nRows, mat_B->nCols, MFT_ZEROS);
-    if ((mat_A->nRows == mat_A->nCols) && (log2(mat_A->nRows)-(int)log2(mat_A->nRows) == 0)) {
-        // square matrix with a power of 2 size
-        strassen_mul(mat_A, mat_B, output);
-    } else {
-        normal_mul(mat_A, mat_B, output);
-    }
-
-    return output;
-}
-
 // output matrix must be zero filled
 void normal_mul(Matrix* mat_A, Matrix* mat_B, Matrix* output) {
     /*
@@ -90,6 +72,24 @@ void strassen_mul(Matrix* mat_A, Matrix* mat_B, Matrix* output) {
     return normal_mul(mat_A, mat_B, output);
 }
 
+Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B) {
+    if (mat_A->nCols != mat_B->nRows) {
+        fprintf(stderr, "matrices inner dimensions don't match. mat A of size %dx%d, mat B of size %dx%d\n", 
+            mat_A->nRows, mat_A->nCols, mat_B->nRows, mat_B->nCols);
+        return NULL;
+    }
+
+    Matrix* output = create_matrix(mat_A->nRows, mat_B->nCols, MFT_ZEROS);
+    if ((mat_A->nRows == mat_A->nCols) && (log2(mat_A->nRows)-(int)log2(mat_A->nRows) == 0)) {
+        // square matrix with a power of 2 size
+        strassen_mul(mat_A, mat_B, output);
+    } else {
+        normal_mul(mat_A, mat_B, output);
+    }
+
+    return output;
+}
+
 Matrix* mat_transpose(Matrix* mat) {
     Matrix* output = create_matrix(mat->nCols, mat->nRows, MFT_NONE);
     for (int r = 0; r < mat->nRows; r++) {
@@ -100,32 +100,54 @@ Matrix* mat_transpose(Matrix* mat) {
     return output;
 }
 
-// implemented using gaussian elimination (might use same algorithm for solve)
-double mat_determinant(Matrix* mat) {
-    double det = 1.0;
-    if (mat->nCols != mat->nRows) {
-        fprintf(stderr, "matrix must be a square to calculate determinant, matrix size %dx%d", mat->nCols, mat->nRows);
-        return -INFINITY;
-    }
-
-    Matrix* tmp = copy_matrix(mat);
-    for (int i = 0; i < tmp->nCols; i++) {
+// takes a mutable matrix that will change
+// do not use matrices that you don't want to change
+void gaussian_elimination(Matrix* mat, double* det) {
+    for (int i = 0; i < mat->nCols; i++) {
+        printf("matrix now:\n");
+        print_matrix(mat);
         int pivot = i;
-        for (int row = i+1; row < tmp->nRows; row++) {
-            if (fabs(tmp->pValues[row][i]) > fabs(tmp->pValues[pivot][i])) pivot = row;
+        for (int row = i+1; row < mat->nRows; row++) {
+            if (fabs(mat->pValues[row][i]) > fabs(mat->pValues[pivot][i])) pivot = row;
         }
 
-        if (fabs(tmp->pValues[pivot][i]) < MX_ATOL) {
+        if (fabs(mat->pValues[pivot][i]) < MX_ATOL) {
             // matrix is singular
-            det = 0.0;
+            if (det) *det = 0.0;
             break;
         }
 
         if (pivot != i) {
             // we need to swap rows here
+            double* tmp_arr = mat->pValues[i];
+            mat->pValues[i] = mat->pValues[pivot];
+            mat->pValues[pivot] = tmp_arr;
+            if (det) *det = -*det; // swapping a row flips the sign
+        }
+
+        if (det) *det *= mat->pValues[i][i]; // multiply diagonal elements
+
+        // eliminate row below
+        for (int row = i+1; row < mat->nRows; row++) {
+            double factor = mat->pValues[row][i] / mat->pValues[i][i];
+            for (int col = i; col < mat->nCols; col++) {
+                mat->pValues[row][col] -= factor * mat->pValues[i][col];
+            }
         }
     }
+}
 
-    free(tmp);
+// implemented using gaussian elimination (might use same algorithm for solve)
+double mat_determinant(Matrix* mat) {
+    if (mat->nCols != mat->nRows) {
+        fprintf(stderr, "matrix must be a square to calculate determinant, matrix size %dx%d", mat->nCols, mat->nRows);
+        return -INFINITY;
+    }
+
+    double det = 1.0;
+    Matrix* tmp = copy_matrix(mat);
+    gaussian_elimination(mat, &det);
+
+    destroy_matrix(tmp);
     return det;
 }
