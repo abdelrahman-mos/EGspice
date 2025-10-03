@@ -102,6 +102,13 @@ Matrix* mat_transpose(Matrix* mat) {
 
 Matrix* back_substitution(Matrix* matA, Matrix* matB) {
     Matrix* output = create_matrix(matB->nRows, 1, MFT_ZEROS);
+    for (int i = matB->nRows-1; i >= 0; i--) {
+        double sum = 0.0;
+        for (int j = i+1; j < matB->nRows; j++) {
+            sum += matA->pValues[i][j] * output->pValues[j][0];
+        }
+        output->pValues[i][0] = (matB->pValues[i][0] - sum) / matA->pValues[i][i];
+    }
     return output;
 }
 
@@ -109,10 +116,6 @@ Matrix* back_substitution(Matrix* matA, Matrix* matB) {
 // do not use matrices that you don't want to change
 void gaussian_elimination(Matrix* matA, Matrix* matB, double* det) {
     for (int i = 0; i < matA->nCols; i++) {
-        printf("matrix A now:\n");
-        print_matrix(matA);
-        printf("matrix B now:\n");
-        print_matrix(matB);
         int pivot = i;
         for (int row = i+1; row < matA->nRows; row++) {
             if (fabs(matA->pValues[row][i]) > fabs(matA->pValues[pivot][i])) pivot = row;
