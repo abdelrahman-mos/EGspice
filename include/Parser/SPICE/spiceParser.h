@@ -8,6 +8,7 @@ typedef struct spiceParser
     HashMap* devices;
     HashMap* options;
     HashMap* analyses;
+    char** nodes;
 } spiceParser;
 
 spiceParser* parse_netlist(char* netlist_path);
