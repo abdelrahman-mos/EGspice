@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
     // hashmap_destroy(my_map);
 
-    spiceParser* parsed_netlist = parse_netlist(argv[1]);
+    Netlist* parsed_netlist = parse_netlist(argv[1]);
     char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     printf("analysis: %s\n", analysis);
     char** devices_names = hashmap_keys(parsed_netlist->devices);

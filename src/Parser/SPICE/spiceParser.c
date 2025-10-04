@@ -9,7 +9,7 @@ char* read_netlist_file(char* netlist_path) {
     FILE* input_netlist_file = fopen(netlist_path, "r");
     if (!input_netlist_file) {
         perror("Failed to open netlist");
-        return NULL;
+        exit(-1);
     }
 
     fseek(input_netlist_file, 0, SEEK_END);
@@ -43,7 +43,7 @@ char** remove_comments(char** netlist_text_split) {
     return netlist_text_split_no_comments;
 }
 
-char** parse_options(spiceParser* parser, char** netlist_text_split) {
+char** parse_options(Netlist* parser, char** netlist_text_split) {
     char** netlist_text_split_no_options = strdup_arr((const char**)netlist_text_split);
     parser->options = hashmap_create(16, hash_string, cmp_func, free, free);
     
@@ -82,7 +82,7 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
     return netlist_text_split_no_options;
 }
 
-char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
+char** parse_analyses(Netlist* parser, char** netlist_text_split) {
     char** netlist_text_split_no_analyses = strdup_arr((const char**)netlist_text_split);
     parser->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
     
@@ -111,7 +111,7 @@ char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
     return netlist_text_split_no_analyses;
 }
 
-void _add_node(spiceParser* parser, char* node_name, int* node_to_add, int* curr_node) {
+void _add_node(Netlist* parser, char* node_name, int* node_to_add, int* curr_node) {
     int i;
     for (i = 1; parser->nodes[i] != NULL; i++) {
         if (strcmp(node_name, parser->nodes[i]) == 0) {
@@ -125,6 +125,7 @@ void _add_node(spiceParser* parser, char* node_name, int* node_to_add, int* curr
     parser->nodes[i+1] = NULL; // ????
     *node_to_add = *curr_node;
     *curr_node = *curr_node + 1;
+    parser->num_nodes++;
 }
 
 double device_val_to_double(char* text) {
@@ -148,7 +149,7 @@ double device_val_to_double(char* text) {
     return output;
 }
 
-void parse_two_terminal_device(spiceParser* parser, char* line, device_type type) {
+void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
     char** line_split = splittext(line, " ");
     static int node = 1;
     static char gnd_found = 0;
@@ -226,12 +227,13 @@ void parse_two_terminal_device(spiceParser* parser, char* line, device_type type
     }
 }
 
-void parse_devices(spiceParser* parser, char** netlist_text_split) {
+void parse_devices(Netlist* parser, char** netlist_text_split) {
     char** netlist_text_split_no_devices = strdup_arr((const char**)netlist_text_split);
     parser->devices = hashmap_create(16, hash_string, cmp_func, free, free_device);
     parser->nodes = (char**)calloc(2, sizeof(char*));
     parser->nodes[0] = my_strdup("0");
     parser->nodes[1] = NULL;
+    parser->num_nodes = 0;
     for (int i = 0; netlist_text_split_no_devices[i] != NULL; i++) {
         char* curr_line = netlist_text_split_no_devices[i];
         lower_str_in_place(curr_line);
@@ -257,8 +259,8 @@ void parse_devices(spiceParser* parser, char** netlist_text_split) {
     }
 }
 
-spiceParser* parse_netlist(char* netlist_path) {
-    spiceParser* parsed_netlist = malloc(sizeof(spiceParser));
+Netlist* parse_netlist(char* netlist_path) {
+    Netlist* parsed_netlist = malloc(sizeof(Netlist));
     char* netlist_text = read_netlist_file(netlist_path);
     char** netlist_text_split = splittext(netlist_text, "\n");
     if (!netlist_text_split) return NULL;
@@ -292,7 +294,7 @@ spiceParser* parse_netlist(char* netlist_path) {
     return parsed_netlist;
 }
 
-void free_parser(spiceParser* parser) {
+void free_parser(Netlist* parser) {
     hashmap_destroy(parser->analyses);
     hashmap_destroy(parser->devices);
     hashmap_destroy(parser->options);

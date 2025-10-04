@@ -1,23 +1,15 @@
 #ifndef SPICE_PARSER
 #define SPICE_PARSER
-#include "../../utils/map.h"
+#include "../netlist.h"
 #include "../Devices/device.h"
 
-typedef struct spiceParser
-{
-    HashMap* devices;
-    HashMap* options;
-    HashMap* analyses;
-    char** nodes;
-} spiceParser;
-
-spiceParser* parse_netlist(char* netlist_path);
+Netlist* parse_netlist(char* netlist_path);
 char* read_netlist_file(char* netlist_path);
 char** remove_comments(char** netlist_text_split);
-char** parse_options(spiceParser* parser, char** netlist_text_split);
-char** parse_analyses(spiceParser* parser, char** netlist_text_split);
-void parse_devices(spiceParser* parser, char** netlist_text_split);
-void free_parser(spiceParser* parser);
+char** parse_options(Netlist* parser, char** netlist_text_split);
+char** parse_analyses(Netlist* parser, char** netlist_text_split);
+void parse_devices(Netlist* parser, char** netlist_text_split);
+void free_parser(Netlist* parser);
 
 
 #endif
