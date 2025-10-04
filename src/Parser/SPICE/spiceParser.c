@@ -127,6 +127,16 @@ void _add_node(spiceParser* parser, char* node_name, int* node_to_add, int* curr
     *curr_node = *curr_node + 1;
 }
 
+double device_val_to_double(char* text) {
+    if (!text) return 0.0;
+    // do we need A here ? wouldn't a correspond to atto ?
+    char* tmp = regex_replace("(F|H|V|OHM)", text, "");
+    printf("text before removing: %s\n", text);
+    printf("text after removing: %s\n", tmp);
+
+    return 0.0;
+}
+
 void parse_two_terminal_device(spiceParser* parser, char* line, device_type type) {
     char** line_split = splittext(line, " ");
     static int node = 1;
@@ -170,7 +180,8 @@ void parse_two_terminal_device(spiceParser* parser, char* line, device_type type
     // 1k -> 1000
     // 1m -> 0.001
     // 1meg -> 1000000
-    double val = atof(line_split[3]);
+    double val = device_val_to_double(line_split[3]);
+    // double val = atof(line_split[3]);
     if (type == VSOURCE) {
         Device* device = malloc(sizeof(Device));
         device->type = VSOURCE;
@@ -216,10 +227,6 @@ void parse_devices(spiceParser* parser, char** netlist_text_split) {
         lower_str_in_place(curr_line);
         int j = 0;
         while(isspace(curr_line[j])) j++;
-        if ((curr_line[j] != 'v') && (curr_line[j] != 'r') && (curr_line[j] != 'i')) {
-            fprintf(stderr, "unsupported device %s\n", curr_line);
-            return;
-        }
         device_type type;
         switch (curr_line[j])
         {
@@ -232,6 +239,9 @@ void parse_devices(spiceParser* parser, char** netlist_text_split) {
         case 'r':
             type = RESISTOR;
             break;
+        default:
+            fprintf(stderr, "unsupported device %s\n", curr_line);
+            return;
         }
         parse_two_terminal_device(parser, curr_line, type);
     }

@@ -129,7 +129,7 @@ char* _regex_replace_compiled(const regex_t* regex, const char* text, const char
 
 char* regex_replace(const char* pattern, const char* text, const char* replacement) {
     regex_t regex;
-    if (regcomp(&regex, pattern, REG_EXTENDED)) {
+    if (regcomp(&regex, pattern, REG_EXTENDED | REG_ICASE)) {
         fprintf(stderr, "Invalid regex: %s\n", pattern);
         return NULL;
     }
