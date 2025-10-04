@@ -10,7 +10,7 @@ char* my_strdup(const char* s);
 char** strdup_arr(const char** s);
 char** splittext(const char s[], char split_token[]);
 char* _regex_replace_compiled(const regex_t* regex, const char* text, const char* replacement);
-char* regex_replace(const char* pattern, const char* text, const char* replacement);
+char* regex_replace(const char* pattern, const char* text, const char* replacement, int flags);
 char* strntondup(const char* src, int start, int end);
 void lower_str_in_place(char* s);
 void free_split_text(char** split_text);

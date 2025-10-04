@@ -48,7 +48,7 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
     parser->options = hashmap_create(16, hash_string, cmp_func, free, free);
     
     for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
-        char* curr_line = regex_replace("\\s*=\\s*", netlist_text_split_no_options[i], "=");
+        char* curr_line = regex_replace("\\s*=\\s*", netlist_text_split_no_options[i], "=", REG_EXTENDED);
         int j = 0;
         while(isspace(curr_line[j])) j++;
         if (curr_line[j] != '.') continue;
@@ -127,10 +127,30 @@ void _add_node(spiceParser* parser, char* node_name, int* node_to_add, int* curr
     *curr_node = *curr_node + 1;
 }
 
+double device_val_to_double(char* text) {
+    if (!text) return 0.0;
+    // is this the best method ? is there a different method ? can I use regex in a different way ?
+    char* out = regex_replace("[Aa]+", text, "a", REG_EXTENDED);
+    out = regex_replace("[Ff]+", out, "f", REG_EXTENDED);
+    out = regex_replace("(Amp|H|V|OHM)$", out, "", REG_EXTENDED);
+    out = regex_replace("(MEG)", out, "e6", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(T)", out, "e12", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(G)", out, "e9", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(K)", out, "e3", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(m)", out, "e-3", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(u)", out, "e-6", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(n)", out, "e-9", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(p)", out, "e-12", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(f)", out, "e-15", REG_EXTENDED | REG_ICASE);
+    out = regex_replace("(a)", out, "e-18", REG_EXTENDED | REG_ICASE);
+    double output = atof(out);
+    free(out);
+    return output;
+}
+
 void parse_two_terminal_device(spiceParser* parser, char* line, device_type type) {
     char** line_split = splittext(line, " ");
     static int node = 1;
-    printf("node num: %d\n", node);
     static char gnd_found = 0;
     int node_1_to_add = -1;
     int node_2_to_add = -1;
@@ -170,7 +190,8 @@ void parse_two_terminal_device(spiceParser* parser, char* line, device_type type
     // 1k -> 1000
     // 1m -> 0.001
     // 1meg -> 1000000
-    double val = atof(line_split[3]);
+    double val = device_val_to_double(line_split[3]);
+    // double val = atof(line_split[3]);
     if (type == VSOURCE) {
         Device* device = malloc(sizeof(Device));
         device->type = VSOURCE;
@@ -216,10 +237,6 @@ void parse_devices(spiceParser* parser, char** netlist_text_split) {
         lower_str_in_place(curr_line);
         int j = 0;
         while(isspace(curr_line[j])) j++;
-        if ((curr_line[j] != 'v') && (curr_line[j] != 'r') && (curr_line[j] != 'i')) {
-            fprintf(stderr, "unsupported device %s\n", curr_line);
-            return;
-        }
         device_type type;
         switch (curr_line[j])
         {
@@ -232,6 +249,9 @@ void parse_devices(spiceParser* parser, char** netlist_text_split) {
         case 'r':
             type = RESISTOR;
             break;
+        default:
+            fprintf(stderr, "unsupported device %s\n", curr_line);
+            return;
         }
         parse_two_terminal_device(parser, curr_line, type);
     }
