@@ -168,8 +168,7 @@ Matrix* solve_matrix(Matrix* matA, Matrix* matB) {
         return NULL;
     }
     if ((matB != NULL) && (matA->nCols != matB->nRows)) {
-        fprintf(stderr, "Inconsistent number of equations vs number of free terms.\n",
-        matB->nRows, matB->nCols);
+        fprintf(stderr, "Inconsistent number of equations vs number of free terms.\n");
         return NULL;
     }
     Matrix* coefficients = copy_matrix(matA);

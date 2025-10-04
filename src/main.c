@@ -7,7 +7,15 @@
 //     return strcmp((const char *) a, (const char *) b);
 // }
 
-int main() {
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("missing netlist\n");
+        exit(-1);
+    }
+    if (strcmp(argv[1], "-h") == 0) {
+        printf("EGspice:\nUsage:\n\tEGspice <netlist_path>\n");
+        exit(0);
+    }
     // HashMap* my_map = hashmap_create(10, hash_string, cmp_func, free, free);
 
     // hashmap_insert(my_map, my_strdup("name"), my_strdup("badass"));
@@ -22,7 +30,7 @@ int main() {
 
     // hashmap_destroy(my_map);
 
-    spiceParser* parsed_netlist = parse_netlist("test_netlists/netlist1.cir");
+    spiceParser* parsed_netlist = parse_netlist(argv[1]);
     char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     printf("analysis: %s\n", analysis);
     char** devices_names = hashmap_keys(parsed_netlist->devices);

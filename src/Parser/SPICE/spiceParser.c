@@ -30,7 +30,7 @@ char* read_netlist_file(char* netlist_path) {
 }
 
 char** remove_comments(char** netlist_text_split) {
-    char** netlist_text_split_no_comments = strdup_arr(netlist_text_split);
+    char** netlist_text_split_no_comments = strdup_arr((const char**)netlist_text_split);
     for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
         int j = 0;
         char* tmp_text = netlist_text_split_no_comments[i];
@@ -44,7 +44,7 @@ char** remove_comments(char** netlist_text_split) {
 }
 
 char** parse_options(spiceParser* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_options = strdup_arr(netlist_text_split);
+    char** netlist_text_split_no_options = strdup_arr((const char**)netlist_text_split);
     parser->options = hashmap_create(16, hash_string, cmp_func, free, free);
     
     for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
@@ -66,7 +66,7 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
         for (int i = 1; curr_line_splitted[i] != NULL; i++) {
             option = curr_line_splitted[i];
             char flag = 0;
-            for (int j = 0; j < strlen(option); j++) {
+            for (size_t j = 0; j < strlen(option); j++) {
                 if (option[j] == '=') flag = 1;
             }
             if (flag) {
@@ -83,7 +83,7 @@ char** parse_options(spiceParser* parser, char** netlist_text_split) {
 }
 
 char** parse_analyses(spiceParser* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_analyses = strdup_arr(netlist_text_split);
+    char** netlist_text_split_no_analyses = strdup_arr((const char**)netlist_text_split);
     parser->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
     
     for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
@@ -227,7 +227,7 @@ void parse_two_terminal_device(spiceParser* parser, char* line, device_type type
 }
 
 void parse_devices(spiceParser* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_devices = strdup_arr(netlist_text_split);
+    char** netlist_text_split_no_devices = strdup_arr((const char**)netlist_text_split);
     parser->devices = hashmap_create(16, hash_string, cmp_func, free, free_device);
     parser->nodes = (char**)calloc(2, sizeof(char*));
     parser->nodes[0] = my_strdup("0");

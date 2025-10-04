@@ -7,7 +7,7 @@ SRC = $(shell find src -name '*.c')
 # Replace src/ with build/ and .c with .o
 OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
 
-TARGET = build/app
+TARGET = build/EGspice
 
 .PHONY: all clean run
 

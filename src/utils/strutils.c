@@ -10,7 +10,7 @@ char* my_strdup(const char *s) {
 }
 
 char** strdup_arr(const char** s) {
-    if (s == NULL) return;
+    if (s == NULL) return NULL;
     char** copy = NULL;
     int i;
     for (i = 0; s[i] != NULL; i++) {
@@ -32,7 +32,7 @@ char** splittext(const char s[], char split_token[]) {
     }
     char** tokens = calloc(num_tokens+2, sizeof(char*));
     if (num_tokens == 0) {
-        tokens[0] = s;
+        tokens[0] = (char*)s;
         tokens[1] = NULL;
         return tokens;
     }
