@@ -207,7 +207,7 @@ void parse_two_terminal_device(spiceParser* parser, char* line, device_type type
 
 void parse_devices(spiceParser* parser, char** netlist_text_split) {
     char** netlist_text_split_no_devices = strdup_arr(netlist_text_split);
-    parser->devices = hashmap_create(16, hash_string, cmp_func, free, free);
+    parser->devices = hashmap_create(16, hash_string, cmp_func, free, free_device);
     parser->nodes = (char**)calloc(2, sizeof(char*));
     parser->nodes[0] = my_strdup("0");
     parser->nodes[1] = NULL;

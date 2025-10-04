@@ -11,3 +11,8 @@ void isource_stamp() {
 void resistor_stamp() {
     return;
 }
+
+void free_device(Device* device) {
+    free(device->device_data);
+    free(device);
+}

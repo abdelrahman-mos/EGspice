@@ -13,4 +13,5 @@ typedef struct {
     void* device_data;
 } Device;
 
+void free_device(Device* device);
 #endif
