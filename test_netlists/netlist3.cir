@@ -1,0 +1,9 @@
+*
+Vbatt 1 0 40V
+R1 1 2 2ohm
+R4 2 0 10ohm
+R2 2 3 9
+R6 3 0 4ohm
+R3 3 4 8
+Isrc 4 0 1
+.op
