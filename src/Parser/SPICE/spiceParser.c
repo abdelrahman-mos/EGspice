@@ -1,5 +1,6 @@
 #include "../../../include/Parser/SPICE/spiceParser.h"
 #include "../../../include/utils/strutils.h"
+#include "../../../include/Simulator/analysis.h"
 
 int cmp_func(const void* a, const void* b) {
     return strcmp((const char *) a, (const char *) b);
@@ -99,12 +100,16 @@ char** parse_analyses(Netlist* parser, char** netlist_text_split) {
         lower_str_in_place(analysis);
 
 
-        if (strcmp(analysis, ".op") != 0) {
+        if (!is_supported_analysis(analysis)) {
             fprintf(stderr, "unsupported analysis %s\n", analysis);
-            return NULL;
-        } 
+            continue;
+        }
+
+        Analysis* analysis_data = malloc(sizeof(Analysis));
         sprintf(analysis_name, "an%d", ++num_analysis);
-        hashmap_insert(parser->analyses, my_strdup(analysis_name), my_strdup(curr_line));
+        analysis_data->analysis_name = analysis_name;
+        analysis_data->type = OP;
+        hashmap_insert(parser->analyses, my_strdup(analysis_name), analysis_data);
         remove_char_element(netlist_text_split_no_analyses, i);
         
     }
@@ -203,6 +208,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->val = val;
         device->device_data = device_data;
         hashmap_insert(parser->devices, device_name, device);
+        parser->num_vsources++;
     } else if (type == ISOURCE)
     {
         Device* device = malloc(sizeof(Device));
@@ -234,6 +240,7 @@ void parse_devices(Netlist* parser, char** netlist_text_split) {
     parser->nodes[0] = my_strdup("0");
     parser->nodes[1] = NULL;
     parser->num_nodes = 0;
+    parser->num_vsources = 0;
     for (int i = 0; netlist_text_split_no_devices[i] != NULL; i++) {
         char* curr_line = netlist_text_split_no_devices[i];
         lower_str_in_place(curr_line);

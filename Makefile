@@ -27,3 +27,4 @@ run: $(TARGET)
 
 clean:
 	rm -rf build
+	rm *.log

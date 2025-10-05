@@ -1,3 +1,5 @@
+#include "../../utils/MxAlg.h"
+
 typedef struct Resistor
 {
     char* name;
@@ -6,4 +8,4 @@ typedef struct Resistor
     double val;
 } Resistor;
 
-void resistor_stamp();
+void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device);
