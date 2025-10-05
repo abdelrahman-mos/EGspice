@@ -2,8 +2,7 @@
 #define ANALYSIS_H
 #include "../Parser/netlist.h"
 #include "../utils/MxAlg.h"
-
-const char* supported_analyses = {"op"};
+#include <string.h>
 
 typedef enum {
     OP
@@ -18,5 +17,6 @@ typedef struct Analysis
 
 // takes the parsed netlist, populates the matrix, and runs different analyses that are found in the netlist
 void run_analyses(Netlist* parsed_netlist);
+char is_supported_analysis(char* analysis);
 
 #endif

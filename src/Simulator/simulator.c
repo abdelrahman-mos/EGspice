@@ -1,9 +1,9 @@
 #include "../../include/Simulator/simulator.h"
-#include "../../include/Parser/SPICE/spiceParser.h"
 
 
 void run_simulator(char* netlist_path) {
     Netlist* parsed_netlist = parse_netlist(netlist_path);
+    run_analyses(parsed_netlist);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);
     // char** devices_names = hashmap_keys(parsed_netlist->devices);

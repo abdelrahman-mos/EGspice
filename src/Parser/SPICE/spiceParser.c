@@ -100,9 +100,9 @@ char** parse_analyses(Netlist* parser, char** netlist_text_split) {
         lower_str_in_place(analysis);
 
 
-        if (strcmp(analysis, ".op") != 0) {
+        if (!is_supported_analysis(analysis)) {
             fprintf(stderr, "unsupported analysis %s\n", analysis);
-            return NULL;
+            continue;
         }
 
         Analysis* analysis_data = malloc(sizeof(Analysis));
