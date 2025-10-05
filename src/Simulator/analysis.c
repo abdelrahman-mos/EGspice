@@ -8,9 +8,22 @@ void populate_matrices(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) 
         exit(-1);
     }
     char** devices_names = hashmap_keys(parsed_netlist->devices);
+    char* vsources_names[parsed_netlist->num_vsources];
+    int num_vsources = 0;
     for (int i = 0; devices_names[i] != NULL; i++) {
+        char* device_name = devices_names[i];
+        if (device_name[0] == 'v') {
+            vsources_names[num_vsources++] = device_name;
+            continue;
+        }
         Device* device = hashmap_get(parsed_netlist->devices, devices_names[i]);
         stamp_device(coeff, outputs, device);
+    }
+
+    for (int i = 0; i < num_vsources; i++) {
+        Device* device = hashmap_get(parsed_netlist->devices, vsources_names[i]);
+        Vsource* curr_vsource = (Vsource*) device->device_data;
+        vsource_stamp(coeff, outputs, curr_vsource, i, num_vsources);
     }
 }
 

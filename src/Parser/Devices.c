@@ -1,12 +1,33 @@
 #include "../../include/Parser/Devices/device.h"
 #include <stdlib.h>
 
-void vsource_stamp(Matrix* coeff, Matrix* outputs, Vsource* device) {
-    return;
+void vsource_stamp(Matrix* coeff, Matrix* outputs, Vsource* device, int curr_num, int total_vsources) {
+    int stamping_index = coeff->nRows - total_vsources + curr_num;
+    printf("stamping index = %d\n", stamping_index);
+    if (device->node1 != 0) {
+        coeff->pValues[device->node1-1][stamping_index] += 1;
+        coeff->pValues[stamping_index][device->node1-1] += 1;
+    }
+    if (device->node2 != 0) {
+        coeff->pValues[device->node2-1][stamping_index] -= 1;
+        coeff->pValues[stamping_index][device->node2-1] -= 1;
+    }
+    outputs->pValues[stamping_index][0] += device->val;
+    printf("stamped vsource %s:\n", device->name);
+    printf("A matrix:\n");
+    print_matrix(coeff);
+    printf("B matrix:\n");
+    print_matrix(outputs);
 }
 
 void isource_stamp(Matrix* coeff, Matrix* outputs, Isource* device) {
-    return;
+    if (device->node1 != 0) {
+        outputs->pValues[device->node1-1][0] += device->val;
+    }
+
+    if (device->node2 != 0) {
+        outputs->pValues[device->node2-1][0] -= device->val;
+    }
 }
 
 void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device) {
@@ -22,14 +43,9 @@ void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device) {
         coeff->pValues[device->node1-1][device->node2-1] -= 1.0/device->val;
         coeff->pValues[device->node2-1][device->node1-1] -= 1.0/device->val;
     }
-    return;
 }
 
 void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device) {
-    if(device->type == VSOURCE) {
-        Vsource* curr_device = (Vsource*) device->device_data;
-        return vsource_stamp(coeff_matrix, outputs_matrix, curr_device);
-    }
     if (device->type == ISOURCE) {
         Isource* curr_device = (Isource*) device->device_data;
         return isource_stamp(coeff_matrix, outputs_matrix, curr_device);
