@@ -3,7 +3,6 @@
 
 void vsource_stamp(Matrix* coeff, Matrix* outputs, Vsource* device, int curr_num, int total_vsources) {
     int stamping_index = coeff->nRows - total_vsources + curr_num;
-    printf("stamping index = %d\n", stamping_index);
     if (device->node1 != 0) {
         coeff->pValues[device->node1-1][stamping_index] += 1;
         coeff->pValues[stamping_index][device->node1-1] += 1;
@@ -13,11 +12,6 @@ void vsource_stamp(Matrix* coeff, Matrix* outputs, Vsource* device, int curr_num
         coeff->pValues[stamping_index][device->node2-1] -= 1;
     }
     outputs->pValues[stamping_index][0] += device->val;
-    printf("stamped vsource %s:\n", device->name);
-    printf("A matrix:\n");
-    print_matrix(coeff);
-    printf("B matrix:\n");
-    print_matrix(outputs);
 }
 
 void isource_stamp(Matrix* coeff, Matrix* outputs, Isource* device) {

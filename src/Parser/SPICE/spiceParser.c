@@ -306,5 +306,6 @@ void free_parser(Netlist* parser) {
     hashmap_destroy(parser->devices);
     hashmap_destroy(parser->options);
     free_split_text(parser->nodes);
+    free_split_text(parser->vsources);
     free(parser);
 }
