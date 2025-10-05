@@ -29,21 +29,24 @@ void populate_matrices(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) 
     parsed_netlist->vsources = vsources_names;
 }
 
+void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
+    int i;
+    for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
+        fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], output_vars->pValues[i-1][0]);
+    }
+    i--;
+    for (int j = 0; i < parsed_netlist->num_nodes+parsed_netlist->num_vsources; i++, j++) {
+        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], output_vars->pValues[i][0]);
+    }
+    fprintf(logfile, "OP analysis finished successfully\n");
+}
+
 void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) {
     FILE* logfile = fopen("output.log", "w+");
     fprintf(logfile, "running OP analysis\n");
     Matrix* vars_values = solve_matrix(coeff, outputs);
-    int i;
-    for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
-        fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], vars_values->pValues[i-1][0]);
-    }
-    i--;
-    for (int j = 0; i < parsed_netlist->num_nodes+parsed_netlist->num_vsources; i++, j++) {
-        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], vars_values->pValues[i][0]);
-    }
-    fprintf(logfile, "OP analysis finished successfully\n");
+    print_op(logfile, parsed_netlist, vars_values);
     fclose(logfile);
-    return;
 }
 
 void run_analyses(Netlist* parsed_netlist) {
