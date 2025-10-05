@@ -2,32 +2,39 @@
 
 const char* supported_analyses[] = {"op", NULL};
 
-Matrix* populate_matrix(Netlist* parsed_netlist) {
+void populate_matrices(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) {
     if (parsed_netlist->num_nodes < 2) {
         fprintf(stderr, "Cannot populate matrix with num nodes less than 2\n");
         exit(-1);
     }
-
-    Matrix* output_matrix = create_matrix(parsed_netlist->num_nodes, parsed_netlist->num_nodes, MFT_ZEROS);
-    return output_matrix;
+    char** devices_names = hashmap_keys(parsed_netlist->devices);
+    for (int i = 0; devices_names[i] != NULL; i++) {
+        Device* device = hashmap_get(parsed_netlist->devices, devices_names[i]);
+        stamp_device(coeff, outputs, device);
+    }
 }
 
-void run_op() {
+void run_op(Matrix* coeff, Matrix* outputs) {
     FILE* logfile = fopen("output.log", "a");
-    fprintf(logfile, "running OP analysis");
+    fprintf(logfile, "running OP analysis\n");
+    fclose(logfile);
     return;
 }
 
 void run_analyses(Netlist* parsed_netlist) {
     char** analyses_names = hashmap_keys(parsed_netlist->analyses);
-    Matrix* populated_matrix = populate_matrix(parsed_netlist);
+    int matrix_size = parsed_netlist->num_nodes + parsed_netlist->num_vsources;
+    Matrix* coeff_matrix = create_matrix(matrix_size, matrix_size, MFT_ZEROS);
+    Matrix* outputs_matrix = create_matrix(matrix_size, 1, MFT_ZEROS);
+    populate_matrices(parsed_netlist, coeff_matrix, outputs_matrix);
     for (int i = 0; analyses_names[i] != NULL; i++) {
         Analysis* analysis = hashmap_get(parsed_netlist->analyses, analyses_names[i]);
         if (analysis->type == OP) {
-            run_op();
+            run_op(coeff_matrix, outputs_matrix);
         }
     }
-    destroy_matrix(populated_matrix);
+    destroy_matrix(coeff_matrix);
+    destroy_matrix(outputs_matrix);
 }
 
 char is_supported_analysis(char* analysis) {

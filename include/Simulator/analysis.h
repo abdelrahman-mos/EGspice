@@ -2,6 +2,7 @@
 #define ANALYSIS_H
 #include "../Parser/netlist.h"
 #include "../utils/MxAlg.h"
+#include "../Parser/Devices/device.h"
 #include <string.h>
 
 typedef enum {

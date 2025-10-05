@@ -3,6 +3,7 @@
 
 void run_simulator(char* netlist_path) {
     Netlist* parsed_netlist = parse_netlist(netlist_path);
+    printf("num nodes = %d\nnum vsources = %d\n", parsed_netlist->num_nodes, parsed_netlist->num_vsources);
     run_analyses(parsed_netlist);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);

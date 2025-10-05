@@ -1,3 +1,5 @@
+#include "../../utils/MxAlg.h"
+
 typedef struct Vsource
 {
     char* name;
@@ -6,4 +8,4 @@ typedef struct Vsource
     double val;
 } Vsource;
 
-void vsource_stamp();
+void vsource_stamp(Matrix* coeff, Matrix* outputs, Vsource* device);

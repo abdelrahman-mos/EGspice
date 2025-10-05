@@ -13,5 +13,6 @@ typedef struct {
     void* device_data;
 } Device;
 
+void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device);
 void free_device(void* device);
 #endif
