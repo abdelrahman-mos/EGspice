@@ -230,7 +230,27 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->val = val;
         device->device_data = device_data;
         hashmap_insert(parser->devices, device_name, device);
-    }
+    } else if (type == CAPACITOR) {
+        Device* device = malloc(sizeof(Device));
+        device->type = CAPACITOR;
+        Capacitor* device_data = malloc(sizeof(Capacitor));
+        device_data->name = device_name;
+        device_data->node1 = node_1_to_add;
+        device_data->node2 = node_2_to_add;
+        device_data->val = val;
+        device->device_data = device_data;
+        hashmap_insert(parser->devices, device_name, device);
+    } else if (type == INDUCTOR) {
+        Device* device = malloc(sizeof(Device));
+        device->type = INDUCTOR;
+        Inductor* device_data = malloc(sizeof(Inductor));
+        device_data->name = device_name;
+        device_data->node1 = node_1_to_add;
+        device_data->node2 = node_2_to_add;
+        device_data->val = val;
+        device->device_data = device_data;
+        hashmap_insert(parser->devices, device_name, device);
+    } 
 }
 
 void parse_devices(Netlist* parser, char** netlist_text_split) {
@@ -257,6 +277,12 @@ void parse_devices(Netlist* parser, char** netlist_text_split) {
             break;
         case 'r':
             type = RESISTOR;
+            break;
+        case 'c':
+            type = CAPACITOR;
+            break;
+        case 'l':
+            type = INDUCTOR;
             break;
         default:
             fprintf(stderr, "unsupported device %s\n", curr_line);

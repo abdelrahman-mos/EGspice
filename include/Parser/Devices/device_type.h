@@ -3,6 +3,8 @@
 
 typedef enum {
     RESISTOR,
+    CAPACITOR,
+    INDUCTOR,
     VSOURCE, 
     ISOURCE
 } device_type;
