@@ -108,7 +108,7 @@ char** hashmap_keys(HashMap* map) {
         HashNode* node = map->buckets[i];
         while (node)
         {
-            keys[index++] = node->key;
+            keys[index++] = my_strdup(node->key);
             node = node->next;
         }
         

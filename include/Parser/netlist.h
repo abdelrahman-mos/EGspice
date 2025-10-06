@@ -11,6 +11,7 @@ typedef struct Netlist
     char** vsources;
     int num_nodes;
     int num_vsources;
+    int num_inductors;
 } Netlist;
 
 #endif

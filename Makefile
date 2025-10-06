@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g -fsanitize=address
 
 # Find all .c files in src/ and subdirs
 SRC = $(shell find src -name '*.c')

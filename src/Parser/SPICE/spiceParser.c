@@ -52,15 +52,24 @@ char** parse_options(Netlist* parser, char** netlist_text_split) {
         char* curr_line = regex_replace("\\s*=\\s*", netlist_text_split_no_options[i], "=", REG_EXTENDED);
         int j = 0;
         while(isspace(curr_line[j])) j++;
-        if (curr_line[j] != '.') continue;
+        if (curr_line[j] != '.') {
+            free(curr_line);
+            continue;
+        }
         char** curr_line_splitted = splittext(curr_line, " ");
 
         char* option = curr_line_splitted[0];
-        if (!option) return NULL;
+        if (!option) {
+            free(curr_line);
+            free_split_text(curr_line_splitted);
+            return NULL;
+        }
         lower_str_in_place(option);
 
 
         if (strcmp(option, ".option") != 0) {
+            free(curr_line);
+            free_split_text(curr_line_splitted);
             continue;
         } 
 
@@ -74,11 +83,12 @@ char** parse_options(Netlist* parser, char** netlist_text_split) {
                 char** option_split = splittext(option, "=");
                 hashmap_insert(parser->options, option_split[0], option_split[1]);
             } else {
-                hashmap_insert(parser->options, option, my_strdup(""));  
+                hashmap_insert(parser->options, my_strdup(option), my_strdup(""));  
             }     
         }
         remove_char_element(netlist_text_split_no_options, i);
-        
+        free(curr_line);
+        free_split_text(curr_line_splitted);
     }
     return netlist_text_split_no_options;
 }
@@ -126,7 +136,7 @@ void _add_node(Netlist* parser, char* node_name, int* node_to_add, int* curr_nod
     }
     // here, i will map to the size of nodes
     parser->nodes = (char**)realloc(parser->nodes, (i+2)*sizeof(char*));
-    parser->nodes[i] = node_name;
+    parser->nodes[i] = my_strdup(node_name);
     parser->nodes[i+1] = NULL; // ????
     *node_to_add = *curr_node;
     *curr_node = *curr_node + 1;
@@ -207,7 +217,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->node2 = node_2_to_add;
         device_data->val = val;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, device_name, device);
+        hashmap_insert(parser->devices, my_strdup(device_name), device);
         parser->num_vsources++;
     } else if (type == ISOURCE)
     {
@@ -219,7 +229,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->node2 = node_2_to_add;
         device_data->val = val;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, device_name, device);
+        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == RESISTOR) {
         Device* device = malloc(sizeof(Device));
         device->type = RESISTOR;
@@ -229,7 +239,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->node2 = node_2_to_add;
         device_data->val = val;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, device_name, device);
+        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == CAPACITOR) {
         Device* device = malloc(sizeof(Device));
         device->type = CAPACITOR;
@@ -239,7 +249,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->node2 = node_2_to_add;
         device_data->val = val;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, device_name, device);
+        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == INDUCTOR) {
         Device* device = malloc(sizeof(Device));
         device->type = INDUCTOR;
@@ -249,8 +259,10 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
         device_data->node2 = node_2_to_add;
         device_data->val = val;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, device_name, device);
-    } 
+        hashmap_insert(parser->devices, my_strdup(device_name), device);
+        parser->num_inductors++;
+    }
+    free_split_text(line_split);
 }
 
 void parse_devices(Netlist* parser, char** netlist_text_split) {
@@ -261,6 +273,7 @@ void parse_devices(Netlist* parser, char** netlist_text_split) {
     parser->nodes[1] = NULL;
     parser->num_nodes = 0;
     parser->num_vsources = 0;
+    parser->num_inductors = 0;
     for (int i = 0; netlist_text_split_no_devices[i] != NULL; i++) {
         char* curr_line = netlist_text_split_no_devices[i];
         lower_str_in_place(curr_line);
@@ -290,6 +303,7 @@ void parse_devices(Netlist* parser, char** netlist_text_split) {
         }
         parse_two_terminal_device(parser, curr_line, type);
     }
+    free_split_text(netlist_text_split_no_devices);
 }
 
 Netlist* parse_netlist(char* netlist_path) {
@@ -320,6 +334,7 @@ Netlist* parse_netlist(char* netlist_path) {
     // for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
     //     printf("index %d: %s\n", i, netlist_text_split_no_options[i]);
     // }
+    free(netlist_text);
     free_split_text(netlist_text_split);
     free_split_text(netlist_text_split_no_comments);
     free_split_text(netlist_text_split_no_analyses);
