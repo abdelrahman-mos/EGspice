@@ -16,6 +16,7 @@ void populate_matrices_dc(Netlist* parsed_netlist, Matrix* coeff, Matrix* output
             vsources_names[num_vsources++] = device_name;
             continue;
         } else if (device_name[0] == 'c') {
+            // since jwc will be equal to zero.
             continue;
         }
         Device* device = hashmap_get(parsed_netlist->devices, devices_names[i]);

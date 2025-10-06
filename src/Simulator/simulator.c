@@ -22,7 +22,15 @@ void run_simulator(char* netlist_path) {
     //     {
     //         Resistor* device_data = (Resistor*) device->device_data;
     //         print_device(device_data);
-    //     }        
+    //     } else if (device->type == CAPACITOR)
+    //     {
+    //         Capacitor* device_data = (Capacitor*) device->device_data;
+    //         print_device(device_data);
+    //     } else if (device->type == INDUCTOR)
+    //     {
+    //         Inductor* device_data = (Inductor*) device->device_data;
+    //         print_device(device_data);
+    //     }      
     // }
     // for (int i = 0; parsed_netlist->nodes[i] != NULL; i++) {
     //     printf("node num %d corresponds to node name %s\n", i, parsed_netlist->nodes[i]);

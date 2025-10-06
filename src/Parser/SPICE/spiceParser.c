@@ -138,7 +138,7 @@ double device_val_to_double(char* text) {
     // is this the best method ? is there a different method ? can I use regex in a different way ?
     char* out = regex_replace("[Aa]+", text, "a", REG_EXTENDED);
     out = regex_replace("[Ff]+", out, "f", REG_EXTENDED);
-    out = regex_replace("(Amp|H|V|OHM)$", out, "", REG_EXTENDED);
+    out = regex_replace("(Amp|H|V|OHM)$", out, "", REG_EXTENDED | REG_ICASE);
     out = regex_replace("(MEG)", out, "e6", REG_EXTENDED | REG_ICASE);
     out = regex_replace("(T)", out, "e12", REG_EXTENDED | REG_ICASE);
     out = regex_replace("(G)", out, "e9", REG_EXTENDED | REG_ICASE);
