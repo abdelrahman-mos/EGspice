@@ -6,6 +6,13 @@
 #include <ctype.h>
 #include <regex.h>
 
+#define REPLACE_INPLACE(var, regex, repl, flags) \
+    do { \
+        char* __tmp = regex_replace((regex), (var), (repl), (flags)); \
+        free(var); \
+        var = __tmp; \
+    } while(0)
+
 char* my_strdup(const char* s);
 char** strdup_arr(const char** s);
 char** splittext(const char s[], char split_token[]);

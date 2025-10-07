@@ -28,3 +28,13 @@ run: $(TARGET)
 clean:
 	rm -rf build
 	rm *.log
+
+install: $(TARGET)
+	@echo "Installing EGspice to /usr/local/bin..."
+	sudo cp $(TARGET) /usr/local/bin/
+	@echo "Installed as 'ُEGspice'. You can now run it using 'EGspice' in the terminal."
+
+uninstall:
+	@echo "Removing installed EGspice..."
+	sudo rm -f /usr/local/bin/EGspice
+	@echo "EGspice removed."

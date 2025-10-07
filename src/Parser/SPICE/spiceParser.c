@@ -81,7 +81,8 @@ char** parse_options(Netlist* parser, char** netlist_text_split) {
             }
             if (flag) {
                 char** option_split = splittext(option, "=");
-                hashmap_insert(parser->options, option_split[0], option_split[1]);
+                hashmap_insert(parser->options, my_strdup(option_split[0]), my_strdup(option_split[1]));
+                free_split_text(option_split);
             } else {
                 hashmap_insert(parser->options, my_strdup(option), my_strdup(""));  
             }     
@@ -112,6 +113,8 @@ char** parse_analyses(Netlist* parser, char** netlist_text_split) {
 
         if (!is_supported_analysis(analysis)) {
             fprintf(stderr, "unsupported analysis %s\n", analysis);
+            free(analysis);
+            free_split_text(curr_line_splitted);
             continue;
         }
 
@@ -121,7 +124,8 @@ char** parse_analyses(Netlist* parser, char** netlist_text_split) {
         analysis_data->type = OP;
         hashmap_insert(parser->analyses, my_strdup(analysis_name), analysis_data);
         remove_char_element(netlist_text_split_no_analyses, i);
-        
+        free(analysis);
+        free_split_text(curr_line_splitted);
     }
     return netlist_text_split_no_analyses;
 }
@@ -147,18 +151,18 @@ double device_val_to_double(char* text) {
     if (!text) return 0.0;
     // is this the best method ? is there a different method ? can I use regex in a different way ?
     char* out = regex_replace("[Aa]+", text, "a", REG_EXTENDED);
-    out = regex_replace("[Ff]+", out, "f", REG_EXTENDED);
-    out = regex_replace("(Amp|H|V|OHM)$", out, "", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(MEG)", out, "e6", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(T)", out, "e12", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(G)", out, "e9", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(K)", out, "e3", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(m)", out, "e-3", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(u)", out, "e-6", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(n)", out, "e-9", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(p)", out, "e-12", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(f)", out, "e-15", REG_EXTENDED | REG_ICASE);
-    out = regex_replace("(a)", out, "e-18", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "[Ff]+", "f", REG_EXTENDED);
+    REPLACE_INPLACE(out, "(Amp|H|V|OHM)$", "", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(MEG)", "e6", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(T)", "e12", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(G)", "e9", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(K)", "e3", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(m)", "e-3", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(u)", "e-6", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(n)", "e-9", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(p)", "e-12", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(f)", "e-15", REG_EXTENDED | REG_ICASE);
+    REPLACE_INPLACE(out, "(a)", "e-18", REG_EXTENDED | REG_ICASE);
     double output = atof(out);
     free(out);
     return output;
@@ -299,6 +303,7 @@ void parse_devices(Netlist* parser, char** netlist_text_split) {
             break;
         default:
             fprintf(stderr, "unsupported device %s\n", curr_line);
+            free_split_text(netlist_text_split_no_devices);
             return;
         }
         parse_two_terminal_device(parser, curr_line, type);

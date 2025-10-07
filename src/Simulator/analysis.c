@@ -58,6 +58,7 @@ void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) {
     Matrix* vars_values = solve_matrix(coeff, outputs);
     print_op(logfile, parsed_netlist, vars_values);
     fclose(logfile);
+    destroy_matrix(vars_values);
 }
 
 void run_analyses(Netlist* parsed_netlist) {
@@ -95,6 +96,7 @@ void run_analyses(Netlist* parsed_netlist) {
     }
     destroy_matrix(coeff_matrix);
     destroy_matrix(outputs_matrix);
+    free_split_text(analyses_names);
 }
 
 char is_supported_analysis(char* analysis) {

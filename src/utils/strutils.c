@@ -31,7 +31,7 @@ char** splittext(const char s[], char split_token[]) {
     }
     char** tokens = calloc(num_tokens+2, sizeof(char*));
     if (num_tokens == 0) {
-        tokens[0] = (char*)s;
+        tokens[0] = my_strdup(s);
         tokens[1] = NULL;
         return tokens;
     }
