@@ -4,9 +4,9 @@ Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
     Matrix* output = (Matrix*)malloc(sizeof(Matrix));
     output->nRows = nRows;
     output->nCols = nCols;
-    output->pValues = (double**)calloc(nRows, sizeof(double*)); // allocate memory for number of rows (single column of arrays)
+    output->pValues = (double complex**)calloc(nRows, sizeof(double complex*)); // allocate memory for number of rows (single column of arrays)
     for (int r = 0; r < nRows; r++) {
-        output->pValues[r] = (double*)calloc(nCols, sizeof(double)); // allocate memory for each row with size of numCols
+        output->pValues[r] = (double complex*)calloc(nCols, sizeof(double complex)); // allocate memory for each row with size of numCols
     }
 
     if (fill_type != MFT_NONE) {
@@ -15,16 +15,19 @@ Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type) {
                 switch (fill_type)
                 {
                 case MFT_ZEROS:
-                    output->pValues[r][c] = 0;
+                    output->pValues[r][c] = 0.0;
                     break;
                 case MFT_ONES:
-                    output->pValues[r][c] = 1;
+                    output->pValues[r][c] = 1.0;
                     break;
                 case MFT_RAND:
                     output->pValues[r][c] = rand()/(double)RAND_MAX;
                     break;
                 case MFT_IDENTITY:
-                    output->pValues[r][c] = (r == c) ? 1 : 0;
+                    output->pValues[r][c] = (r == c) ? 1.0 : 0.0;
+                    break;
+                case MFT_CMPLX_ONES:
+                    output->pValues[r][c] = 1*I;
                     break;
                 default:
                     return output;

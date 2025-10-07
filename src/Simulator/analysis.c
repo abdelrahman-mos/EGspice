@@ -22,7 +22,7 @@ void populate_matrices_dc(Netlist* parsed_netlist, Matrix* coeff, Matrix* output
             continue;
         }
         Device* device = hashmap_get(parsed_netlist->devices, device_name);
-        stamp_device(coeff, outputs, device);
+        stamp_device(coeff, outputs, device, 0.0);
     }
     for (int i = 0; i < num_vsources; i++) {
         Device* device = hashmap_get(parsed_netlist->devices, vsources_names[i]);
@@ -43,12 +43,12 @@ void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
     fprintf(logfile, "###### OPERATING POINT RESULTS ######\n\n");
     int i;
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
-        fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], output_vars->pValues[i-1][0]);
+        fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
     }
     i--;
     int num = parsed_netlist->num_nodes+parsed_netlist->num_vsources+parsed_netlist->num_inductors;
     for (int j = 0; i < num; i++, j++) {
-        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], output_vars->pValues[i][0]);
+        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
     }
     fprintf(logfile, "\nOP analysis finished successfully\n");
 }

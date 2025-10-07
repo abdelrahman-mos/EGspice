@@ -11,4 +11,4 @@ typedef struct Inductor
 // in DC or OP, it should just act as a short circuit, this will introduce GL=-INF,
 // Thus we introduce a new equation for DC where Vn1 = Vn2, or just by adding a dummy
 // voltage source instead of the inductor when stamping the matrix
-void inductor_stamp(Matrix* coeff, Matrix* outputs, Inductor* device);
+void inductor_stamp(Matrix* coeff, Matrix* outputs, Inductor* device, double frequency);

@@ -22,6 +22,6 @@ typedef struct {
     double val;
 } commonData;
 
-void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device);
+void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device, double frequency);
 void free_device(void* device);
 #endif

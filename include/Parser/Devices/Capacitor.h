@@ -8,4 +8,4 @@ typedef struct Capacitor
     double val;
 } Capacitor;
 
-void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device);
+void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device, double frequency);
