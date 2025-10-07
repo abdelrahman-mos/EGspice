@@ -4,15 +4,15 @@
 
 void run_simulator(char* netlist_path) {
     time_t time_1, time_2;
-
     time_1 = time(NULL);
-    Netlist* parsed_netlist = parse_netlist(netlist_path);
+    FILE* logfile = fopen("output.log", "w+");
+    Netlist* parsed_netlist = parse_netlist(netlist_path, logfile);
     printf("num nodes = %d\nnum vsources = %d\nnum inductors = %d\n", 
         parsed_netlist->num_nodes,
         parsed_netlist->num_vsources,
         parsed_netlist->num_inductors
     );
-    run_analyses(parsed_netlist);
+    run_analyses(parsed_netlist, logfile);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);
     // char** devices_names = hashmap_keys(parsed_netlist->devices);
@@ -45,7 +45,6 @@ void run_simulator(char* netlist_path) {
     // }
     free_parser(parsed_netlist);
     time_2 = time(NULL);
-    FILE* logfile = fopen("output.log", "a");
-    fprintf(logfile, "time taken %.2f nano seconds\n", difftime(time_2, time_1)*1e9);
+    fprintf(logfile, "time taken %.2lf seconds\n", difftime(time_2, time_1));
     fclose(logfile);
 }

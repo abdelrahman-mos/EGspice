@@ -2,8 +2,33 @@
 #include "../../../include/utils/strutils.h"
 #include "../../../include/Simulator/analysis.h"
 
+const char* supported_options[] = {"gmin", "aex", NULL};
+
+char is_supported_option(char* option) {
+    for (int i = 0; supported_options[i] != NULL; i++) {
+        if (strcmp(option, supported_options[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int cmp_func(const void* a, const void* b) {
     return strcmp((const char *) a, (const char *) b);
+}
+
+Netlist* initialize_netlist() {
+    Netlist* output = malloc(sizeof(Netlist));
+    output->analyses = NULL;
+    output->devices = NULL;
+    output->options = NULL;
+    output->vsources = NULL;
+    output->nodes = NULL;
+    output->vsources = NULL;
+    output->num_inductors = 0;
+    output->num_nodes = 0;
+    output->num_vsources = 0;
+    return output;
 }
 
 char* read_netlist_file(char* netlist_path) {
@@ -28,106 +53,6 @@ char* read_netlist_file(char* netlist_path) {
 
     fclose(input_netlist_file);
     return netlist_text;
-}
-
-char** remove_comments(char** netlist_text_split) {
-    char** netlist_text_split_no_comments = strdup_arr((const char**)netlist_text_split);
-    for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
-        int j = 0;
-        char* tmp_text = netlist_text_split_no_comments[i];
-        // skip blank
-        while (isblank(tmp_text[j])) j++;
-        if (tmp_text[j] == '*') {
-            remove_char_element(netlist_text_split_no_comments, i--);
-        }
-    }
-    return netlist_text_split_no_comments;
-}
-
-char** parse_options(Netlist* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_options = strdup_arr((const char**)netlist_text_split);
-    parser->options = hashmap_create(16, hash_string, cmp_func, free, free);
-    
-    for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
-        char* curr_line = regex_replace("\\s*=\\s*", netlist_text_split_no_options[i], "=", REG_EXTENDED);
-        int j = 0;
-        while(isspace(curr_line[j])) j++;
-        if (curr_line[j] != '.') {
-            free(curr_line);
-            continue;
-        }
-        char** curr_line_splitted = splittext(curr_line, " ");
-
-        char* option = curr_line_splitted[0];
-        if (!option) {
-            free(curr_line);
-            free_split_text(curr_line_splitted);
-            return NULL;
-        }
-        lower_str_in_place(option);
-
-
-        if (strcmp(option, ".option") != 0) {
-            free(curr_line);
-            free_split_text(curr_line_splitted);
-            continue;
-        } 
-
-        for (int i = 1; curr_line_splitted[i] != NULL; i++) {
-            option = curr_line_splitted[i];
-            char flag = 0;
-            for (size_t j = 0; j < strlen(option); j++) {
-                if (option[j] == '=') flag = 1;
-            }
-            if (flag) {
-                char** option_split = splittext(option, "=");
-                hashmap_insert(parser->options, my_strdup(option_split[0]), my_strdup(option_split[1]));
-                free_split_text(option_split);
-            } else {
-                hashmap_insert(parser->options, my_strdup(option), my_strdup(""));  
-            }     
-        }
-        remove_char_element(netlist_text_split_no_options, i);
-        free(curr_line);
-        free_split_text(curr_line_splitted);
-    }
-    return netlist_text_split_no_options;
-}
-
-char** parse_analyses(Netlist* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_analyses = strdup_arr((const char**)netlist_text_split);
-    parser->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
-    
-    for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
-        char* curr_line = netlist_text_split_no_analyses[i];
-        int j = 0;
-        int num_analysis = 0;
-        char analysis_name[5];
-        while(isspace(curr_line[j])) j++;
-        if (curr_line[j] != '.') continue;
-        char** curr_line_splitted = splittext(curr_line, " ");
-        char* analysis = my_strdup(curr_line_splitted[0]);
-        if (!analysis) return NULL;
-        lower_str_in_place(analysis);
-
-
-        if (!is_supported_analysis(analysis)) {
-            fprintf(stderr, "unsupported analysis %s\n", analysis);
-            free(analysis);
-            free_split_text(curr_line_splitted);
-            continue;
-        }
-
-        Analysis* analysis_data = malloc(sizeof(Analysis));
-        sprintf(analysis_name, "an%d", ++num_analysis);
-        analysis_data->analysis_name = analysis_name;
-        analysis_data->type = OP;
-        hashmap_insert(parser->analyses, my_strdup(analysis_name), analysis_data);
-        remove_char_element(netlist_text_split_no_analyses, i);
-        free(analysis);
-        free_split_text(curr_line_splitted);
-    }
-    return netlist_text_split_no_analyses;
 }
 
 void _add_node(Netlist* parser, char* node_name, int* node_to_add, int* curr_node) {
@@ -168,7 +93,7 @@ double device_val_to_double(char* text) {
     return output;
 }
 
-void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
+void parse_two_terminal_device(Netlist* parser, char* line, device_type type, FILE* logfile) {
     char** line_split = splittext(line, " ");
     static int node = 1;
     static char gnd_found = 0;
@@ -177,7 +102,7 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
     int line_len = 0;
     for (line_len = 0; line_split[line_len] != NULL; line_len++);
     if (line_len != 4) {
-        fprintf(stderr, "Incorrect device definition %s", line);
+        fprintf(logfile, "Incorrect device definition %s", line);
         return;
     }
     
@@ -211,118 +136,160 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type) {
     // 1m -> 0.001
     // 1meg -> 1000000
     double val = device_val_to_double(line_split[3]);
-    // double val = atof(line_split[3]);
+    Device* device = malloc(sizeof(Device));
+    // is doing this actually a good thing ?
+    commonData* data = malloc(sizeof(commonData));
+    data->name = device_name;
+    data->node1 = node_1_to_add;
+    data->node2 = node_2_to_add;
+    data->val = val;
+    device->type = type;
     if (type == VSOURCE) {
-        Device* device = malloc(sizeof(Device));
-        device->type = VSOURCE;
-        Vsource* device_data = (Vsource*) malloc(sizeof(Vsource));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Vsource* device_data = (Vsource*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
         parser->num_vsources++;
     } else if (type == ISOURCE)
     {
-        Device* device = malloc(sizeof(Device));
-        device->type = ISOURCE;
-        Isource* device_data = malloc(sizeof(Isource));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Isource* device_data = (Isource*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == RESISTOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = RESISTOR;
-        Resistor* device_data = malloc(sizeof(Resistor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Resistor* device_data = (Resistor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == CAPACITOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = CAPACITOR;
-        Capacitor* device_data = malloc(sizeof(Capacitor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Capacitor* device_data = (Capacitor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == INDUCTOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = INDUCTOR;
-        Inductor* device_data = malloc(sizeof(Inductor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Inductor* device_data = (Inductor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
         parser->num_inductors++;
     }
+    hashmap_insert(parser->devices, my_strdup(device_name), device);
     free_split_text(line_split);
 }
 
-void parse_devices(Netlist* parser, char** netlist_text_split) {
-    char** netlist_text_split_no_devices = strdup_arr((const char**)netlist_text_split);
-    parser->devices = hashmap_create(16, hash_string, cmp_func, free, free_device);
-    parser->nodes = (char**)calloc(2, sizeof(char*));
-    parser->nodes[0] = my_strdup("0");
-    parser->nodes[1] = NULL;
-    parser->num_nodes = 0;
-    parser->num_vsources = 0;
-    parser->num_inductors = 0;
-    for (int i = 0; netlist_text_split_no_devices[i] != NULL; i++) {
-        char* curr_line = netlist_text_split_no_devices[i];
-        lower_str_in_place(curr_line);
-        int j = 0;
-        while(isspace(curr_line[j])) j++;
-        device_type type;
-        switch (curr_line[j])
-        {
-        case 'v':
-            type = VSOURCE;
-            break;
-        case 'i':
-            type = ISOURCE;
-            break;
-        case 'r':
-            type = RESISTOR;
-            break;
-        case 'c':
-            type = CAPACITOR;
-            break;
-        case 'l':
-            type = INDUCTOR;
-            break;
-        default:
-            fprintf(stderr, "unsupported device %s\n", curr_line);
-            free_split_text(netlist_text_split_no_devices);
-            return;
-        }
-        parse_two_terminal_device(parser, curr_line, type);
+void parse_option(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logfile) {
+    if (parsed_netlist->options == NULL) {
+        parsed_netlist->options = hashmap_create(16, hash_string, cmp_func, free, free);
     }
-    free_split_text(netlist_text_split_no_devices);
+    for (int i = 1; curr_line_splitted[i] != NULL; i++) {
+        char* option = curr_line_splitted[i];
+        char flag = 0;
+        for (size_t j = 0; j < strlen(option); j++) {
+            if (option[j] == '=') flag = 1;
+        }
+        lower_str_in_place(option);
+        if (flag) {
+            char** option_split = splittext(option, "=");
+            char* option_name = option_split[0];
+            if (!is_supported_option(option_name)) {
+                fprintf(logfile, "unsupported option %s\n", option_name);
+                free_split_text(option_split);
+                continue; // since one option line can contain multiple options
+            }
+            hashmap_insert(parsed_netlist->options, my_strdup(option_split[0]), my_strdup(option_split[1]));
+            free_split_text(option_split);
+        } else {
+            if (!is_supported_option(option)) {
+                fprintf(logfile, "unsupported option %s\n", option);
+                continue; // since one option line can contain multiple options
+            }
+            hashmap_insert(parsed_netlist->options, my_strdup(option), my_strdup(""));  
+        }     
+    }
 }
 
-Netlist* parse_netlist(char* netlist_path) {
-    Netlist* parsed_netlist = malloc(sizeof(Netlist));
+void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logfile) {
+    if (parsed_netlist->analyses == NULL) {
+        parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
+    }
+
+    static int num_analysis = 0;
+    char analysis_name[5];
+    Analysis* analysis_data = malloc(sizeof(Analysis));
+    sprintf(analysis_name, "an%d", ++num_analysis);
+    analysis_data->analysis_name = analysis_name;
+    analysis_data->type = OP;
+    hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis_data);
+}
+
+void parse_dot_command(Netlist* parsed_netlist, char* curr_line, FILE* logfile) {
+    char* tmp_line = regex_replace("\\s*=\\s*", curr_line, "=", REG_EXTENDED);
+    char** curr_line_splitted = splittext(tmp_line, " ");
+    char* dot_command = curr_line_splitted[0];
+    lower_str_in_place(dot_command);
+    if (strcmp(dot_command, ".option") == 0) {
+        parse_option(parsed_netlist, curr_line_splitted, logfile);
+    } else if (is_supported_analysis(dot_command)) {
+        parse_analysis(parsed_netlist, curr_line_splitted, logfile);
+    } else {
+        fprintf(logfile, "unsupported dot command %s\n", tmp_line);
+    }
+    free(tmp_line);
+    free_split_text(curr_line_splitted);
+}
+
+void parse_device(Netlist* parsed_netlist, char* curr_line, FILE* logfile) {
+    if (parsed_netlist->devices == NULL) {
+        parsed_netlist->devices = hashmap_create(16, hash_string, cmp_func, free, free_device);
+        parsed_netlist->nodes = (char**)calloc(2, sizeof(char*));
+        parsed_netlist->nodes[0] = my_strdup("0");
+        parsed_netlist->nodes[1] = NULL;
+    }
+    lower_str_in_place(curr_line);
+    int j = 0;
+    while(isspace(curr_line[j])) j++; // skip spaces
+    device_type type;
+    switch (curr_line[j])
+    {
+    case 'v':
+        type = VSOURCE;
+        break;
+    case 'i':
+        type = ISOURCE;
+        break;
+    case 'r':
+        type = RESISTOR;
+        break;
+    case 'c':
+        type = CAPACITOR;
+        break;
+    case 'l':
+        type = INDUCTOR;
+        break;
+    default:
+        fprintf(logfile, "unsupported device %s\n", curr_line);
+        return;
+    }
+    parse_two_terminal_device(parsed_netlist, curr_line, type, logfile);
+}
+
+// we currently don't support multiline commands such as using \ or +
+Netlist* parse_netlist(char* netlist_path, FILE* logfile) {
+    Netlist* parsed_netlist = initialize_netlist();
     char* netlist_text = read_netlist_file(netlist_path);
     char** netlist_text_split = splittext(netlist_text, "\n");
     if (!netlist_text_split) return NULL;
-
+    fprintf(logfile, "Netlist:\n");
+    fprintf(logfile, "%s\n\n", netlist_text);
     remove_char_element(netlist_text_split, 0);
-    char** netlist_text_split_no_comments = remove_comments(netlist_text_split);
-    char** netlist_text_split_no_analyses = parse_analyses(parsed_netlist, netlist_text_split_no_comments);
-    char** netlist_text_split_no_options = parse_options(parsed_netlist, netlist_text_split_no_analyses);
-    parse_devices(parsed_netlist, netlist_text_split_no_options);
-
+    // making parsing sequential instead of repeating operations on lines,
+    // this might be a little bit troubling when needing to parse subckts before the netlist itself
+    for (int i = 0; netlist_text_split[i] != NULL; i++) {
+        char* curr_line = netlist_text_split[i];
+        int j;
+        for (j = 0; isspace(curr_line[j]); j++); // skip spaces
+        if (curr_line[j] == '*') {
+            // check first if it's a comment and remove it
+            remove_char_element(netlist_text_split, i--);
+            continue;
+        } else if (curr_line[j] == '.') {
+            // check if it's a dot command (option, analysis)
+            parse_dot_command(parsed_netlist, curr_line, logfile);
+        } else {
+            // else, we'll parse it as a device
+            parse_device(parsed_netlist, curr_line, logfile);
+        }
+    }
     // printf("returned split text\n");
     // for (int i = 0; netlist_text_split[i] != NULL; i++) {
     //     printf("index %d: %s\n", i, netlist_text_split[i]);
@@ -341,9 +308,6 @@ Netlist* parse_netlist(char* netlist_path) {
     // }
     free(netlist_text);
     free_split_text(netlist_text_split);
-    free_split_text(netlist_text_split_no_comments);
-    free_split_text(netlist_text_split_no_analyses);
-    free_split_text(netlist_text_split_no_options);
     return parsed_netlist;
 }
 

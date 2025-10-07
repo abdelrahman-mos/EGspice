@@ -40,6 +40,7 @@ void populate_matrices_dc(Netlist* parsed_netlist, Matrix* coeff, Matrix* output
 }
 
 void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
+    fprintf(logfile, "###### OPERATING POINT RESULTS ######\n\n");
     int i;
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
         fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], output_vars->pValues[i-1][0]);
@@ -49,19 +50,39 @@ void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
     for (int j = 0; i < num; i++, j++) {
         fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], output_vars->pValues[i][0]);
     }
-    fprintf(logfile, "OP analysis finished successfully\n");
+    fprintf(logfile, "\nOP analysis finished successfully\n");
 }
 
-void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) {
-    FILE* logfile = fopen("output.log", "w+");
+void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs, FILE* logfile) {
+    Matrix* reshaped_coeff_matrix = coeff;
+    Matrix* reshaped_outputs_matrix = outputs;
+    if (parsed_netlist->num_inductors > 0) {
+        reshaped_coeff_matrix = reshape_matrix(
+            coeff, 
+            coeff->nRows+parsed_netlist->num_inductors, 
+            coeff->nCols+parsed_netlist->num_inductors,
+            MFT_ZEROS
+        );
+        reshaped_outputs_matrix = reshape_matrix(
+            outputs, 
+            outputs->nRows+parsed_netlist->num_inductors, 
+            1,
+            MFT_ZEROS
+        );
+    }
+    populate_matrices_dc(parsed_netlist, reshaped_coeff_matrix, reshaped_outputs_matrix);
     fprintf(logfile, "running OP analysis\n");
-    Matrix* vars_values = solve_matrix(coeff, outputs);
+    Matrix* vars_values = solve_matrix(reshaped_coeff_matrix, reshaped_outputs_matrix);
     print_op(logfile, parsed_netlist, vars_values);
-    fclose(logfile);
     destroy_matrix(vars_values);
+    // felt cute, might delete later
+    if (reshaped_coeff_matrix != coeff) {
+        destroy_matrix(reshaped_coeff_matrix);
+        destroy_matrix(reshaped_outputs_matrix);
+    }
 }
 
-void run_analyses(Netlist* parsed_netlist) {
+void run_analyses(Netlist* parsed_netlist, FILE* logfile) {
     char** analyses_names = hashmap_keys(parsed_netlist->analyses);
     int matrix_size = parsed_netlist->num_nodes + parsed_netlist->num_vsources;
     Matrix* coeff_matrix = create_matrix(matrix_size, matrix_size, MFT_ZEROS);
@@ -69,29 +90,7 @@ void run_analyses(Netlist* parsed_netlist) {
     for (int i = 0; analyses_names[i] != NULL; i++) {
         Analysis* analysis = hashmap_get(parsed_netlist->analyses, analyses_names[i]);
         if (analysis->type == OP) {
-            Matrix* reshaped_coeff_matrix = coeff_matrix;
-            Matrix* reshaped_outputs_matrix = outputs_matrix;
-            if (parsed_netlist->num_inductors > 0) {
-                reshaped_coeff_matrix = reshape_matrix(
-                    coeff_matrix, 
-                    coeff_matrix->nRows+parsed_netlist->num_inductors, 
-                    coeff_matrix->nCols+parsed_netlist->num_inductors,
-                    MFT_ZEROS
-                );
-                reshaped_outputs_matrix = reshape_matrix(
-                    outputs_matrix, 
-                    outputs_matrix->nRows+parsed_netlist->num_inductors, 
-                    1,
-                    MFT_ZEROS
-                );
-            }
-            populate_matrices_dc(parsed_netlist, reshaped_coeff_matrix, reshaped_outputs_matrix);
-            run_op(parsed_netlist, reshaped_coeff_matrix, reshaped_outputs_matrix);
-            // felt cute, might delete later
-            if (reshaped_coeff_matrix != coeff_matrix) {
-                destroy_matrix(reshaped_coeff_matrix);
-                destroy_matrix(reshaped_outputs_matrix);
-            }
+            run_op(parsed_netlist, coeff_matrix, outputs_matrix, logfile);
         }
     }
     destroy_matrix(coeff_matrix);
