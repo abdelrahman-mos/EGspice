@@ -136,61 +136,34 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type, FI
     // 1m -> 0.001
     // 1meg -> 1000000
     double val = device_val_to_double(line_split[3]);
-    // double val = atof(line_split[3]);
+    Device* device = malloc(sizeof(Device));
+    // is doing this actually a good thing ?
+    commonData* data = malloc(sizeof(commonData));
+    data->name = device_name;
+    data->node1 = node_1_to_add;
+    data->node2 = node_2_to_add;
+    data->val = val;
+    device->type = type;
     if (type == VSOURCE) {
-        Device* device = malloc(sizeof(Device));
-        device->type = VSOURCE;
-        Vsource* device_data = (Vsource*) malloc(sizeof(Vsource));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Vsource* device_data = (Vsource*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
         parser->num_vsources++;
     } else if (type == ISOURCE)
     {
-        Device* device = malloc(sizeof(Device));
-        device->type = ISOURCE;
-        Isource* device_data = malloc(sizeof(Isource));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Isource* device_data = (Isource*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == RESISTOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = RESISTOR;
-        Resistor* device_data = malloc(sizeof(Resistor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Resistor* device_data = (Resistor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == CAPACITOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = CAPACITOR;
-        Capacitor* device_data = malloc(sizeof(Capacitor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Capacitor* device_data = (Capacitor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
     } else if (type == INDUCTOR) {
-        Device* device = malloc(sizeof(Device));
-        device->type = INDUCTOR;
-        Inductor* device_data = malloc(sizeof(Inductor));
-        device_data->name = device_name;
-        device_data->node1 = node_1_to_add;
-        device_data->node2 = node_2_to_add;
-        device_data->val = val;
+        Inductor* device_data = (Inductor*) data;
         device->device_data = device_data;
-        hashmap_insert(parser->devices, my_strdup(device_name), device);
         parser->num_inductors++;
     }
+    hashmap_insert(parser->devices, my_strdup(device_name), device);
     free_split_text(line_split);
 }
 
