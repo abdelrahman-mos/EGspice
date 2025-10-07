@@ -25,6 +25,7 @@ Matrix* mat_sum(int num, ...);
 Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_transpose(Matrix* mat);
 Matrix* solve_matrix(Matrix* matA, Matrix* matB);
+Matrix* reshape_matrix(Matrix* mat, int new_rows, int new_cols, MatFillType fill_type);
 double mat_determinant(Matrix* mat);
 
 #endif

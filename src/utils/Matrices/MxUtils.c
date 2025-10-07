@@ -45,6 +45,24 @@ Matrix* copy_matrix(Matrix* matrix) {
     return output;
 }
 
+Matrix* reshape_matrix(Matrix* mat, int new_rows, int new_cols, MatFillType fill_type) {
+    if ((new_rows == mat->nRows) && (new_cols == mat->nCols)) {
+        // no reshaping happens here
+        return mat;
+    }
+    Matrix* output = create_matrix(new_rows, new_cols, fill_type);
+    int total_rows, total_cols;
+    total_rows = (new_rows < mat->nRows) ? new_rows : mat->nRows;
+    total_cols = (new_cols < mat->nCols) ? new_cols : mat->nCols;
+    // copy existing values and keep the rest as fill_type
+    for (int i = 0; i < total_rows; i++) {
+        for (int j = 0; j < total_cols; j++) {
+            output->pValues[i][j] = mat->pValues[i][j];
+        }
+    }
+    return output;
+}
+
 void destroy_matrix(Matrix* matrix) {
     if (!matrix) return;
     for (int r = 0; r < matrix->nRows; r++) {

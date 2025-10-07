@@ -1,9 +1,17 @@
 #include "../../include/Simulator/simulator.h"
+#include <time.h>
 
 
 void run_simulator(char* netlist_path) {
+    time_t time_1, time_2;
+
+    time_1 = time(NULL);
     Netlist* parsed_netlist = parse_netlist(netlist_path);
-    printf("num nodes = %d\nnum vsources = %d\n", parsed_netlist->num_nodes, parsed_netlist->num_vsources);
+    printf("num nodes = %d\nnum vsources = %d\nnum inductors = %d\n", 
+        parsed_netlist->num_nodes,
+        parsed_netlist->num_vsources,
+        parsed_netlist->num_inductors
+    );
     run_analyses(parsed_netlist);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);
@@ -22,10 +30,22 @@ void run_simulator(char* netlist_path) {
     //     {
     //         Resistor* device_data = (Resistor*) device->device_data;
     //         print_device(device_data);
-    //     }        
+    //     } else if (device->type == CAPACITOR)
+    //     {
+    //         Capacitor* device_data = (Capacitor*) device->device_data;
+    //         print_device(device_data);
+    //     } else if (device->type == INDUCTOR)
+    //     {
+    //         Inductor* device_data = (Inductor*) device->device_data;
+    //         print_device(device_data);
+    //     }      
     // }
     // for (int i = 0; parsed_netlist->nodes[i] != NULL; i++) {
     //     printf("node num %d corresponds to node name %s\n", i, parsed_netlist->nodes[i]);
     // }
     free_parser(parsed_netlist);
+    time_2 = time(NULL);
+    FILE* logfile = fopen("output.log", "a");
+    fprintf(logfile, "time taken %.2f nano seconds\n", difftime(time_2, time_1)*1e9);
+    fclose(logfile);
 }

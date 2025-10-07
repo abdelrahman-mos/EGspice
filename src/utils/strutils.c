@@ -11,15 +11,14 @@ char* my_strdup(const char *s) {
 
 char** strdup_arr(const char** s) {
     if (s == NULL) return NULL;
-    char** copy = NULL;
     int i;
+    for (i = 0; s[i] != NULL; i++);
+    // allocating only once instead of reallocating each time inside the loop
+    char** copy = calloc((i+1), sizeof(char*));
+    if (!copy) return NULL;
     for (i = 0; s[i] != NULL; i++) {
-        copy = realloc(copy, (i+1)*sizeof(char*));
-        if (!copy) return NULL;
         copy[i] = my_strdup(s[i]);
     }
-    copy = realloc(copy, (i+1)*sizeof(char*));
-    if (!copy) return NULL;
     copy[i] = NULL;
     return copy;
 }
@@ -32,7 +31,7 @@ char** splittext(const char s[], char split_token[]) {
     }
     char** tokens = calloc(num_tokens+2, sizeof(char*));
     if (num_tokens == 0) {
-        tokens[0] = (char*)s;
+        tokens[0] = my_strdup(s);
         tokens[1] = NULL;
         return tokens;
     }
@@ -57,12 +56,9 @@ void free_split_text(char** split_text) {
     int i;
     for (i = 0; split_text[i] != NULL; i++) {
         free(split_text[i]);
-        split_text[i] = NULL;
     }
     free(split_text[i]);
-    split_text[i] = NULL;
     free(split_text);
-    split_text = NULL;
 }
 
 void remove_char_element(char** text_arr, int index) {

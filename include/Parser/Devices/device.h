@@ -3,6 +3,8 @@
 #include "Resistor.h"
 #include "Vsource.h"
 #include "Isource.h"
+#include "Capacitor.h"
+#include "Inductor.h"
 #include "device_type.h"
 
 #define print_device(device)\

@@ -1,5 +1,6 @@
 #ifndef MAP_H
 #define MAP_H
+#include "strutils.h"
 #include <stdio.h>
 
 typedef struct HashNode

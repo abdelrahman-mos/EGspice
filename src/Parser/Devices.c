@@ -24,6 +24,14 @@ void isource_stamp(Matrix* coeff, Matrix* outputs, Isource* device) {
     }
 }
 
+void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device) {
+    return;
+}
+
+void inductor_stamp(Matrix* coeff, Matrix* outputs, Inductor* device) {
+    return;
+}
+
 void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device) {
     if (device->node1 != 0) {
         coeff->pValues[device->node1-1][device->node1-1] += 1.0/device->val;
@@ -47,6 +55,14 @@ void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device) 
     if (device->type == RESISTOR) {
         Resistor* curr_device = (Resistor*) device->device_data;
         return resistor_stamp(coeff_matrix, outputs_matrix, curr_device);
+    }
+    if (device->type == CAPACITOR) {
+        Capacitor* curr_device = (Capacitor*) device->device_data;
+        return capacitor_stamp(coeff_matrix, outputs_matrix, curr_device);
+    }
+    if (device->type == INDUCTOR) {
+        Inductor* curr_device = (Inductor*) device->device_data;
+        return inductor_stamp(coeff_matrix, outputs_matrix, curr_device);
     }
 }
 

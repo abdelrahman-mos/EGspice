@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g -fsanitize=address
 
 # Find all .c files in src/ and subdirs
 SRC = $(shell find src -name '*.c')
@@ -28,3 +28,13 @@ run: $(TARGET)
 clean:
 	rm -rf build
 	rm *.log
+
+install: $(TARGET)
+	@echo "Installing EGspice to /usr/local/bin..."
+	sudo cp $(TARGET) /usr/local/bin/
+	@echo "Installed as 'ُEGspice'. You can now run it using 'EGspice' in the terminal."
+
+uninstall:
+	@echo "Removing installed EGspice..."
+	sudo rm -f /usr/local/bin/EGspice
+	@echo "EGspice removed."
