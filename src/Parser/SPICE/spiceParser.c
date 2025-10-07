@@ -186,7 +186,6 @@ void parse_option(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logf
                 free_split_text(option_split);
                 continue; // since one option line can contain multiple options
             }
-
             hashmap_insert(parsed_netlist->options, my_strdup(option_split[0]), my_strdup(option_split[1]));
             free_split_text(option_split);
         } else {
@@ -212,7 +211,6 @@ void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* lo
     analysis_data->type = OP;
     hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis_data);
 }
-
 
 void parse_dot_command(Netlist* parsed_netlist, char* curr_line, FILE* logfile) {
     char* tmp_line = regex_replace("\\s*=\\s*", curr_line, "=", REG_EXTENDED);

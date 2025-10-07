@@ -18,7 +18,7 @@ typedef struct Analysis
 
 
 // takes the parsed netlist, populates the matrix, and runs different analyses that are found in the netlist
-void run_analyses(Netlist* parsed_netlist);
+void run_analyses(Netlist* parsed_netlist, FILE* logfile);
 char is_supported_analysis(char* analysis);
 
 #endif
