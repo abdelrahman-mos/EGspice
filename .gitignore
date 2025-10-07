@@ -58,3 +58,6 @@ dkms.conf
 build/
 # vscode folder
 .vscode/
+
+# simulation files
+*.log
