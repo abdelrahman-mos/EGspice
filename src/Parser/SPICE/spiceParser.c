@@ -204,6 +204,30 @@ void parse_option(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logf
     }
 }
 
+AC_Analysis* parse_ac_analysis(char** curr_line_splitted, FILE* logfile) {
+    AC_Analysis* ac_analysis = (AC_Analysis*)malloc(sizeof(AC_Analysis));
+    AC_TYPE ac_analysis_type;
+    char* tmp = curr_line_splitted[1];
+    if (strcmp(tmp, "dec")) {
+        ac_analysis_type = DEC;
+    } else if (strcmp(tmp, "oct")) {
+        ac_analysis_type = OCT;
+    } else if (strcmp(tmp, "lin")) {
+        ac_analysis_type = LIN;
+    } else {
+        fprintf(logfile, "Incorrect AC analysis points type %s\n", tmp);
+        return NULL;
+    }
+    int numpoints = atoi(curr_line_splitted[2]); // this must be an integer lol
+    double start = device_val_to_double(curr_line_splitted[3]);
+    double end = device_val_to_double(curr_line_splitted[4]);
+    ac_analysis->type = ac_analysis_type;
+    ac_analysis->num_points = numpoints;
+    ac_analysis->start = start;
+    ac_analysis->end = end;
+    return ac_analysis;
+}
+
 void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logfile) {
     if (parsed_netlist->analyses == NULL) {
         parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
@@ -211,11 +235,27 @@ void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* lo
 
     static int num_analysis = 0;
     char analysis_name[5];
-    Analysis* analysis_data = malloc(sizeof(Analysis));
+    Analysis* analysis = malloc(sizeof(Analysis));
     sprintf(analysis_name, "an%d", ++num_analysis);
-    analysis_data->analysis_name = analysis_name;
-    analysis_data->type = OP;
-    hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis_data);
+    analysis->analysis_name = analysis_name;
+    char* analysis_command = curr_line_splitted[0];
+    if (strcmp(analysis_command, ".op") == 0) {
+        analysis->type = OP;
+    } else if (strcmp(analysis_command, ".ac")) {
+        // ac type numpoints start end
+        int line_len = 0;
+        for(; curr_line_splitted[line_len] != NULL; line_len++) {
+            lower_str_in_place(curr_line_splitted[line_len]);
+        }
+        if (line_len != 5) {
+            fprintf(logfile, "Incorrect AC analysis definition\n");
+            return;
+        }
+        AC_Analysis* ac_analysis = parse_ac_analysis(curr_line_splitted, logfile);
+        analysis->analysis_data = ac_analysis;
+    }
+    
+    hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis);
 }
 
 void parse_dot_command(Netlist* parsed_netlist, char* curr_line, FILE* logfile) {

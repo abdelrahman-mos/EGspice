@@ -20,8 +20,16 @@ typedef struct Analysis
 {
     Analysis_type type;
     char* analysis_name;
+    void* analysis_data;
 } Analysis;
 
+typedef struct 
+{
+    AC_TYPE type;
+    int num_points;
+    double start;
+    double end;
+} AC_Analysis;
 
 // takes the parsed netlist, populates the matrix, and runs different analyses that are found in the netlist
 void run_analyses(Netlist* parsed_netlist, FILE* logfile);

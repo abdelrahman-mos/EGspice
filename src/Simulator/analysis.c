@@ -1,6 +1,6 @@
 #include "../../include/Simulator/analysis.h"
 
-const char* supported_analyses[] = {"op", NULL};
+const char* supported_analyses[] = {"op", "ac", NULL};
 
 // will populate matrices normally but skip inductors and capacitors
 void populate_matrices(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) {
@@ -32,7 +32,7 @@ void populate_matrices(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs) 
         Device* device = hashmap_get(parsed_netlist->devices, device_name);
         stamp_device(coeff, outputs, device, 0.0);
     }
-    for (int i = 0; i < num_vsources; i++) {
+    for (size_t i = 0; i < num_vsources; i++) {
         Device* device = hashmap_get(parsed_netlist->devices, vsources_names[i]);
         Vsource* curr_vsource = (Vsource*) device->device_data;
         vsource_stamp(coeff, outputs, curr_vsource, i, num_vsources);
@@ -48,6 +48,8 @@ void populate_dc_inductors(Netlist* parsed_netlist, Matrix* coeff, Matrix* outpu
     int num = parsed_netlist->num_vsources + parsed_netlist->num_inductors;
     for (int i = parsed_netlist->num_vsources, j=0; i < num; i++, j++) {
         Device* device = hashmap_get(parsed_netlist->devices, parsed_netlist->inductors[j]);
+        // populated as a 0 voltage source between the nodes to act as a SC
+        // Vx = Vy
         Vsource* curr_vsource = (Vsource*) device->device_data;
         double val = curr_vsource->val;
         if (device->type == INDUCTOR) {

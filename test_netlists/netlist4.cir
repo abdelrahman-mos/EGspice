@@ -2,6 +2,5 @@
 V1 1 0 1
 R1 1 2 1k
 C1 2 0 1uF
-L1 2 0 15nH
 .op
-.ac
+.ac dec 10 1 100k
