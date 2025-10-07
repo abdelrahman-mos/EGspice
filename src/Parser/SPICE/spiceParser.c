@@ -25,6 +25,7 @@ Netlist* initialize_netlist() {
     output->vsources = NULL;
     output->nodes = NULL;
     output->vsources = NULL;
+    output->inductors = NULL;
     output->num_inductors = 0;
     output->num_nodes = 0;
     output->num_vsources = 0;
@@ -103,10 +104,15 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type, FI
     for (line_len = 0; line_split[line_len] != NULL; line_len++);
     if (line_len != 4) {
         fprintf(logfile, "Incorrect device definition %s", line);
-        return;
+        exit(-1);
     }
     
     char* device_name = line_split[0];
+    char* device_exists = hashmap_get(parser->devices, device_name);
+    if (device_exists != NULL) {
+        fprintf(logfile, "Device %s is defined more than once\n", device_name);
+        exit(-1);
+    }
     // need to support non-number node names
     char* node_1 = line_split[1];
     char* node_2 = line_split[2];
@@ -317,5 +323,6 @@ void free_parser(Netlist* parser) {
     hashmap_destroy(parser->options);
     free_split_text(parser->nodes);
     free_split_text(parser->vsources);
+    free_split_text(parser->inductors);
     free(parser);
 }

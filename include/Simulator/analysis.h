@@ -10,6 +10,12 @@ typedef enum {
     OP
 } Analysis_type;
 
+typedef enum {
+    DEC,
+    OCT,
+    LIN
+} AC_TYPE;
+
 typedef struct Analysis
 {
     Analysis_type type;

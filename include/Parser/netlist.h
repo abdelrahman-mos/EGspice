@@ -9,6 +9,7 @@ typedef struct Netlist
     HashMap* analyses;
     char** nodes;
     char** vsources;
+    char** inductors;
     int num_nodes;
     int num_vsources;
     int num_inductors;

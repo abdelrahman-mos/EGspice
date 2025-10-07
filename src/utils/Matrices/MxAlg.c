@@ -118,7 +118,7 @@ void gaussian_elimination(Matrix* matA, Matrix* matB, double complex* det) {
         if (cabs(matA->pValues[pivot][i]) < MX_ATOL) {
             // matrix is singular
             if (det) *det = 0.0;
-            fprintf(stderr, "matrix A is singular, cannot solve");
+            fprintf(stderr, "matrix A is singular, cannot solve\n");
             break;
         }
 
