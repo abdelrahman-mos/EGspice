@@ -60,6 +60,19 @@ void populate_dc_inductors(Netlist* parsed_netlist, Matrix* coeff, Matrix* outpu
     }
 }
 
+void populate_ac_devices(Netlist* parsed_netlist, Matrix* ac_coeff_matrix, double freq) {
+    char** devices_names = hashmap_keys(parsed_netlist->devices);
+    for (int i = 0; devices_names[i] != NULL; i++) {
+        char* device_name = devices_names[i];
+        if ((device_name[0] == 'c') || (device_name[0] == 'l')) {
+            Device* device = hashmap_get(parsed_netlist->devices, device_name);
+            stamp_device(ac_coeff_matrix, NULL, device, freq);
+        }
+    }
+    free(devices_names);
+}
+
+
 void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
     fprintf(logfile, "###### OPERATING POINT RESULTS ######\n\n");
     int i;
@@ -75,6 +88,50 @@ void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
         fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
     }
     fprintf(logfile, "\nOP analysis finished successfully\n");
+}
+
+void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, double* freqs) {
+    fprintf(logfile, "###### AC Analysis RESULTS ######\n\n");
+    int i;
+    for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
+        fprintf(logfile, "\t\tFREQ\t\tV(%s)\n", parsed_netlist->nodes[i]);
+        for (int j = 0; freqs[j] > 0.0; j++) {
+            double real = creal(ac_outputs[j]->pValues[i][0]);
+            double imag = cimag(ac_outputs[j]->pValues[i][0]);
+            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n", freqs[j],
+                real,
+                (imag >= 0.0) ? "+" : "-",
+                cabs(imag)
+            );
+            // double abs = cabs(ac_outputs[j]->pValues[i][0]);
+            // double arg = carg(ac_outputs[j]->pValues[i][0]);
+            // fprintf(logfile, "\t\t%lf\t\t%lf<%lfi\n", freqs[j],
+            //     abs,
+            //     arg
+            // );
+        }
+        fprintf(logfile, "\n\n");
+    }
+    i--;
+    for (int j = 0; j < parsed_netlist->num_vsources; i++, j++) {
+        fprintf(logfile, "\t\tFREQ\t\tI(%s)\n", parsed_netlist->vsources[j]);
+        for (int k = 0; freqs[k] > 0.0; k++) {
+            double real = creal(ac_outputs[k]->pValues[i][0]);
+            double imag = cimag(ac_outputs[k]->pValues[i][0]);
+            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n", freqs[k],
+                real,
+                (imag >= 0.0) ? "+" : "",
+                cabs(imag)
+            );
+            // double abs = cabs(ac_outputs[k]->pValues[i][0]);
+            // double arg = carg(ac_outputs[k]->pValues[i][0]);
+            // fprintf(logfile, "\t\t%lf\t\t%lf<%lfi\n", freqs[k],
+            //     abs,
+            //     arg
+            // );
+        }
+    }
+    fprintf(logfile, "\nAC analysis finished successfully\n");
 }
 
 void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs, FILE* logfile) {
@@ -106,6 +163,33 @@ void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs, FILE* logfi
     }
 }
 
+void run_ac(Netlist* parsed_netlist, AC_Analysis* analysis, Matrix* coeff, Matrix* outputs, FILE* logfile) {
+    double* freqs = expand_freq(analysis);
+    int num_freqs = 0;
+    for (num_freqs = 0; freqs[num_freqs] > 0.0; num_freqs++);
+    Matrix** ac_outputs = calloc(num_freqs, sizeof(Matrix*));
+    fprintf(logfile, "running AC analysis\n");
+    fprintf(logfile, "\tfstart = %lf\n", analysis->start);
+    fprintf(logfile, "\tfend = %lf\n", analysis->end);
+    fprintf(logfile, "\ttype = %s\n", (analysis->type == DEC) ? "dec" : (analysis->type == OCT) ? "oct" : "lin");
+    for (int i = 0; i < num_freqs; i++) {
+        Matrix* ac_coeff_matrix = copy_matrix(coeff);
+        populate_ac_devices(parsed_netlist, ac_coeff_matrix, freqs[i]);
+        printf("coefficients matrix: \n");
+        print_matrix(ac_coeff_matrix);
+        ac_outputs[i] = solve_matrix(ac_coeff_matrix, outputs);
+        printf("solution: \n");
+        print_matrix(ac_outputs[i]);
+        destroy_matrix(ac_coeff_matrix);
+    }
+    print_ac(logfile, parsed_netlist, ac_outputs, freqs);
+    for (int i = 0; i < num_freqs; i++) {
+        destroy_matrix(ac_outputs[i]);
+    }
+    free(ac_outputs);
+    free(freqs);
+}
+
 void run_analyses(Netlist* parsed_netlist, FILE* logfile) {
     char** analyses_names = hashmap_keys(parsed_netlist->analyses);
     int matrix_size = parsed_netlist->num_nodes + parsed_netlist->num_vsources;
@@ -116,6 +200,8 @@ void run_analyses(Netlist* parsed_netlist, FILE* logfile) {
         Analysis* analysis = hashmap_get(parsed_netlist->analyses, analyses_names[i]);
         if (analysis->type == OP) {
             run_op(parsed_netlist, coeff_matrix, outputs_matrix, logfile);
+        } else if (analysis->type == AC) {
+            run_ac(parsed_netlist, analysis->analysis_data, coeff_matrix, outputs_matrix, logfile);
         }
     }
     destroy_matrix(coeff_matrix);

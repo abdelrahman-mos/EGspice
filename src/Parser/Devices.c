@@ -35,8 +35,8 @@ void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device, double f
     }
 
     if ((device->node1 != 0) && (device->node2 != 0)) {
-        coeff->pValues[device->node1-1][device->node2-1] -= CMPLX(0.0, 2.0*M_PI*frequency*device->val);
-        coeff->pValues[device->node2-1][device->node1-1] -= CMPLX(0.0, 2.0*M_PI*frequency*device->val);
+        coeff->pValues[device->node1-1][device->node2-1] += CMPLX(0.0, -2.0*M_PI*frequency*device->val);
+        coeff->pValues[device->node2-1][device->node1-1] += CMPLX(0.0, -2.0*M_PI*frequency*device->val);
     }
 }
 

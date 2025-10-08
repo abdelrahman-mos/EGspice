@@ -46,7 +46,9 @@ double* expand_freq_lin(int num_points, double start, double end) {
         freq += step;
     }
     output[num_points+1] = -1;
+    return output;
 }
+
 double* expand_freq(AC_Analysis* analysis) {
     double* output_frequencies;
     switch (analysis->type)
@@ -63,4 +65,5 @@ double* expand_freq(AC_Analysis* analysis) {
     default:
         break;
     }
+    return output_frequencies;
 }

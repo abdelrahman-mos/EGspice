@@ -79,7 +79,12 @@ void print_matrix(Matrix* matrix) {
     if (!matrix) return;
     for (int r = 0; r < matrix->nRows; r++) {
         for (int c = 0; c < matrix->nCols; c++) {
-            printf("%.15lf\t", matrix->pValues[r][c]);
+            double imag = cimag(matrix->pValues[r][c]);
+            printf("%.15lf%s%.15lfi\t",
+                creal(matrix->pValues[r][c]),
+                (imag >= 0.0) ? "+" : "",
+                imag
+            );
         }
         printf("\n");
     }

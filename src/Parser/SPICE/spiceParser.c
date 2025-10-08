@@ -208,11 +208,11 @@ AC_Analysis* parse_ac_analysis(char** curr_line_splitted, FILE* logfile) {
     AC_Analysis* ac_analysis = (AC_Analysis*)malloc(sizeof(AC_Analysis));
     AC_TYPE ac_analysis_type;
     char* tmp = curr_line_splitted[1];
-    if (strcmp(tmp, "dec")) {
+    if (strcmp(tmp, "dec") == 0) {
         ac_analysis_type = DEC;
-    } else if (strcmp(tmp, "oct")) {
+    } else if (strcmp(tmp, "oct") == 0) {
         ac_analysis_type = OCT;
-    } else if (strcmp(tmp, "lin")) {
+    } else if (strcmp(tmp, "lin") == 0) {
         ac_analysis_type = LIN;
     } else {
         fprintf(logfile, "Incorrect AC analysis points type %s\n", tmp);
@@ -241,7 +241,7 @@ void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* lo
     char* analysis_command = curr_line_splitted[0];
     if (strcmp(analysis_command, ".op") == 0) {
         analysis->type = OP;
-    } else if (strcmp(analysis_command, ".ac")) {
+    } else if (strcmp(analysis_command, ".ac") == 0) {
         // ac type numpoints start end
         int line_len = 0;
         for(; curr_line_splitted[line_len] != NULL; line_len++) {
@@ -251,6 +251,7 @@ void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* lo
             fprintf(logfile, "Incorrect AC analysis definition\n");
             return;
         }
+        analysis->type = AC;
         AC_Analysis* ac_analysis = parse_ac_analysis(curr_line_splitted, logfile);
         analysis->analysis_data = ac_analysis;
     }
