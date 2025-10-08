@@ -6,15 +6,15 @@ void run_simulator(char* netlist_path) {
     time_t time_1, time_2;
     time_1 = time(NULL);
     FILE* logfile = fopen("output.log", "w+");
-    // Netlist* parsed_netlist = parse_netlist(netlist_path, logfile);
-    // printf("num nodes = %d\nnum vsources = %d\nnum inductors = %d\n", 
-    //     parsed_netlist->num_nodes,
-    //     parsed_netlist->num_vsources,
-    //     parsed_netlist->num_inductors
-    // );
-    // run_analyses(parsed_netlist, logfile);
-    AC_Analysis analysis = {.type=LIN, .start=1.0, .end=1000.0, .num_points=100};
-    expand_freq(&analysis);
+    Netlist* parsed_netlist = parse_netlist(netlist_path, logfile);
+    printf("num nodes = %d\nnum vsources = %d\nnum inductors = %d\n", 
+        parsed_netlist->num_nodes,
+        parsed_netlist->num_vsources,
+        parsed_netlist->num_inductors
+    );
+    run_analyses(parsed_netlist, logfile);
+    // AC_Analysis analysis = {.type=OCT, .start=1.0, .end=10000.0, .num_points=8};
+    // expand_freq(&analysis);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);
     // char** devices_names = hashmap_keys(parsed_netlist->devices);
@@ -45,7 +45,7 @@ void run_simulator(char* netlist_path) {
     // for (int i = 0; parsed_netlist->nodes[i] != NULL; i++) {
     //     printf("node num %d corresponds to node name %s\n", i, parsed_netlist->nodes[i]);
     // }
-    // free_parser(parsed_netlist);
+    free_parser(parsed_netlist);
     time_2 = time(NULL);
     fprintf(logfile, "time taken %.2lf seconds\n", difftime(time_2, time_1));
     fclose(logfile);

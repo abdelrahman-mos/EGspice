@@ -1,20 +1,38 @@
 #include "../../include/utils/mathutils.h"
+#include <stdio.h>
 
 double* expand_freq_dec(int num_points, double start, double end) {
     // num_points here represent number of points per decade
-    double* output = (double*)calloc(3, sizeof(double));
+    double log_start = log10(start);
+    double log_end = log10(end);
+    int total_points = (int)((log_end - log_start) * num_points);
+    double* output = (double*)calloc(total_points+2, sizeof(double));
+
+    double step = (log_end - log_start) / total_points;
+    double exponent = log_start;
     output[0] = start;
-    output[1] = end;
-    output[2] = -1.0;
+    for (int i = 1; i < total_points; i++) {
+        exponent += step;
+        output[i] = pow(10.0, exponent);
+    }
+    output[total_points] = end;
+    output[total_points+1] = -1.0;
     return output;
 }
 
 double* expand_freq_oct(int num_points, double start, double end) {
     // num_points here represent number of points per octave
-    double* output = (double*)calloc(3, sizeof(double));
-    output[0] = start;
-    output[1] = end;
-    output[2] = -1.0;
+    double log_start = log2(start);
+    double log_end = log2(end);
+    int total_points = (int)((log_end - log_start) * num_points);
+    double* output = (double*)calloc(total_points+2, sizeof(double));
+    double step = 1.0/num_points;
+    double exponent = log_start;
+    for (int i = 0; i < total_points+1; i++) {
+        output[i] = pow(2.0, exponent);
+        exponent += step;
+    }
+    output[total_points+1] = -1.0;
     return output;
 }
 
