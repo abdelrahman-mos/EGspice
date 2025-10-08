@@ -3,11 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <complex.h>
-
-#define MX_ATOL 1e-18
-#define M_PI 3.14159265358979323846	/* pi */
+#include "mathutils.h"
 
 typedef struct
 {

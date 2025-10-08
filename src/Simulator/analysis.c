@@ -1,4 +1,4 @@
-#include "../../include/Simulator/analysis.h"
+#include "../../include/Simulator/Analysis/analysis.h"
 
 const char* supported_analyses[] = {"op", "ac", NULL};
 

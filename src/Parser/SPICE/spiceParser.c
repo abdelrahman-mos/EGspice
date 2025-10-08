@@ -1,6 +1,6 @@
 #include "../../../include/Parser/SPICE/spiceParser.h"
 #include "../../../include/utils/strutils.h"
-#include "../../../include/Simulator/analysis.h"
+#include "../../../include/Simulator/Analysis/analysis.h"
 
 const char* supported_options[] = {"gmin", "aex", NULL};
 

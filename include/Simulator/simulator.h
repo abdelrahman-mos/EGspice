@@ -2,7 +2,7 @@
 #define SIMULATOR_H
 
 #include "../Parser/SPICE/spiceParser.h"
-#include "analysis.h"
+#include "Analysis/analysis.h"
 
 void run_simulator(char* netlist_path);
 
