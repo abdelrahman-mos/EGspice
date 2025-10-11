@@ -216,6 +216,7 @@ AC_Analysis* parse_ac_analysis(char** curr_line_splitted, FILE* logfile) {
         ac_analysis_type = LIN;
     } else {
         fprintf(logfile, "Incorrect AC analysis points type %s\n", tmp);
+        free(ac_analysis);
         return NULL;
     }
     int numpoints = atoi(curr_line_splitted[2]); // this must be an integer lol
@@ -230,12 +231,13 @@ AC_Analysis* parse_ac_analysis(char** curr_line_splitted, FILE* logfile) {
 
 void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logfile) {
     if (parsed_netlist->analyses == NULL) {
-        parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
+        parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free_analysis);
     }
 
     static int num_analysis = 0;
     char analysis_name[5];
     Analysis* analysis = malloc(sizeof(Analysis));
+    analysis->analysis_data = NULL;
     sprintf(analysis_name, "an%d", ++num_analysis);
     analysis->analysis_name = analysis_name;
     char* analysis_command = curr_line_splitted[0];
@@ -249,10 +251,15 @@ void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* lo
         }
         if (line_len != 5) {
             fprintf(logfile, "Incorrect AC analysis definition\n");
+            free_analysis(analysis);
             return;
         }
         analysis->type = AC;
         AC_Analysis* ac_analysis = parse_ac_analysis(curr_line_splitted, logfile);
+        if (ac_analysis == NULL) {
+            free_analysis(analysis);
+            return;
+        }
         analysis->analysis_data = ac_analysis;
     }
     
@@ -337,22 +344,6 @@ Netlist* parse_netlist(char* netlist_path, FILE* logfile) {
             parse_device(parsed_netlist, curr_line, logfile);
         }
     }
-    // printf("returned split text\n");
-    // for (int i = 0; netlist_text_split[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split[i]);
-    // }
-    // printf("text with no comments\n");
-    // for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
-    // }
-    // printf("text with no comments nor analyses\n");
-    // for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_analyses[i]);
-    // }
-    // printf("text with no comments nor analyses nor options\n");
-    // for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_options[i]);
-    // }
     free(netlist_text);
     free_split_text(netlist_text_split);
     return parsed_netlist;

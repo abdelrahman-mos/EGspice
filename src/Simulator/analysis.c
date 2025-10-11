@@ -69,7 +69,7 @@ void populate_ac_devices(Netlist* parsed_netlist, Matrix* ac_coeff_matrix, doubl
             stamp_device(ac_coeff_matrix, NULL, device, freq);
         }
     }
-    free(devices_names);
+    free_split_text(devices_names);
 }
 
 
@@ -222,4 +222,12 @@ char is_supported_analysis(char* analysis) {
         }
     }
     return 0;
+}
+
+void free_analysis(void* input) {
+    Analysis* analysis = (Analysis*) input;
+    if (analysis->analysis_data != NULL) {
+        free(analysis->analysis_data);
+    }
+    free(analysis);
 }
