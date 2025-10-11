@@ -96,16 +96,17 @@ void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, doubl
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
         fprintf(logfile, "\t\tFREQ\t\tV(%s)\n", parsed_netlist->nodes[i]);
         for (int j = 0; freqs[j] > 0.0; j++) {
-            double real = creal(ac_outputs[j]->pValues[i][0]);
-            double imag = cimag(ac_outputs[j]->pValues[i][0]);
-            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n", freqs[j],
+            double real = creal(ac_outputs[j]->pValues[i-1][0]);
+            double imag = cimag(ac_outputs[j]->pValues[i-1][0]);
+            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n",
+                freqs[j],
                 real,
                 (imag >= 0.0) ? "+" : "-",
                 cabs(imag)
             );
-            // double abs = cabs(ac_outputs[j]->pValues[i][0]);
-            // double arg = carg(ac_outputs[j]->pValues[i][0]);
-            // fprintf(logfile, "\t\t%lf\t\t%lf<%lfi\n", freqs[j],
+            // double abs = cabs(ac_outputs[j]->pValues[i-1][0]);
+            // double arg = carg(ac_outputs[j]->pValues[i-1][0]) * 180.0 / M_PI;
+            // fprintf(logfile, "\t\t%lf\t\t%lf<%lf\n", freqs[j],
             //     abs,
             //     arg
             // );
@@ -175,11 +176,7 @@ void run_ac(Netlist* parsed_netlist, AC_Analysis* analysis, Matrix* coeff, Matri
     for (int i = 0; i < num_freqs; i++) {
         Matrix* ac_coeff_matrix = copy_matrix(coeff);
         populate_ac_devices(parsed_netlist, ac_coeff_matrix, freqs[i]);
-        printf("coefficients matrix: \n");
-        print_matrix(ac_coeff_matrix);
         ac_outputs[i] = solve_matrix(ac_coeff_matrix, outputs);
-        printf("solution: \n");
-        print_matrix(ac_outputs[i]);
         destroy_matrix(ac_coeff_matrix);
     }
     print_ac(logfile, parsed_netlist, ac_outputs, freqs);
