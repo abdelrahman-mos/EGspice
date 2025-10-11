@@ -6,6 +6,7 @@
 #include "Capacitor.h"
 #include "Inductor.h"
 #include "device_type.h"
+#include "../../utils/mathutils.h"
 
 #define print_device(device)\
     printf("name: %s, val: %f, node1: %d, node2: %d\n", device->name, device->val, device->node1, device->node2);
@@ -22,6 +23,6 @@ typedef struct {
     double val;
 } commonData;
 
-void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device);
+void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device, double frequency);
 void free_device(void* device);
 #endif

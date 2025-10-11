@@ -1,6 +1,5 @@
 #include "../../../include/utils/MxAlg.h"
 #include <stdarg.h>
-#include <math.h>
 
 Matrix* mat_add(Matrix* mat_A, Matrix* mat_B) {
     if ((mat_A->nRows != mat_B->nRows) || (mat_A->nCols != mat_B->nCols)) {
@@ -80,12 +79,7 @@ Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B) {
     }
 
     Matrix* output = create_matrix(mat_A->nRows, mat_B->nCols, MFT_ZEROS);
-    if ((mat_A->nRows == mat_A->nCols) && (log2(mat_A->nRows)-(int)log2(mat_A->nRows) == 0)) {
-        // square matrix with a power of 2 size
-        strassen_mul(mat_A, mat_B, output);
-    } else {
-        normal_mul(mat_A, mat_B, output);
-    }
+    normal_mul(mat_A, mat_B, output);
 
     return output;
 }
@@ -114,23 +108,23 @@ Matrix* back_substitution(Matrix* matA, Matrix* matB) {
 
 // takes a mutable matrix that will change
 // do not use matrices that you don't want to change
-void gaussian_elimination(Matrix* matA, Matrix* matB, double* det) {
+void gaussian_elimination(Matrix* matA, Matrix* matB, double complex* det) {
     for (int i = 0; i < matA->nCols; i++) {
         int pivot = i;
         for (int row = i+1; row < matA->nRows; row++) {
-            if (fabs(matA->pValues[row][i]) > fabs(matA->pValues[pivot][i])) pivot = row;
+            if (cabs(matA->pValues[row][i]) > cabs(matA->pValues[pivot][i])) pivot = row;
         }
 
-        if (fabs(matA->pValues[pivot][i]) < MX_ATOL) {
+        if (cabs(matA->pValues[pivot][i]) < MX_ATOL) {
             // matrix is singular
             if (det) *det = 0.0;
-            fprintf(stderr, "matrix A is singular, cannot solve");
+            fprintf(stderr, "matrix A is singular, cannot solve\n");
             break;
         }
 
         if (pivot != i) {
             // we need to swap rows here
-            double* tmp_arr = matA->pValues[i];
+            double complex* tmp_arr = matA->pValues[i];
             matA->pValues[i] = matA->pValues[pivot];
             matA->pValues[pivot] = tmp_arr;
             if (det) *det = -*det; // swapping a row flips the sign
@@ -182,13 +176,13 @@ Matrix* solve_matrix(Matrix* matA, Matrix* matB) {
 }
 
 // implemented using gaussian elimination (might use same algorithm for solve)
-double mat_determinant(Matrix* mat) {
+double complex mat_determinant(Matrix* mat) {
     if (mat->nCols != mat->nRows) {
         fprintf(stderr, "matrix must be a square to calculate determinant, matrix size %dx%d", mat->nCols, mat->nRows);
         return -INFINITY;
     }
 
-    double det = 1.0;
+    double complex det = 1.0;
     Matrix* tmp = copy_matrix(mat);
     gaussian_elimination(mat, NULL, &det);
 

@@ -1,6 +1,6 @@
 #include "../../../include/Parser/SPICE/spiceParser.h"
 #include "../../../include/utils/strutils.h"
-#include "../../../include/Simulator/analysis.h"
+#include "../../../include/Simulator/Analysis/analysis.h"
 
 const char* supported_options[] = {"gmin", "aex", NULL};
 
@@ -25,6 +25,7 @@ Netlist* initialize_netlist() {
     output->vsources = NULL;
     output->nodes = NULL;
     output->vsources = NULL;
+    output->inductors = NULL;
     output->num_inductors = 0;
     output->num_nodes = 0;
     output->num_vsources = 0;
@@ -103,10 +104,15 @@ void parse_two_terminal_device(Netlist* parser, char* line, device_type type, FI
     for (line_len = 0; line_split[line_len] != NULL; line_len++);
     if (line_len != 4) {
         fprintf(logfile, "Incorrect device definition %s", line);
-        return;
+        exit(-1);
     }
     
     char* device_name = line_split[0];
+    char* device_exists = hashmap_get(parser->devices, device_name);
+    if (device_exists != NULL) {
+        fprintf(logfile, "Device %s is defined more than once\n", device_name);
+        exit(-1);
+    }
     // need to support non-number node names
     char* node_1 = line_split[1];
     char* node_2 = line_split[2];
@@ -198,18 +204,66 @@ void parse_option(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logf
     }
 }
 
+AC_Analysis* parse_ac_analysis(char** curr_line_splitted, FILE* logfile) {
+    AC_Analysis* ac_analysis = (AC_Analysis*)malloc(sizeof(AC_Analysis));
+    AC_TYPE ac_analysis_type;
+    char* tmp = curr_line_splitted[1];
+    if (strcmp(tmp, "dec") == 0) {
+        ac_analysis_type = DEC;
+    } else if (strcmp(tmp, "oct") == 0) {
+        ac_analysis_type = OCT;
+    } else if (strcmp(tmp, "lin") == 0) {
+        ac_analysis_type = LIN;
+    } else {
+        fprintf(logfile, "Incorrect AC analysis points type %s\n", tmp);
+        free(ac_analysis);
+        return NULL;
+    }
+    int numpoints = atoi(curr_line_splitted[2]); // this must be an integer lol
+    double start = device_val_to_double(curr_line_splitted[3]);
+    double end = device_val_to_double(curr_line_splitted[4]);
+    ac_analysis->type = ac_analysis_type;
+    ac_analysis->num_points = numpoints;
+    ac_analysis->start = start;
+    ac_analysis->end = end;
+    return ac_analysis;
+}
+
 void parse_analysis(Netlist* parsed_netlist, char** curr_line_splitted, FILE* logfile) {
     if (parsed_netlist->analyses == NULL) {
-        parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free);
+        parsed_netlist->analyses = hashmap_create(16, hash_string, cmp_func, free, free_analysis);
     }
 
     static int num_analysis = 0;
     char analysis_name[5];
-    Analysis* analysis_data = malloc(sizeof(Analysis));
+    Analysis* analysis = malloc(sizeof(Analysis));
+    analysis->analysis_data = NULL;
     sprintf(analysis_name, "an%d", ++num_analysis);
-    analysis_data->analysis_name = analysis_name;
-    analysis_data->type = OP;
-    hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis_data);
+    analysis->analysis_name = analysis_name;
+    char* analysis_command = curr_line_splitted[0];
+    if (strcmp(analysis_command, ".op") == 0) {
+        analysis->type = OP;
+    } else if (strcmp(analysis_command, ".ac") == 0) {
+        // ac type numpoints start end
+        int line_len = 0;
+        for(; curr_line_splitted[line_len] != NULL; line_len++) {
+            lower_str_in_place(curr_line_splitted[line_len]);
+        }
+        if (line_len != 5) {
+            fprintf(logfile, "Incorrect AC analysis definition\n");
+            free_analysis(analysis);
+            return;
+        }
+        analysis->type = AC;
+        AC_Analysis* ac_analysis = parse_ac_analysis(curr_line_splitted, logfile);
+        if (ac_analysis == NULL) {
+            free_analysis(analysis);
+            return;
+        }
+        analysis->analysis_data = ac_analysis;
+    }
+    
+    hashmap_insert(parsed_netlist->analyses, my_strdup(analysis_name), analysis);
 }
 
 void parse_dot_command(Netlist* parsed_netlist, char* curr_line, FILE* logfile) {
@@ -290,22 +344,6 @@ Netlist* parse_netlist(char* netlist_path, FILE* logfile) {
             parse_device(parsed_netlist, curr_line, logfile);
         }
     }
-    // printf("returned split text\n");
-    // for (int i = 0; netlist_text_split[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split[i]);
-    // }
-    // printf("text with no comments\n");
-    // for (int i = 0; netlist_text_split_no_comments[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_comments[i]);
-    // }
-    // printf("text with no comments nor analyses\n");
-    // for (int i = 0; netlist_text_split_no_analyses[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_analyses[i]);
-    // }
-    // printf("text with no comments nor analyses nor options\n");
-    // for (int i = 0; netlist_text_split_no_options[i] != NULL; i++) {
-    //     printf("index %d: %s\n", i, netlist_text_split_no_options[i]);
-    // }
     free(netlist_text);
     free_split_text(netlist_text_split);
     return parsed_netlist;
@@ -317,5 +355,6 @@ void free_parser(Netlist* parser) {
     hashmap_destroy(parser->options);
     free_split_text(parser->nodes);
     free_split_text(parser->vsources);
+    free_split_text(parser->inductors);
     free(parser);
 }

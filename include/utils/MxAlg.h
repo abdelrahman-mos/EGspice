@@ -3,17 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#define MX_ATOL 1e-18
+#include "mathutils.h"
 
 typedef struct
 {
     int nRows;
     int nCols;
-    double** pValues;
+    double complex** pValues;
 } Matrix;
 
-typedef enum {MFT_NONE, MFT_ZEROS, MFT_ONES, MFT_RAND, MFT_IDENTITY} MatFillType;
+typedef enum {MFT_NONE, MFT_ZEROS, MFT_ONES, MFT_RAND, MFT_IDENTITY, MFT_CMPLX_ONES} MatFillType;
 
 Matrix* create_matrix(int nRows, int nCols, MatFillType fill_type);
 Matrix* copy_matrix(Matrix* matrix);
@@ -26,6 +25,6 @@ Matrix* mat_mul(Matrix* mat_A, Matrix* mat_B);
 Matrix* mat_transpose(Matrix* mat);
 Matrix* solve_matrix(Matrix* matA, Matrix* matB);
 Matrix* reshape_matrix(Matrix* mat, int new_rows, int new_cols, MatFillType fill_type);
-double mat_determinant(Matrix* mat);
+double complex mat_determinant(Matrix* mat);
 
 #endif

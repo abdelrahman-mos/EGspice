@@ -13,6 +13,8 @@ void run_simulator(char* netlist_path) {
         parsed_netlist->num_inductors
     );
     run_analyses(parsed_netlist, logfile);
+    // AC_Analysis analysis = {.type=OCT, .start=1.0, .end=10000.0, .num_points=8};
+    // expand_freq(&analysis);
     // char* analysis = (char*)hashmap_get(parsed_netlist->analyses, "an1");
     // printf("analysis: %s\n", analysis);
     // char** devices_names = hashmap_keys(parsed_netlist->devices);

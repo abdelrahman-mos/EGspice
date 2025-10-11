@@ -24,12 +24,36 @@ void isource_stamp(Matrix* coeff, Matrix* outputs, Isource* device) {
     }
 }
 
-void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device) {
-    return;
+void capacitor_stamp(Matrix* coeff, Matrix* outputs, Capacitor* device, double frequency) {
+    // GC = jwC
+    if (device->node1 != 0) {
+        coeff->pValues[device->node1-1][device->node1-1] += CMPLX(0.0, 2.0*M_PI*frequency*device->val);
+    }
+
+    if (device->node2 != 0) {
+        coeff->pValues[device->node2-1][device->node2-1] += CMPLX(0.0, 2.0*M_PI*frequency*device->val);
+    }
+
+    if ((device->node1 != 0) && (device->node2 != 0)) {
+        coeff->pValues[device->node1-1][device->node2-1] += CMPLX(0.0, -2.0*M_PI*frequency*device->val);
+        coeff->pValues[device->node2-1][device->node1-1] += CMPLX(0.0, -2.0*M_PI*frequency*device->val);
+    }
 }
 
-void inductor_stamp(Matrix* coeff, Matrix* outputs, Inductor* device) {
-    return;
+void inductor_stamp(Matrix* coeff, Matrix* outputs, Inductor* device, double frequency) {
+    // GL = 1/jwL
+    if (device->node1 != 0) {
+        coeff->pValues[device->node1-1][device->node1-1] += CMPLX(0.0, 1.0/(2.0*M_PI*frequency*device->val));
+    }
+
+    if (device->node2 != 0) {
+        coeff->pValues[device->node2-1][device->node2-1] += CMPLX(0.0, 1.0/(2.0*M_PI*frequency*device->val));
+    }
+
+    if ((device->node1 != 0) && (device->node2 != 0)) {
+        coeff->pValues[device->node1-1][device->node2-1] -= CMPLX(0.0, 1.0/(2.0*M_PI*frequency*device->val));
+        coeff->pValues[device->node2-1][device->node1-1] -= CMPLX(0.0, 1.0/(2.0*M_PI*frequency*device->val));
+    }
 }
 
 void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device) {
@@ -47,7 +71,7 @@ void resistor_stamp(Matrix* coeff, Matrix* outputs, Resistor* device) {
     }
 }
 
-void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device) {
+void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device, double frequency) {
     if (device->type == ISOURCE) {
         Isource* curr_device = (Isource*) device->device_data;
         return isource_stamp(coeff_matrix, outputs_matrix, curr_device);
@@ -58,11 +82,11 @@ void stamp_device(Matrix* coeff_matrix, Matrix* outputs_matrix, Device* device) 
     }
     if (device->type == CAPACITOR) {
         Capacitor* curr_device = (Capacitor*) device->device_data;
-        return capacitor_stamp(coeff_matrix, outputs_matrix, curr_device);
+        return capacitor_stamp(coeff_matrix, outputs_matrix, curr_device, frequency);
     }
     if (device->type == INDUCTOR) {
         Inductor* curr_device = (Inductor*) device->device_data;
-        return inductor_stamp(coeff_matrix, outputs_matrix, curr_device);
+        return inductor_stamp(coeff_matrix, outputs_matrix, curr_device, frequency);
     }
 }
 
