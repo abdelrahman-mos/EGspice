@@ -74,31 +74,50 @@ void populate_ac_devices(Netlist* parsed_netlist, Matrix* ac_coeff_matrix, doubl
 
 
 void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
+    static int output_op = 0;
+    char op_file_name[12];
+    sprintf(op_file_name, "output.op%d", output_op++);
+    FILE* op_output_file = fopen(op_file_name, "w+");
     fprintf(logfile, "###### OPERATING POINT RESULTS ######\n\n");
     int i;
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
         fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
+        fprintf(op_output_file, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
     }
     i--;
     for (int j = 0; j < parsed_netlist->num_vsources; i++, j++) {
         fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
+        fprintf(op_output_file, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
     }
     i--;
     for (int j = 0; j < parsed_netlist->num_inductors; i++, j++) {
         fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
+        fprintf(op_output_file, "I(%s)=%.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
     }
     fprintf(logfile, "\nOP analysis finished successfully\n");
+    fclose(op_output_file);
 }
 
 void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, double* freqs) {
+    static int output_ac = 0;
+    char ac_file_name[12];
+    sprintf(ac_file_name, "output.ac%d", output_ac++);
+    FILE* ac_output_file = fopen(ac_file_name, "w+");
     fprintf(logfile, "###### AC Analysis RESULTS ######\n\n");
     int i;
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
         fprintf(logfile, "\t\tFREQ\t\tV(%s)\n", parsed_netlist->nodes[i]);
+        fprintf(ac_output_file, "\t\tFREQ\t\tV(%s)\n", parsed_netlist->nodes[i]);
         for (int j = 0; freqs[j] > 0.0; j++) {
             double real = creal(ac_outputs[j]->pValues[i-1][0]);
             double imag = cimag(ac_outputs[j]->pValues[i-1][0]);
             fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n",
+                freqs[j],
+                real,
+                (imag >= 0.0) ? "+" : "-",
+                cabs(imag)
+            );
+            fprintf(ac_output_file, "\t\t%lf\t\t%lf%s%lfi\n",
                 freqs[j],
                 real,
                 (imag >= 0.0) ? "+" : "-",
@@ -112,14 +131,21 @@ void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, doubl
             // );
         }
         fprintf(logfile, "\n\n");
+        fprintf(ac_output_file, "\n\n");
     }
     i--;
     for (int j = 0; j < parsed_netlist->num_vsources; i++, j++) {
         fprintf(logfile, "\t\tFREQ\t\tI(%s)\n", parsed_netlist->vsources[j]);
+        fprintf(ac_output_file, "\t\tFREQ\t\tI(%s)\n", parsed_netlist->vsources[j]);
         for (int k = 0; freqs[k] > 0.0; k++) {
             double real = creal(ac_outputs[k]->pValues[i][0]);
             double imag = cimag(ac_outputs[k]->pValues[i][0]);
             fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n", freqs[k],
+                real,
+                (imag >= 0.0) ? "+" : "",
+                cabs(imag)
+            );
+            fprintf(ac_output_file, "\t\t%lf\t\t%lf%s%lfi\n", freqs[k],
                 real,
                 (imag >= 0.0) ? "+" : "",
                 cabs(imag)
@@ -133,6 +159,7 @@ void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, doubl
         }
     }
     fprintf(logfile, "\nAC analysis finished successfully\n");
+    fclose(ac_output_file);
 }
 
 void run_op(Netlist* parsed_netlist, Matrix* coeff, Matrix* outputs, FILE* logfile) {
