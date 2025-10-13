@@ -52,9 +52,7 @@ void populate_dc_inductors(Netlist* parsed_netlist, Matrix* coeff, Matrix* outpu
         // Vx = Vy
         Vsource* curr_vsource = (Vsource*) device->device_data;
         double val = curr_vsource->val;
-        if (device->type == INDUCTOR) {
-            curr_vsource->val = 0.0;
-        }
+        curr_vsource->val = 0.0;
         vsource_stamp(coeff, outputs, curr_vsource, i, num);
         curr_vsource->val = val;
     }
@@ -81,18 +79,18 @@ void print_op(FILE* logfile, Netlist* parsed_netlist, Matrix* output_vars) {
     fprintf(logfile, "###### OPERATING POINT RESULTS ######\n\n");
     int i;
     for (i = 1; parsed_netlist->nodes[i] != NULL; i++) {
-        fprintf(logfile, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
-        fprintf(op_output_file, "V(%s)=%.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
+        fprintf(logfile, "\tV(%s)\t%15.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
+        fprintf(op_output_file, "\tV(%s)\t%15.15lf\n", parsed_netlist->nodes[i], cabs(output_vars->pValues[i-1][0]));
     }
     i--;
     for (int j = 0; j < parsed_netlist->num_vsources; i++, j++) {
-        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
-        fprintf(op_output_file, "I(%s)=%.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
+        fprintf(logfile, "\tI(%s)\t%15.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
+        fprintf(op_output_file, "\tI(%s)\t%15.15lf\n", parsed_netlist->vsources[j], cabs(output_vars->pValues[i][0]));
     }
     i--;
     for (int j = 0; j < parsed_netlist->num_inductors; i++, j++) {
-        fprintf(logfile, "I(%s)=%.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
-        fprintf(op_output_file, "I(%s)=%.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
+        fprintf(logfile, "\tI(%s)\t%15.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
+        fprintf(op_output_file, "\tI(%s)\t%15.15lf\n", parsed_netlist->inductors[j], cabs(output_vars->pValues[i][0]));
     }
     fprintf(logfile, "\nOP analysis finished successfully\n");
     fclose(op_output_file);
@@ -111,17 +109,15 @@ void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, doubl
         for (int j = 0; freqs[j] > 0.0; j++) {
             double real = creal(ac_outputs[j]->pValues[i-1][0]);
             double imag = cimag(ac_outputs[j]->pValues[i-1][0]);
-            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n",
+            fprintf(logfile, "\t\t%15.10lf\t\t%.10lf%+.10lfi\n",
                 freqs[j],
                 real,
-                (imag >= 0.0) ? "+" : "-",
-                cabs(imag)
+                imag
             );
-            fprintf(ac_output_file, "\t\t%lf\t\t%lf%s%lfi\n",
+            fprintf(ac_output_file, "\t\t%.10lf\t\t%.10lf%+.10lfi\n",
                 freqs[j],
                 real,
-                (imag >= 0.0) ? "+" : "-",
-                cabs(imag)
+                imag
             );
             // double abs = cabs(ac_outputs[j]->pValues[i-1][0]);
             // double arg = carg(ac_outputs[j]->pValues[i-1][0]) * 180.0 / M_PI;
@@ -140,15 +136,15 @@ void print_ac(FILE* logfile, Netlist* parsed_netlist, Matrix** ac_outputs, doubl
         for (int k = 0; freqs[k] > 0.0; k++) {
             double real = creal(ac_outputs[k]->pValues[i][0]);
             double imag = cimag(ac_outputs[k]->pValues[i][0]);
-            fprintf(logfile, "\t\t%lf\t\t%lf%s%lfi\n", freqs[k],
+            fprintf(logfile, "\t\t%.10lf\t\t%.10lf%+.10lfi\n", 
+                freqs[k],
                 real,
-                (imag >= 0.0) ? "+" : "",
-                cabs(imag)
+                imag
             );
-            fprintf(ac_output_file, "\t\t%lf\t\t%lf%s%lfi\n", freqs[k],
+            fprintf(ac_output_file, "\t\t%.10lf\t\t%.10lf%+.10lfi\n", 
+                freqs[k],
                 real,
-                (imag >= 0.0) ? "+" : "",
-                cabs(imag)
+                imag
             );
             // double abs = cabs(ac_outputs[k]->pValues[i][0]);
             // double arg = carg(ac_outputs[k]->pValues[i][0]);
