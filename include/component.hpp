@@ -18,18 +18,33 @@ public:
     virtual void stamp(std::shared_ptr<Matrix<double>> circuit_matrix) {
         return;
     }
+
+    virtual void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, double frequency) {
+        return;
+    }
 };
 
 class Vsource : public Component {
 public:
     Vsource(std::vector<int> terminals, std::string name = "", double value = 0.0) : Component(terminals, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix) override;
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, double frequency) override;
 };
+
+class Isource : public Component
+{
+public:
+    Isource(std::vector<int> terminals, std::string name = "", double value = 0.0) : Component(terminals, name, value) {}
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix) override;
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, double frequency) override;
+};
+
 
 class Resistor : public Component {
 public:
     Resistor(std::vector<int> terminals, std::string name = "", double value = 0.0) : Component(terminals, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix) override;
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, double frequency) override;
 };
 
 #endif

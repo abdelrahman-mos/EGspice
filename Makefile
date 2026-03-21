@@ -1,11 +1,11 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g -fsanitize=address
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g -fsanitize=address 
 
 # Find all .c files in src/ and subdirs
-SRC = $(shell find src -name '*.c')
+SRC = $(shell find src -name '*.cpp')
 
 # Replace src/ with build/ and .c with .o
-OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
+OBJ = $(patsubst src/%.cpp, build/%.o, $(SRC))
 
 TARGET = build/EGspice
 

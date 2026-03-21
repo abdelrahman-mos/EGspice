@@ -28,6 +28,13 @@ public:
             component->stamp(circuit_matrix);
         }
     }
+
+    void stamp_circuit(double frequency) {
+        circuit_matrix = std::make_shared<Matrix<double>>(num_nodes, num_nodes);
+        for (const auto& component : components) {
+            component->stamp(circuit_matrix, frequency);
+        }
+    }
 };
 
 
