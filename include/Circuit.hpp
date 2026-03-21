@@ -19,7 +19,7 @@ public:
 
     void add_component(std::unique_ptr<Component> component) {
         num_nodes++;
-        if (typeid(component) == typeid(Vsource)) num_vsources++;
+        if (typeid(*component) == typeid(Vsource)) num_vsources++;
         components.push_back(std::move(component));
     }
 
@@ -41,7 +41,11 @@ public:
             output_matrix = std::make_shared<Matrix<double>>(num_nodes, 1);
         }
         for (const auto& component : components) {
-            component->stamp(circuit_matrix, output_matrix);
+            if (typeid(*component) == typeid(Vsource)) {
+                Vsource* curr_vsource = dynamic_cast<Vsource*>(component.get());
+                std::cout << "id: " << curr_vsource->vsource_id << std::endl;
+            }
+            component->stamp(circuit_matrix, output_matrix, num_vsources);
         }
     }
 
@@ -50,13 +54,13 @@ public:
             circuit_matrix = std::make_shared<Matrix<double>>(num_nodes, num_nodes);
             output_matrix = std::make_shared<Matrix<double>>(num_nodes, 1);
             for (const auto& component : components) {
-                component->stamp(circuit_matrix, output_matrix, frequency);
+                component->stamp(circuit_matrix, output_matrix, num_vsources, frequency);
             }
         } else {
             for (const auto& component : components) {
                 // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
-                if ((typeid(component) == typeid(Inductor)) || (typeid(component) == typeid(Capacitor))) {
-                    component->stamp(circuit_matrix, output_matrix, frequency);
+                if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
+                    component->stamp(circuit_matrix, output_matrix, num_vsources, frequency);
                 }
             }
         }
