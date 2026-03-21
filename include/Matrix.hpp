@@ -1,6 +1,7 @@
 #ifndef Matrix_hpp
 #define Matrix_hpp
 #include <vector>
+#include <algorithm>
 #include <iostream>
 
 template <typename T>
@@ -22,6 +23,12 @@ public:
 
     size_t numCols() const {
         return data.empty() ? 0 : data[0].size();
+    }
+
+    void fillZeros() {
+        for (size_t i = 0; i < this->numRows(); i++) {
+            std::fill(data[i].begin(), data[i].end(), 0);
+        }
     }
 
     Matrix<T> operator*(const Matrix<T>& mul) {

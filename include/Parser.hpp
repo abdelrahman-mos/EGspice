@@ -9,6 +9,7 @@
 #include "component.hpp"
 #include "Command.hpp"
 #include "Circuit.hpp"
+#include <regex>
 
 class Parser {
     std::string filename;

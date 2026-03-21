@@ -9,12 +9,32 @@ std::string str_tolower(std::string s)
     return s;
 }
 
+double value_to_double(std::string str_value) {
+    std::string output = std::regex_replace(str_value, std::regex("[Aa]+", std::regex_constants::extended), "a");
+    output = std::regex_replace(output, std::regex("[Ff]+", std::regex_constants::extended), "f");
+    output = std::regex_replace(output, std::regex("(Amp|H|V|OHM)$", std::regex_constants::extended | std::regex_constants::icase), "");
+    output = std::regex_replace(output, std::regex("(MEG)", std::regex_constants::extended | std::regex_constants::icase), "e6");
+    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
+    output = std::regex_replace(output, std::regex("(G)", std::regex_constants::extended | std::regex_constants::icase), "e9");
+    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
+    output = std::regex_replace(output, std::regex("(K)", std::regex_constants::extended | std::regex_constants::icase), "e3");
+    output = std::regex_replace(output, std::regex("(m)", std::regex_constants::extended | std::regex_constants::icase), "e-3");
+    output = std::regex_replace(output, std::regex("(u)", std::regex_constants::extended | std::regex_constants::icase), "e-6");
+    output = std::regex_replace(output, std::regex("(n)", std::regex_constants::extended | std::regex_constants::icase), "e-9");
+    output = std::regex_replace(output, std::regex("(p)", std::regex_constants::extended | std::regex_constants::icase), "e-12");
+    output = std::regex_replace(output, std::regex("(f)", std::regex_constants::extended | std::regex_constants::icase), "e-15");
+    output = std::regex_replace(output, std::regex("(a)", std::regex_constants::extended | std::regex_constants::icase), "e-18");
+    double value = std::stod(output);
+    return value;
+}
+
 std::unique_ptr<Vsource> Parser::parseVsource(const std::string& line) {
     std::istringstream iss(line);
     std::string name;
     int t1, t2;
-    double value;
-    iss >> name >> t1 >> t2 >> value;
+    std::string str_value;
+    iss >> name >> t1 >> t2 >> str_value;
+    double value = value_to_double(str_value);
     std::cout << "Parsed Vsource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
     return std::unique_ptr<Vsource>(new Vsource({t1, t2}, name, value));
 }
@@ -23,8 +43,9 @@ std::unique_ptr<Isource> Parser::parseIsource(const std::string& line) {
     std::istringstream iss(line);
     std::string name;
     int t1, t2;
-    double value;
-    iss >> name >> t1 >> t2 >> value;
+    std::string str_value;
+    iss >> name >> t1 >> t2 >> str_value;
+    double value = value_to_double(str_value);
     std::cout << "Parsed Isource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
     return std::unique_ptr<Isource>(new Isource({t1, t2}, name, value));
 }
@@ -33,8 +54,9 @@ std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     std::istringstream iss(line);
     std::string name;
     int t1, t2;
-    double value;
-    iss >> name >> t1 >> t2 >> value;
+    std::string str_value;
+    iss >> name >> t1 >> t2 >> str_value;
+    double value = value_to_double(str_value);
     std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
     return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
@@ -66,11 +88,11 @@ std::unique_ptr<Circuit> Parser::parse() {
         if (line.empty() || line[0] == '*') {
             continue; // Skip comments and empty lines
         }
-        if (line[0] == 'v' || line[0] == 'V') {
+        if (line[0] == 'v') {
             circuit->add_component(parseVsource(line));
-        } else if (line[0] == 'i' || line[0] == 'I') {
+        } else if (line[0] == 'i') {
             circuit->add_component(parseIsource(line));
-        } else if (line[0] == 'r' || line[0] == 'R') {
+        } else if (line[0] == 'r') {
             circuit->add_component(parseResistor(line));
         } else if (line[0] == '.') {
             circuit->add_command(parseCommand(line));

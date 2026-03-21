@@ -5,9 +5,11 @@
 #include <memory>
 
 int main() {
-    Parser parser("test_netlists/netlist1.cir");
+    Parser parser("test_netlists/voltage_divider.cir");
     std::unique_ptr<Circuit> circuit = parser.parse();
     circuit->stamp_circuit();
     auto circuit_matrix = circuit->get_matrix();
     std::cout << circuit_matrix << std::endl;
+    auto output_matrix = circuit->get_output_matrix();
+    std::cout << output_matrix << std::endl;
 }

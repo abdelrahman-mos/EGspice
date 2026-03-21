@@ -1,8 +1,8 @@
 #include "../include/component.hpp"
-void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix) {
+void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix) {
     std::cout << "hello" << std::endl;
 }
 
-void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, double frequency) {
+void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, double frequency) {
     std::cout << "hello AC" << std::endl;
 }
