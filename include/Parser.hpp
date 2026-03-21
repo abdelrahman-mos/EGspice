@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include "component.hpp"
+#include "Command.hpp"
 #include "Circuit.hpp"
 
 class Parser {
@@ -14,6 +15,7 @@ class Parser {
     std::unique_ptr<Vsource> parseVsource(const std::string& line);
     std::unique_ptr<Resistor> parseResistor(const std::string& line);
     std::unique_ptr<Isource> parseIsource(const std::string& line);
+    std::unique_ptr<Command> parseCommand(const std::string& line);
 public:
     Parser(const std::string& filename) : filename(filename) {}
     std::unique_ptr<Circuit> parse();

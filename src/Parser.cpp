@@ -39,6 +39,15 @@ std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
 
+std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
+    std::istringstream iss(line);
+    std::string command;
+    iss >> command;
+    command.erase(0, 1);
+    std::cout << "Unsupported command " << command << std::endl;
+    return nullptr;
+}
+
 std::unique_ptr<Circuit> Parser::parse() {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -64,11 +73,7 @@ std::unique_ptr<Circuit> Parser::parse() {
         } else if (line[0] == 'r' || line[0] == 'R') {
             circuit->add_component(parseResistor(line));
         } else if (line[0] == '.') {
-            std::istringstream iss(line);
-            std::string command;
-            iss >> command;
-            command.erase(0, 1);
-            std::cout << "Unsupported command " << command << std::endl;
+            circuit->add_command(parseCommand(line));
         } else {
             std::cout << "Unsupported component " << line[0] << std::endl;
         }
