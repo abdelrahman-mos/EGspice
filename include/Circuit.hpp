@@ -2,6 +2,7 @@
 #define CIRCUIT_HPP
 #include <vector>
 #include <memory>
+#include <map>
 #include "component.hpp"
 #include "Command.hpp"
 #include "Matrix.hpp"

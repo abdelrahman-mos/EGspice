@@ -1,4 +1,4 @@
-#include "../include/component.hpp"
+#include "../../include/component.hpp"
 void Inductor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
     std::cout << "goodbye" << std::endl;
 }

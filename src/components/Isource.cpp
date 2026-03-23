@@ -1,4 +1,4 @@
-#include "../include/component.hpp"
+#include "../../include/component.hpp"
 void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
     int node_1 = terminals[0];
     int node_2 = terminals[1];

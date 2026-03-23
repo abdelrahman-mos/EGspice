@@ -1,4 +1,4 @@
-#include "../include/component.hpp"
+#include "../../include/component.hpp"
 void Resistor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
     size_t node_1 = terminals[0];
     size_t node_2 = terminals[1];

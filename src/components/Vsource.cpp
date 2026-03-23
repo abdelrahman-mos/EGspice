@@ -1,4 +1,4 @@
-#include "../include/component.hpp"
+#include "../../include/component.hpp"
 void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
     size_t stamp_index = circuit_matrix->numRows() - num_vsources + vsource_id;
     size_t node_1 = terminals[0];
