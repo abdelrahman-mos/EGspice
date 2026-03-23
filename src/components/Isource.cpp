@@ -1,7 +1,7 @@
 #include "../../include/component.hpp"
 void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
-    int node_1 = terminals[0];
-    int node_2 = terminals[1];
+    int node_1 = terminals_int[0];
+    int node_2 = terminals_int[1];
 
     if (node_1 != 0) {
         (*output_matrix)[node_1-1][0] += value;
@@ -13,8 +13,8 @@ void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_
 }
 
 void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, double frequency) {
-    int node_1 = terminals[0];
-    int node_2 = terminals[1];
+    int node_1 = terminals_int[0];
+    int node_2 = terminals_int[1];
 
     if (node_1 != 0) {
         (*output_matrix)[node_1-1][0] += ac_val;

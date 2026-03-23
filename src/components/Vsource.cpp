@@ -1,8 +1,8 @@
 #include "../../include/component.hpp"
 void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
     size_t stamp_index = circuit_matrix->numRows() - num_vsources + vsource_id;
-    size_t node_1 = terminals[0];
-    size_t node_2 = terminals[1];
+    size_t node_1 = terminals_int[0];
+    size_t node_2 = terminals_int[1];
 
     if (node_1 != 0) {
         (*circuit_matrix)[node_1-1][stamp_index] += 1;
@@ -19,8 +19,8 @@ void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_
 
 void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, double frequency) {
     size_t stamp_index = circuit_matrix->numRows() - num_vsources + vsource_id;
-    size_t node_1 = terminals[0];
-    size_t node_2 = terminals[1];
+    size_t node_1 = terminals_int[0];
+    size_t node_2 = terminals_int[1];
 
     if (node_1 != 0) {
         (*circuit_matrix)[node_1-1][stamp_index] += 1;

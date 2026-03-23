@@ -2,7 +2,7 @@
 #define CIRCUIT_HPP
 #include <vector>
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include "component.hpp"
 #include "Command.hpp"
 #include "Matrix.hpp"
@@ -14,14 +14,33 @@ class Circuit
     std::shared_ptr<Matrix<double>> circuit_matrix;
     std::shared_ptr<Matrix<double>> output_matrix;
     int num_nodes;
+    std::unordered_map<std::string, int> node_map;
     int num_vsources;
 public:
-    Circuit() = default;
+    Circuit() {
+        node_map = {{"0", 0}, {"gnd", 0}};
+    }
 
     void add_component(std::unique_ptr<Component> component) {
-        num_nodes++;
+        // num_nodes++;
+        // if (typeid(*component) == typeid(Vsource)) num_vsources++;
+        // components.push_back(std::move(component));
+        static int curr_node = 1;
+        std::vector<std::string> terminals = component->get_terminals();
+        std::vector<int> terminals_int;
+        for (auto terminal : terminals) {
+            auto curr_terminal = node_map.find(terminal);
+            if (curr_terminal == node_map.end()) {
+                terminals_int.push_back(curr_node);
+                node_map.insert({terminal, curr_node++});
+            } else {
+                terminals_int.push_back(curr_terminal->second);
+            }
+        }
+        component->update_terminals(terminals_int);
         if (typeid(*component) == typeid(Vsource)) num_vsources++;
         components.push_back(std::move(component));
+        num_nodes = curr_node-1;
     }
 
     void add_command(std::unique_ptr<Command> command) {

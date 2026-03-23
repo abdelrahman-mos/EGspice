@@ -31,9 +31,7 @@ double value_to_double(std::string str_value) {
 std::unique_ptr<Vsource> Parser::parseVsource(const std::string& line) {
     static int vsource_id = 0;
     std::istringstream iss(line);
-    std::string name;
-    int t1, t2;
-    std::string str_value;
+    std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     std::cout << "Parsed Vsource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
@@ -42,9 +40,7 @@ std::unique_ptr<Vsource> Parser::parseVsource(const std::string& line) {
 
 std::unique_ptr<Isource> Parser::parseIsource(const std::string& line) {
     std::istringstream iss(line);
-    std::string name;
-    int t1, t2;
-    std::string str_value;
+    std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     std::cout << "Parsed Isource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
@@ -53,9 +49,7 @@ std::unique_ptr<Isource> Parser::parseIsource(const std::string& line) {
 
 std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     std::istringstream iss(line);
-    std::string name;
-    int t1, t2;
-    std::string str_value;
+    std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
