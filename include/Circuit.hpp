@@ -22,6 +22,14 @@ public:
         node_map = {{"0", 0}, {"gnd", 0}};
     }
 
+    int numNodes() const {
+        return num_nodes;
+    }
+
+    int numVsources() const {
+        return num_vsources;
+    }
+
     int numInductors() const {
         return num_inductors;
     }

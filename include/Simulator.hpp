@@ -7,7 +7,7 @@
 
 class Simulator {
     std::unordered_map<std::string, std::string> inputs;
-    std::unique_ptr<Circuit> circuit;
+    std::shared_ptr<Circuit> circuit;
     Parser parser = Parser();
     
 public:
@@ -20,7 +20,7 @@ public:
         auto& commands = circuit->commands();
         for (const auto& command : commands) {
             if (!command) continue;
-            command->run();
+            command->run(circuit);
         }
     }
 };

@@ -61,18 +61,24 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     std::string command;
     iss >> command;
     command.erase(0, 1);
+    if (command == "op") {
+        return std::unique_ptr<OP>(new OP("op"));
+    } else if (command == "ac")
+    {
+        return std::unique_ptr<AC>(new AC("ac", 1, 1e9, AC_TYPE::DEC));
+    }
     std::cout << "Unsupported command " << command << std::endl;
     return nullptr;
 }
 
-std::unique_ptr<Circuit> Parser::parse(std::string filename) {
+std::shared_ptr<Circuit> Parser::parse(std::string filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cout << "Could not open file: " << filename << std::endl;
         return nullptr;
     }
     // std::vector<std::unique_ptr<Component>> components;
-    std::unique_ptr<Circuit> circuit(new Circuit());
+    std::shared_ptr<Circuit> circuit(new Circuit());
     std::string line;
     while (std::getline(file, line)) {
         std::cout << line << std::endl;
@@ -83,16 +89,28 @@ std::unique_ptr<Circuit> Parser::parse(std::string filename) {
         if (line.empty() || line[0] == '*') {
             continue; // Skip comments and empty lines
         }
+
+        if (line[0] == '.') {
+            auto command = parseCommand(line);
+            if (command) {
+                circuit->add_command(std::move(command));
+            }
+            continue;
+        }
+
+        std::unique_ptr<Component> component = nullptr;
         if (line[0] == 'v') {
-            circuit->add_component(parseVsource(line));
+            component = parseVsource(line);
         } else if (line[0] == 'i') {
-            circuit->add_component(parseIsource(line));
+            component = parseIsource(line);
         } else if (line[0] == 'r') {
-            circuit->add_component(parseResistor(line));
-        } else if (line[0] == '.') {
-            circuit->add_command(parseCommand(line));
+            component = parseResistor(line);
         } else {
             std::cout << "Unsupported component " << line[0] << std::endl;
+        }
+
+        if (component) {
+            circuit->add_component(std::move(component));
         }
     }
     file.close();

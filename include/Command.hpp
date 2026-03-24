@@ -3,19 +3,24 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <memory>
+
+class Circuit;
 
 class Command {
 protected:
     std::string name_;
     std::vector<std::string> command_options;
 public:
+    Command() = default;
     Command(std::string name) : name_(name) {}
+    Command(std::string name, std::vector<std::string> command_options) : name_(name), command_options(command_options) {}
 
     std::string name() const {
         return name_;
     }
     
-    virtual void run() {
+    virtual void run(std::shared_ptr<Circuit> circuit) {
         return;
     }
 };
@@ -28,9 +33,7 @@ public:
 class OP : public Simulation {
 public:
     OP(std::string name) : Simulation(name) {}
-    void run() override {
-        return;
-    }
+    void run(std::shared_ptr<Circuit> circuit) override;
 };
 
 enum class AC_TYPE {
@@ -53,7 +56,7 @@ public:
     AC(std::string name, double fstart, double fend, AC_TYPE type) : Simulation(name), fstart(fstart), fend(fend), type(type) {
         expand_freq();
     }
-    void run() override {
+    void run(std::shared_ptr<Circuit> circuit) override {
         return;
     }
 };
