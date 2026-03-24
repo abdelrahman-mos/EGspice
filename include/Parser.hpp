@@ -18,8 +18,8 @@ class Parser {
     std::unique_ptr<Isource> parseIsource(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
 public:
-    Parser(const std::string& filename) : filename(filename) {}
-    std::unique_ptr<Circuit> parse();
+    Parser() = default;
+    std::unique_ptr<Circuit> parse(std::string filename);
 };
 
 #endif /* PARSER_HPP */

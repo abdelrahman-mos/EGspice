@@ -128,6 +128,13 @@ public:
         return output;
     }
 
+    void ressize_matrix(int new_rows, int new_cols) {
+        data.resize(new_rows);
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i].resize(new_cols);
+        }
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& mat) {
         for (size_t i = 0; i < mat.numRows(); i++) {
             for (size_t j = 0; j < mat.numCols(); j++) {

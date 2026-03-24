@@ -65,7 +65,7 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     return nullptr;
 }
 
-std::unique_ptr<Circuit> Parser::parse() {
+std::unique_ptr<Circuit> Parser::parse(std::string filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cout << "Could not open file: " << filename << std::endl;

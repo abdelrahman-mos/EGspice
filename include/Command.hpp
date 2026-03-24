@@ -6,10 +6,18 @@
 
 class Command {
 protected:
-    std::string name;
+    std::string name_;
     std::vector<std::string> command_options;
 public:
-    Command(std::string name) : name(name) {}
+    Command(std::string name) : name_(name) {}
+
+    std::string name() const {
+        return name_;
+    }
+    
+    virtual void run() {
+        return;
+    }
 };
 
 class Simulation : public Command {
@@ -20,6 +28,9 @@ public:
 class OP : public Simulation {
 public:
     OP(std::string name) : Simulation(name) {}
+    void run() override {
+        return;
+    }
 };
 
 enum class AC_TYPE {
@@ -41,6 +52,9 @@ class AC : public Simulation {
 public:
     AC(std::string name, double fstart, double fend, AC_TYPE type) : Simulation(name), fstart(fstart), fend(fend), type(type) {
         expand_freq();
+    }
+    void run() override {
+        return;
     }
 };
 
