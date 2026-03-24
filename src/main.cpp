@@ -5,7 +5,7 @@
 #include <memory>
 
 int main() {
-    Parser parser("test_netlists/netlist1.cir");
+    Parser parser("test_netlists/netlist2.cir");
     std::unique_ptr<Circuit> circuit = parser.parse();
     circuit->stamp_circuit();
     auto circuit_matrix = circuit->get_matrix();

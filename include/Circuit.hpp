@@ -57,8 +57,8 @@ public:
 
     void stamp_circuit() {
         if (circuit_matrix == nullptr) {
-            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes, num_nodes);
-            output_matrix = std::make_shared<Matrix<double>>(num_nodes, 1);
+            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources, num_nodes+num_vsources);
+            output_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources, 1);
         }
         for (const auto& component : components) {
             if (typeid(*component) == typeid(Vsource)) {

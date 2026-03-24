@@ -36,7 +36,7 @@ public:
 
     Matrix<T> operator*(const Matrix<T>& mul) {
         if (this->numCols() != mul.numRows()) {
-            std::cout << "Cannot multiply, dimenstions don't match" << std::endl;
+            std::cout << "Cannot multiply, dimensions don't match" << std::endl;
             return nullptr;
         }
 
