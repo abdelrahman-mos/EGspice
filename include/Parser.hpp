@@ -17,6 +17,7 @@ class Parser {
     std::unique_ptr<Resistor> parseResistor(const std::string& line);
     std::unique_ptr<Isource> parseIsource(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
+    std::unique_ptr<Command> parseAC(std::istringstream& iss);
 public:
     Parser() = default;
     std::shared_ptr<Circuit> parse(std::string filename);

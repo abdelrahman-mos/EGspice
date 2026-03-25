@@ -56,6 +56,29 @@ std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
 
+std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
+    std::string type_str, numpoints_str, fstart_str, fend_str;
+    iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
+    AC_TYPE type;
+    if (type_str == "dec") {
+        type = AC_TYPE::DEC;
+    } else if (type_str == "oct")
+    {
+        type = AC_TYPE::OCT;
+    } else if (type_str == "lin")
+    {
+        type = AC_TYPE::LIN;
+    } else {
+        std::cout << "unknown ac type " << type_str << std::endl;
+        return nullptr;
+    }
+
+    int numpoints = value_to_double(numpoints_str);
+    double fstart = value_to_double(fstart_str);
+    double fend = value_to_double(fend_str);
+    return std::unique_ptr<AC>(new AC("ac", fstart, fend, numpoints, type));
+}
+
 std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     std::istringstream iss(line);
     std::string command;
@@ -65,7 +88,7 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
         return std::unique_ptr<OP>(new OP("op"));
     } else if (command == "ac")
     {
-        return std::unique_ptr<AC>(new AC("ac", 1, 1e9, AC_TYPE::DEC));
+        return parseAC(iss);
     }
     std::cout << "Unsupported command " << command << std::endl;
     return nullptr;

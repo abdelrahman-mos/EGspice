@@ -1,5 +1,5 @@
-#include "../include/Circuit.hpp"
-#include "../include/Command.hpp"
+#include "../../include/Circuit.hpp"
+#include "../../include/Command.hpp"
 
 void OP::run(std::shared_ptr<Circuit> circuit) {
     circuit->stamp_circuit();

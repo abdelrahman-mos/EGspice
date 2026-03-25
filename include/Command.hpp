@@ -53,12 +53,11 @@ class AC : public Simulation {
     void expand_freq_oct();
     void expand_freq_lin();
 public:
-    AC(std::string name, double fstart, double fend, AC_TYPE type) : Simulation(name), fstart(fstart), fend(fend), type(type) {
+    AC(std::string name, double fstart, double fend, size_t numpoints, AC_TYPE type) : Simulation(name), fstart(fstart),
+     fend(fend), numpoints(numpoints), type(type) {
         expand_freq();
     }
-    void run(std::shared_ptr<Circuit> circuit) override {
-        return;
-    }
+    void run(std::shared_ptr<Circuit> circuit) override;
 };
 
 #endif

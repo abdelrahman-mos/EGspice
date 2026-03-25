@@ -17,9 +17,11 @@ class Circuit
     std::unordered_map<std::string, int> node_map;
     int num_vsources;
     int num_inductors;
+    bool freq_first_point;
 public:
     Circuit() {
         node_map = {{"0", 0}, {"gnd", 0}};
+        freq_first_point = true;
     }
 
     int numNodes() const {
@@ -91,12 +93,13 @@ public:
     }
 
     void stamp_circuit(double frequency) {
-        if (circuit_matrix == nullptr) {
-            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes, num_nodes);
-            output_matrix = std::make_shared<Matrix<double>>(num_nodes, 1);
+        if ((circuit_matrix == nullptr) || (freq_first_point == true)) {
+            circuit_matrix.reset(new Matrix<double>(num_nodes+num_vsources, num_nodes+num_vsources));
+            output_matrix.reset(new Matrix<double>(num_nodes+num_vsources, 1));
             for (const auto& component : components_) {
                 component->stamp(circuit_matrix, output_matrix, num_vsources, frequency);
             }
+            freq_first_point = false;
         } else {
             for (const auto& component : components_) {
                 // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices

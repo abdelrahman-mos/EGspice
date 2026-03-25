@@ -1,4 +1,5 @@
-#include "../include/Command.hpp"
+#include "../../include/Command.hpp"
+#include "../../include/Circuit.hpp"
 
 void AC::expand_freq_dec() {
     double log_start = std::log10(fstart);
@@ -55,4 +56,16 @@ void AC::expand_freq() {
     default:
         break;
     }
+}
+
+void AC::run(std::shared_ptr<Circuit> circuit) {
+    for (auto freq : frequency_points) {
+        std::cout << "frequency: " << freq << std::endl;
+        circuit->stamp_circuit(freq);
+        auto circuit_matrix = circuit->get_matrix();
+        auto output_matrix = circuit->get_output_matrix();
+        auto outputs = Matrix<double>::solve_matrix(circuit_matrix, output_matrix);
+        // std::cout << outputs << std::endl;
+    }
+    return;
 }
