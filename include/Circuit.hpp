@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <complex>
 #include "component.hpp"
 #include "Command.hpp"
 #include "Matrix.hpp"
@@ -13,6 +14,8 @@ class Circuit
     std::vector<std::unique_ptr<Command>> commands_;
     std::shared_ptr<Matrix<double>> circuit_matrix;
     std::shared_ptr<Matrix<double>> output_matrix;
+    std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix_ac;
+    std::shared_ptr<Matrix<std::complex<double>>> output_matrix_ac;
     int num_nodes;
     std::unordered_map<std::string, int> node_map;
     int num_vsources;
@@ -78,6 +81,14 @@ public:
         return output_matrix;
     }
 
+    std::shared_ptr<Matrix<std::complex<double>>> get_ac_matrix() {
+        return circuit_matrix_ac;
+    }
+
+    std::shared_ptr<Matrix<std::complex<double>>> get_ac_output_matrix() {
+        return output_matrix_ac;
+    }
+
     void stamp_circuit() {
         if (circuit_matrix == nullptr) {
             circuit_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources, num_nodes+num_vsources);
@@ -93,18 +104,18 @@ public:
     }
 
     void stamp_circuit(double frequency) {
-        if ((circuit_matrix == nullptr) || (freq_first_point == true)) {
-            circuit_matrix.reset(new Matrix<double>(num_nodes+num_vsources, num_nodes+num_vsources));
-            output_matrix.reset(new Matrix<double>(num_nodes+num_vsources, 1));
+        if ((circuit_matrix_ac == nullptr) || (freq_first_point == true)) {
+            circuit_matrix_ac = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
+            output_matrix_ac = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
             for (const auto& component : components_) {
-                component->stamp(circuit_matrix, output_matrix, num_vsources, frequency);
+                component->stamp(circuit_matrix_ac, output_matrix_ac, num_vsources, frequency);
             }
             freq_first_point = false;
         } else {
             for (const auto& component : components_) {
                 // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
                 if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
-                    component->stamp(circuit_matrix, output_matrix, num_vsources, frequency);
+                    component->stamp(circuit_matrix_ac, output_matrix_ac, num_vsources, frequency);
                 }
             }
         }

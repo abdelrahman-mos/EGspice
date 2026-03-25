@@ -62,10 +62,10 @@ void AC::run(std::shared_ptr<Circuit> circuit) {
     for (auto freq : frequency_points) {
         std::cout << "frequency: " << freq << std::endl;
         circuit->stamp_circuit(freq);
-        auto circuit_matrix = circuit->get_matrix();
-        auto output_matrix = circuit->get_output_matrix();
-        auto outputs = Matrix<double>::solve_matrix(circuit_matrix, output_matrix);
-        // std::cout << outputs << std::endl;
+        auto circuit_matrix_ac = circuit->get_ac_matrix();
+        auto output_matrix_ac = circuit->get_ac_output_matrix();
+        auto outputs = Matrix<std::complex<double>>::solve_matrix(circuit_matrix_ac, output_matrix_ac);
+        std::cout << outputs << std::endl;
     }
     return;
 }

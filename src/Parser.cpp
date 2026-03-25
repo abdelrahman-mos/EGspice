@@ -56,6 +56,24 @@ std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
 
+std::unique_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
+    std::istringstream iss(line);
+    std::string name, t1, t2, str_value;
+    iss >> name >> t1 >> t2 >> str_value;
+    double value = value_to_double(str_value);
+    std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    return std::unique_ptr<Capacitor>(new Capacitor({t1, t2}, name, value));
+}
+
+std::unique_ptr<Inductor> Parser::parseInductor(const std::string& line) {
+    std::istringstream iss(line);
+    std::string name, t1, t2, str_value;
+    iss >> name >> t1 >> t2 >> str_value;
+    double value = value_to_double(str_value);
+    std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    return std::unique_ptr<Inductor>(new Inductor({t1, t2}, name, value));
+}
+
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
@@ -128,6 +146,10 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             component = parseIsource(line);
         } else if (line[0] == 'r') {
             component = parseResistor(line);
+        } else if (line[0] == 'c') {
+            component = parseCapacitor(line);
+        } else if (line[0] == 'l') {
+            component = parseInductor(line);
         } else {
             std::cout << "Unsupported component " << line[0] << std::endl;
         }

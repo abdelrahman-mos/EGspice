@@ -75,7 +75,7 @@ public:
         return output;
     }
 
-    static void gaussian_elimination(std::shared_ptr<Matrix<T>> coeff, std::shared_ptr<Matrix<T>> free_term, double* det) {
+    static void gaussian_elimination(std::shared_ptr<Matrix<T>> coeff, std::shared_ptr<Matrix<T>> free_term, T* det) {
         for (size_t i = 0; i < coeff->numCols(); i++) {
             size_t pivot = i;
             for (size_t row = i+1; row < coeff->numRows(); row++) {
