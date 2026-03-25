@@ -1,5 +1,5 @@
 #include "../../include/component.hpp"
-void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
+void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) {
     int node_1 = terminals_int[0];
     int node_2 = terminals_int[1];
 

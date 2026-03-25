@@ -20,6 +20,7 @@ public:
         auto& commands = circuit->commands();
         for (const auto& command : commands) {
             if (!command) continue;
+            std::cout << "running command " << command->name() << std::endl;
             command->run(circuit);
         }
     }

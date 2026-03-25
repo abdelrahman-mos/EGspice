@@ -65,6 +65,7 @@ public:
         }
         component->update_terminals(terminals_int);
         if (typeid(*component) == typeid(Vsource)) num_vsources++;
+        if (typeid(*component) == typeid(Inductor)) num_inductors++;
         components_.push_back(std::move(component));
         num_nodes = curr_node-1;
     }
@@ -91,15 +92,15 @@ public:
 
     void stamp_circuit() {
         if (circuit_matrix == nullptr) {
-            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources, num_nodes+num_vsources);
-            output_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources, 1);
+            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, num_nodes+num_vsources+num_inductors);
+            output_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, 1);
         }
         for (const auto& component : components_) {
             if (typeid(*component) == typeid(Vsource)) {
                 Vsource* curr_vsource = dynamic_cast<Vsource*>(component.get());
                 std::cout << "id: " << curr_vsource->vsource_id << std::endl;
             }
-            component->stamp(circuit_matrix, output_matrix, num_vsources);
+            component->stamp(circuit_matrix, output_matrix, num_vsources, num_inductors);
         }
     }
 

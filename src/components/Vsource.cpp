@@ -1,6 +1,6 @@
 #include "../../include/component.hpp"
-void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
-    size_t stamp_index = circuit_matrix->numRows() - num_vsources + vsource_id;
+void Vsource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) {
+    size_t stamp_index = circuit_matrix->numRows() - num_vsources - num_inductors + vsource_id;
     size_t node_1 = terminals_int[0];
     size_t node_2 = terminals_int[1];
 

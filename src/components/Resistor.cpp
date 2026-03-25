@@ -1,5 +1,5 @@
 #include "../../include/component.hpp"
-void Resistor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
+void Resistor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) {
     size_t node_1 = terminals_int[0];
     size_t node_2 = terminals_int[1];
 

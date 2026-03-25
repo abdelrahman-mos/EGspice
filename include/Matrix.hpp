@@ -85,7 +85,7 @@ public:
             if (std::abs((*coeff)[pivot][i]) < MX_ATOL) {
                 if (det) *det = 0.0;
                 std::cout << "matrix is singular, cannot solve" << std::endl;
-                break;
+                exit(1);
             }
 
             if (pivot != i) {
@@ -118,10 +118,14 @@ public:
     static std::shared_ptr<Matrix<T>> solve_matrix(std::shared_ptr<Matrix<T>> A, std::shared_ptr<Matrix<T>> B) {
         if (A->numRows() != A->numCols()) {
             std::cout << "Matrix A is not square." << std::endl;
+            exit(1);
+        }
+        if (A->numRows() != B->numRows()) {
+            std::cout << "Matrix A and Matrix B don't have matching dimensions" << std::endl;
+            exit(1);
         }
         auto coeff_matrix = std::make_shared<Matrix<T>>(*A);
         auto free_terms = std::make_shared<Matrix<T>>(*B);
-
         gaussian_elimination(coeff_matrix, free_terms, nullptr);
         auto output = back_substitution(coeff_matrix, free_terms);
 

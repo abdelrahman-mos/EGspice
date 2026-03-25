@@ -1,11 +1,11 @@
 #include "../../include/component.hpp"
-void Capacitor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources) {
+void Capacitor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) {
     std::cout << "goodbye" << std::endl;
 }
 
 void Capacitor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) {
-    int node_1 = terminals_int[0];
-    int node_2 = terminals_int[1];
+    size_t node_1 = terminals_int[0];
+    size_t node_2 = terminals_int[1];
     
     if (node_1 != 0) {
         (*circuit_matrix)[node_1-1][node_1-1] += std::complex<double>(0.0, 2.0*M_PI*frequency*value);

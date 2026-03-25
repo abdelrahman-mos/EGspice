@@ -66,12 +66,13 @@ std::unique_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
 }
 
 std::unique_ptr<Inductor> Parser::parseInductor(const std::string& line) {
+    static int inductor_id = 0;
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
-    return std::unique_ptr<Inductor>(new Inductor({t1, t2}, name, value));
+    return std::unique_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
 }
 
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
