@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <complex>
 
 #define MX_ATOL 1e-18
 

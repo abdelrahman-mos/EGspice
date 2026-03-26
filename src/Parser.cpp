@@ -28,51 +28,51 @@ double value_to_double(std::string str_value) {
     return value;
 }
 
-std::unique_ptr<Vsource> Parser::parseVsource(const std::string& line) {
+std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line) {
     static int vsource_id = 0;
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed Vsource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::unique_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, name, value));
+    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, name, value));
 }
 
-std::unique_ptr<Isource> Parser::parseIsource(const std::string& line) {
+std::shared_ptr<Isource> Parser::parseIsource(const std::string& line) {
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed Isource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::unique_ptr<Isource>(new Isource({t1, t2}, name, value));
+    return std::shared_ptr<Isource>(new Isource({t1, t2}, name, value));
 }
 
-std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
+std::shared_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed Resistor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
+    return std::shared_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
 
-std::unique_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
+std::shared_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed Capacitor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::unique_ptr<Capacitor>(new Capacitor({t1, t2}, name, value));
+    return std::shared_ptr<Capacitor>(new Capacitor({t1, t2}, name, value));
 }
 
-std::unique_ptr<Inductor> Parser::parseInductor(const std::string& line) {
+std::shared_ptr<Inductor> Parser::parseInductor(const std::string& line) {
     static int inductor_id = 0;
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed Inductor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::unique_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
+    return std::shared_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
 }
 
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
@@ -95,7 +95,7 @@ std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     int numpoints = value_to_double(numpoints_str);
     double fstart = value_to_double(fstart_str);
     double fend = value_to_double(fend_str);
-    return std::unique_ptr<AC>(new AC("ac", fstart, fend, numpoints, type));
+    return std::unique_ptr<AC>(new AC("ac", fstart, fend, numpoints, type, logger_));
 }
 
 std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
@@ -104,7 +104,7 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     iss >> command;
     command.erase(0, 1);
     if (command == "op") {
-        return std::unique_ptr<OP>(new OP("op"));
+        return std::unique_ptr<OP>(new OP("op", logger_));
     } else if (command == "ac")
     {
         return parseAC(iss);
@@ -140,24 +140,21 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             continue;
         }
 
-        std::unique_ptr<Component> component = nullptr;
         if (line[0] == 'v') {
-            component = parseVsource(line);
+            circuit->add_component(parseVsource(line));
         } else if (line[0] == 'i') {
-            component = parseIsource(line);
+            circuit->add_component(parseIsource(line));
         } else if (line[0] == 'r') {
-            component = parseResistor(line);
+            circuit->add_component(parseResistor(line));
         } else if (line[0] == 'c') {
-            component = parseCapacitor(line);
+            circuit->add_component(parseCapacitor(line));
         } else if (line[0] == 'l') {
-            component = parseInductor(line);
+            circuit->add_component(parseInductor(line));
         } else {
             logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
+            continue;
         }
 
-        if (component) {
-            circuit->add_component(std::move(component));
-        }
     }
     file.close();
     return circuit;

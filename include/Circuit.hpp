@@ -11,20 +11,40 @@
 
 class Circuit
 {
-    std::vector<std::unique_ptr<Component>> components_;
+    std::vector<std::shared_ptr<Component>> components_;
+    std::vector<std::shared_ptr<Vsource>> vsources_;
+    std::vector<std::shared_ptr<Inductor>> inductors_;
     std::vector<std::unique_ptr<Command>> commands_;
     std::shared_ptr<Matrix<double>> circuit_matrix;
     std::shared_ptr<Matrix<double>> output_matrix;
     std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix_ac;
     std::shared_ptr<Matrix<std::complex<double>>> output_matrix_ac;
-    int num_nodes;
+    size_t num_nodes;
     std::unordered_map<std::string, int> node_map;
-    int num_vsources;
-    int num_inductors;
+    size_t num_vsources;
+    size_t num_inductors;
     bool freq_first_point;
+
+    void get_and_update_terminals(std::shared_ptr<Component> component) {
+        static int curr_node = 1;
+        std::vector<std::string> terminals = component->get_terminals();
+        std::vector<int> terminals_int;
+        for (auto terminal : terminals) {
+            auto curr_terminal = node_map.find(terminal);
+            if (curr_terminal == node_map.end()) {
+                terminals_int.push_back(curr_node);
+                node_map.insert({terminal, curr_node++});
+            } else {
+                terminals_int.push_back(curr_terminal->second);
+            }
+        }
+        component->update_terminals(terminals_int);
+        num_nodes = curr_node-1;
+    }
+
 public:
     Circuit() {
-        node_map = {{"0", 0}, {"gnd", 0}};
+        node_map = {{"0", 0}};
         freq_first_point = true;
         num_nodes = 0;
         num_inductors = 0;
@@ -43,32 +63,43 @@ public:
         return num_inductors;
     }
 
-    std::vector<std::unique_ptr<Component>>& components() {
+    std::unordered_map<std::string, int> nodeMap() const {
+        return node_map;
+    }
+
+    std::vector<std::shared_ptr<Component>>& components() {
         return components_;
+    }
+
+    std::vector<std::shared_ptr<Vsource>>& vsources() {
+        return vsources_;
+    }
+
+    std::vector<std::shared_ptr<Inductor>>& inductors() {
+        return inductors_;
     }
 
     std::vector<std::unique_ptr<Command>>& commands() {
         return commands_;
     }
 
-    void add_component(std::unique_ptr<Component> component) {
-        static int curr_node = 1;
-        std::vector<std::string> terminals = component->get_terminals();
-        std::vector<int> terminals_int;
-        for (auto terminal : terminals) {
-            auto curr_terminal = node_map.find(terminal);
-            if (curr_terminal == node_map.end()) {
-                terminals_int.push_back(curr_node);
-                node_map.insert({terminal, curr_node++});
-            } else {
-                terminals_int.push_back(curr_terminal->second);
-            }
-        }
-        component->update_terminals(terminals_int);
-        if (typeid(*component) == typeid(Vsource)) num_vsources++;
-        if (typeid(*component) == typeid(Inductor)) num_inductors++;
-        components_.push_back(std::move(component));
-        num_nodes = curr_node-1;
+    void add_component(std::shared_ptr<Component> component) {
+        get_and_update_terminals(component);
+        components_.push_back(component);
+    }
+
+    void add_component(std::shared_ptr<Vsource> component) {
+        num_vsources++;
+        get_and_update_terminals(component);
+        vsources_.push_back(component);
+        components_.push_back(component);
+    }
+
+    void add_component(std::shared_ptr<Inductor> component) {
+        num_inductors++;
+        get_and_update_terminals(component);
+        inductors_.push_back(component);
+        components_.push_back(component);
     }
 
     void add_command(std::unique_ptr<Command> command) {

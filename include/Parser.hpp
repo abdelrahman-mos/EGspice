@@ -13,11 +13,11 @@
 
 class Parser {
     std::string filename;
-    std::unique_ptr<Vsource> parseVsource(const std::string& line);
-    std::unique_ptr<Resistor> parseResistor(const std::string& line);
-    std::unique_ptr<Isource> parseIsource(const std::string& line);
-    std::unique_ptr<Capacitor> parseCapacitor(const std::string& line);
-    std::unique_ptr<Inductor> parseInductor(const std::string& line);
+    std::shared_ptr<Vsource> parseVsource(const std::string& line);
+    std::shared_ptr<Resistor> parseResistor(const std::string& line);
+    std::shared_ptr<Isource> parseIsource(const std::string& line);
+    std::shared_ptr<Capacitor> parseCapacitor(const std::string& line);
+    std::shared_ptr<Inductor> parseInductor(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
     std::unique_ptr<Command> parseAC(std::istringstream& iss);
     std::shared_ptr<Logger> logger_;
