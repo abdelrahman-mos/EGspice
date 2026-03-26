@@ -1,11 +1,11 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g -fsanitize=address
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++20 -Iinclude -g #-fsanitize=address 
 
-# Find all .c files in src/ and subdirs
-SRC = $(shell find src -name '*.c')
+# Find all .cpp files in src/ and subdirs
+SRC = $(shell find src -name '*.cpp')
 
-# Replace src/ with build/ and .c with .o
-OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
+# Replace src/ with build/ and .cpp with .o
+OBJ = $(patsubst src/%.cpp, build/%.o, $(SRC))
 
 TARGET = build/EGspice
 
@@ -15,12 +15,12 @@ all: $(TARGET)
 
 # Link all object files into final app
 $(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@ -lm
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $@ -lm
 
-# Rule to compile .c into .o, creating subdirs if needed
-build/%.o: src/%.c
+# Rule to compile .cpp into .o, creating subdirs if needed
+build/%.o: src/%.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
