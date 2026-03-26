@@ -34,7 +34,7 @@ std::unique_ptr<Vsource> Parser::parseVsource(const std::string& line) {
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
-    std::cout << "Parsed Vsource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    logger_->log(LogLevel::INFO, "Parsed Vsource: " + name + " " + t1 + " " + t2 + " " + str_value);
     return std::unique_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, name, value));
 }
 
@@ -43,7 +43,7 @@ std::unique_ptr<Isource> Parser::parseIsource(const std::string& line) {
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
-    std::cout << "Parsed Isource: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    logger_->log(LogLevel::INFO, "Parsed Isource: " + name + " " + t1 + " " + t2 + " " + str_value);
     return std::unique_ptr<Isource>(new Isource({t1, t2}, name, value));
 }
 
@@ -52,7 +52,7 @@ std::unique_ptr<Resistor> Parser::parseResistor(const std::string& line) {
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
-    std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    logger_->log(LogLevel::INFO, "Parsed Resistor: " + name + " " + t1 + " " + t2 + " " + str_value);
     return std::unique_ptr<Resistor>(new Resistor({t1, t2}, name, value));
 }
 
@@ -61,7 +61,7 @@ std::unique_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
-    std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    logger_->log(LogLevel::INFO, "Parsed Capacitor: " + name + " " + t1 + " " + t2 + " " + str_value);
     return std::unique_ptr<Capacitor>(new Capacitor({t1, t2}, name, value));
 }
 
@@ -71,7 +71,7 @@ std::unique_ptr<Inductor> Parser::parseInductor(const std::string& line) {
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
     double value = value_to_double(str_value);
-    std::cout << "Parsed Resistor: " << name << " " << t1 << " " << t2 << " " << value << std::endl;
+    logger_->log(LogLevel::INFO, "Parsed Inductor: " + name + " " + t1 + " " + t2 + " " + str_value);
     return std::unique_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
 }
 
@@ -88,7 +88,7 @@ std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     {
         type = AC_TYPE::LIN;
     } else {
-        std::cout << "unknown ac type " << type_str << std::endl;
+        logger_->log(LogLevel::ERROR, "Unknown AC type " + type_str);
         return nullptr;
     }
 
@@ -109,21 +109,21 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     {
         return parseAC(iss);
     }
-    std::cout << "Unsupported command " << command << std::endl;
+    logger_->log(LogLevel::ERROR, "Unsupported command " + command);
     return nullptr;
 }
 
 std::shared_ptr<Circuit> Parser::parse(std::string filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Could not open file: " << filename << std::endl;
-        return nullptr;
+        logger_->log(LogLevel::ERROR, "Could not open file: " + filename);
+        exit(1);
     }
     // std::vector<std::unique_ptr<Component>> components;
     std::shared_ptr<Circuit> circuit(new Circuit());
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << line << std::endl;
+        logger_->log(line + "\n");
         line = str_tolower(line);
         while(line.begin() != line.end() && std::isspace(*line.begin())) {
             line.erase(line.begin());
@@ -152,7 +152,7 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
         } else if (line[0] == 'l') {
             component = parseInductor(line);
         } else {
-            std::cout << "Unsupported component " << line[0] << std::endl;
+            logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
         }
 
         if (component) {

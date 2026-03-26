@@ -1,5 +1,6 @@
 #ifndef CIRCUIT_HPP
 #define CIRCUIT_HPP
+#include <iostream>
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -25,6 +26,9 @@ public:
     Circuit() {
         node_map = {{"0", 0}, {"gnd", 0}};
         freq_first_point = true;
+        num_nodes = 0;
+        num_inductors = 0;
+        num_vsources = 0;
     }
 
     int numNodes() const {
@@ -48,9 +52,6 @@ public:
     }
 
     void add_component(std::unique_ptr<Component> component) {
-        // num_nodes++;
-        // if (typeid(*component) == typeid(Vsource)) num_vsources++;
-        // components.push_back(std::move(component));
         static int curr_node = 1;
         std::vector<std::string> terminals = component->get_terminals();
         std::vector<int> terminals_int;

@@ -4,11 +4,11 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <iostream>
 #include <memory>
 #include "component.hpp"
 #include "Command.hpp"
 #include "Circuit.hpp"
+#include "Logger.hpp"
 #include <regex>
 
 class Parser {
@@ -20,8 +20,9 @@ class Parser {
     std::unique_ptr<Inductor> parseInductor(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
     std::unique_ptr<Command> parseAC(std::istringstream& iss);
+    std::shared_ptr<Logger> logger_;
 public:
-    Parser() = default;
+    Parser(std::shared_ptr<Logger> logger) : logger_(logger) {}
     std::shared_ptr<Circuit> parse(std::string filename);
 };
 

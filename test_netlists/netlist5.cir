@@ -8,3 +8,4 @@ L2 3 0 15nH
 .ac dec 10 1 10k
 .ac oct 8 10k 100k
 .ac lin 10 100k 1MEG
+.ac
