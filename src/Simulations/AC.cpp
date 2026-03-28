@@ -58,14 +58,58 @@ void AC::expand_freq() {
     }
 }
 
+void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
+    std::string message = "AC Results:\n";
+    auto node_map = circuit->nodeMap();
+    size_t num_points = frequency_points.size();
+    for (size_t curr_point = 0; curr_point < num_points; curr_point++) {
+        message += "\nFREQ: " + std::to_string(frequency_points[curr_point]) + "\n";
+        for (auto& curr_node : node_map) {
+            int node_num = curr_node.second;
+            std::complex<double> node_value = 0.0;
+            if (node_num != 0) {
+                node_value = (*outputs)[curr_point][node_num-1];
+            }
+            message += "\tABS(V( " + curr_node.first + " )) = " + std::to_string(std::abs(node_value)) + "V";
+            message += "\tPHASE(V( " + curr_node.first + " )) = " + std::to_string(std::arg(node_value)) + "deg\n";
+        }
+
+        auto vsources = circuit->vsources();
+        auto inductors = circuit->inductors();
+        int num_nodes = circuit->numNodes();
+        int num_vsources = circuit->numVsources();
+        int num_inductors = circuit->numInductors();
+        for (int i = 0; i < num_vsources; i++) {
+            auto curr_vsource = vsources[i];
+            auto current = (*outputs)[curr_point][num_nodes-num_inductors+curr_vsource->vsource_id];
+            message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
+            message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "deg\n";
+        }
+
+        for (int i = 0; i < num_inductors; i++) {
+            auto curr_inductor = inductors[i];
+            auto current = (*outputs)[num_nodes+num_vsources-1+curr_inductor->inductor_id][0];
+            message += "\tABS(I( " + curr_inductor->name() + " )) = " + std::to_string(std::abs(current)) + "A";
+            message += "\tPHASE(I( " + curr_inductor->name() + " )) = " + std::to_string(std::arg(current)) + "deg\n";
+        }
+    }
+    logger_->log(message + "\n");
+}
+
 void AC::run(std::shared_ptr<Circuit> circuit) {
-    for (auto freq : frequency_points) {
-        std::cout << "frequency: " << freq << std::endl;
+    circuit->stamp_circuit(1.0);
+    auto circuit_matrix_ac = circuit->get_ac_matrix();
+    size_t num_rows = circuit_matrix_ac->numRows();
+    size_t num_points = frequency_points.size();
+    auto outputs_mat = std::make_shared<Matrix<std::complex<double>>>(num_points, num_rows);
+    for (size_t i = 0; i < num_points; i++) {
+        double freq = frequency_points[i];
         circuit->stamp_circuit(freq);
         auto circuit_matrix_ac = circuit->get_ac_matrix();
         auto output_matrix_ac = circuit->get_ac_output_matrix();
         auto outputs = Matrix<std::complex<double>>::solve_matrix(circuit_matrix_ac, output_matrix_ac);
-        std::cout << outputs << std::endl;
+        outputs_mat->emplace_at(outputs->transpose()[0], i);
     }
+    report(circuit, outputs_mat);
     return;
 }

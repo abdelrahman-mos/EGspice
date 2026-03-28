@@ -31,12 +31,18 @@ public:
 class Simulation : public Command {
 public:
     Simulation(std::string name, std::shared_ptr<Logger> logger) : Command(name, logger) {}
+    virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
+        return;
+    }
+    virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
+        return;
+    }
 };
 
 class OP : public Simulation {
 public:
     OP(std::string name, std::shared_ptr<Logger> logger) : Simulation(name, logger) {}
-    void report_op(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs);
+    void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) override;
     void run(std::shared_ptr<Circuit> circuit) override;
 };
 
@@ -62,6 +68,7 @@ public:
         expand_freq();
     }
     void run(std::shared_ptr<Circuit> circuit) override;
+    virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) override;
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "../../include/Circuit.hpp"
 #include "../../include/Command.hpp"
 
-void OP::report_op(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
+void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
     std::string message = "OP Results:\n";
     auto node_map = circuit->nodeMap();
     for (auto& curr_node : node_map) {
@@ -38,6 +38,6 @@ void OP::run(std::shared_ptr<Circuit> circuit) {
     auto circuit_matrix = circuit->get_matrix();
     auto output_matrix = circuit->get_output_matrix();
     auto outputs = Matrix<double>::solve_matrix(circuit_matrix, output_matrix);
-    report_op(circuit, outputs);
+    report(circuit, outputs);
     return;
 }
