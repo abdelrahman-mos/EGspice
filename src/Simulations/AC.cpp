@@ -71,7 +71,7 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
                 node_value = (*outputs)[curr_point][node_num-1];
             }
             message += "\tABS(V( " + curr_node.first + " )) = " + std::to_string(std::abs(node_value)) + "V";
-            message += "\tPHASE(V( " + curr_node.first + " )) = " + std::to_string(std::arg(node_value)) + "deg\n";
+            message += "\tPHASE(V( " + curr_node.first + " )) = " + std::to_string(std::arg(node_value)) + "rad\n";
         }
 
         auto vsources = circuit->vsources();
@@ -83,14 +83,14 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
             auto curr_vsource = vsources[i];
             auto current = (*outputs)[curr_point][num_nodes-num_inductors+curr_vsource->vsource_id];
             message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
-            message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "deg\n";
+            message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
         }
 
         for (int i = 0; i < num_inductors; i++) {
             auto curr_inductor = inductors[i];
             auto current = (*outputs)[num_nodes+num_vsources-1+curr_inductor->inductor_id][0];
             message += "\tABS(I( " + curr_inductor->name() + " )) = " + std::to_string(std::abs(current)) + "A";
-            message += "\tPHASE(I( " + curr_inductor->name() + " )) = " + std::to_string(std::arg(current)) + "deg\n";
+            message += "\tPHASE(I( " + curr_inductor->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
         }
     }
     logger_->log(message + "\n");

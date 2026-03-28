@@ -75,6 +75,15 @@ std::shared_ptr<Inductor> Parser::parseInductor(const std::string& line) {
     return std::shared_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
 }
 
+std::shared_ptr<VCCS> Parser::parseVCCS(const std::string& line) {
+    std::istringstream iss(line);
+    std::string name, t1, t2, t3, t4, str_value;
+    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
+    double value = value_to_double(str_value);
+    logger_->log(LogLevel::INFO, "Parsed VCCS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
+    return std::shared_ptr<VCCS>(new VCCS({t1, t2, t3, t4}, name, value));
+}
+
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
@@ -150,6 +159,8 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             circuit->add_component(parseCapacitor(line));
         } else if (line[0] == 'l') {
             circuit->add_component(parseInductor(line));
+        } else if (line[0] == 'g') {
+            circuit->add_component(parseVCCS(line));
         } else {
             logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
             continue;
