@@ -105,4 +105,12 @@ public:
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) override;
 };
 
+class CCVS : public Vsource {
+public:
+    CCVS(std::vector<std::string> terminals, int cccs_id, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, name, value) {}
+    CCVS(std::vector<std::string> terminals, int cccs_id, double ac_val, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, ac_val, name, value) {}
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) override;
+    void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) override;
+};
+
 #endif

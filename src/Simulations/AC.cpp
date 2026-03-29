@@ -79,13 +79,21 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
         int num_nodes = circuit->numNodes();
         int num_vsources = circuit->numVsources();
         int num_inductors = circuit->numInductors();
-        for (int i = 0; i < num_vsources; i++) {
-            auto curr_vsource = vsources[i];
-            auto current = (*outputs)[curr_point][num_nodes-num_inductors+curr_vsource->id];
+        for (int i = 0, j = 0; i < num_vsources; i++) {
+            auto curr_vsource = vsources[i-j];
+            size_t stamp_index = num_nodes-num_inductors+curr_vsource->id;
+            auto current = (*outputs)[curr_point][stamp_index];
+            auto terminals = curr_vsource->get_terminals();
             if (typeid(*curr_vsource) == typeid(CCCS)) {
-                auto terminals = curr_vsource->get_terminals();
                 message += "\tABS(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::abs(current)) + "A";
                 message += "\tPHASE(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+            } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+                message += "\tABS(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::abs(current)) + "A";
+                message += "\tPHASE(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                current = (*outputs)[stamp_index+1][0];
+                message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
+                message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                j++;
             } else {
                 message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
                 message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";

@@ -18,12 +18,18 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     int num_nodes = circuit->numNodes();
     int num_vsources = circuit->numVsources();
     int num_inductors = circuit->numInductors();
-    for (int i = 0; i < num_vsources; i++) {
-        auto curr_vsource = vsources[i];
-        double current = (*outputs)[num_nodes-num_inductors+curr_vsource->id][0];
+    for (int i = 0, j=0; i < num_vsources; i++) {
+        auto curr_vsource = vsources[i-j];
+        int stamp_index = num_nodes-num_inductors+curr_vsource->id;
+        double current = (*outputs)[stamp_index][0];
+        auto terminals = curr_vsource->get_terminals();
         if (typeid(*curr_vsource) == typeid(CCCS)) {
-            auto terminals = curr_vsource->get_terminals();
             message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+        } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+            current = (*outputs)[stamp_index+1][0];
+            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+            j++;
         } else {
             message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
         }

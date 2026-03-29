@@ -20,7 +20,8 @@ class Parser {
     std::shared_ptr<Inductor> parseInductor(const std::string& line);
     std::shared_ptr<VCCS> parseVCCS(const std::string& line);
     std::shared_ptr<CCCS> parseCCCS(const std::string& line, int& cccs_id);
-    std::shared_ptr<VCVS> parseVCVS(const std::string& line, int& cccs_id);
+    std::shared_ptr<VCVS> parseVCVS(const std::string& line, int& vcvs_id);
+    std::shared_ptr<CCVS> parseCCVS(const std::string& line, int& ccvs_id);
     std::unique_ptr<Command> parseCommand(const std::string& line);
     std::unique_ptr<Command> parseAC(std::istringstream& iss);
     std::shared_ptr<Logger> logger_;

@@ -95,6 +95,13 @@ public:
         components_.push_back(component);
     }
 
+    void add_component(std::shared_ptr<CCVS> component) {
+        num_vsources += 2;
+        get_and_update_terminals(component);
+        vsources_.push_back(component);
+        components_.push_back(component);
+    }
+
     void add_component(std::shared_ptr<Inductor> component) {
         num_inductors++;
         get_and_update_terminals(component);
