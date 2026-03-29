@@ -130,7 +130,7 @@ public:
         for (const auto& component : components_) {
             if (typeid(*component) == typeid(Vsource)) {
                 Vsource* curr_vsource = dynamic_cast<Vsource*>(component.get());
-                std::cout << "id: " << curr_vsource->vsource_id << std::endl;
+                std::cout << "id: " << curr_vsource->id << std::endl;
             }
             component->stamp(circuit_matrix, output_matrix, num_vsources, num_inductors);
         }

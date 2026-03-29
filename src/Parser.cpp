@@ -28,8 +28,7 @@ double value_to_double(std::string str_value) {
     return value;
 }
 
-std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line) {
-    static int vsource_id = 0;
+std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsource_id) {
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
     iss >> name >> t1 >> t2 >> str_value;
@@ -84,6 +83,15 @@ std::shared_ptr<VCCS> Parser::parseVCCS(const std::string& line) {
     return std::shared_ptr<VCCS>(new VCCS({t1, t2, t3, t4}, name, value));
 }
 
+std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line, int& cccs_id) {
+    std::istringstream iss(line);
+    std::string name, t1, t2, t3, t4, str_value;
+    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
+    double value = value_to_double(str_value);
+    logger_->log(LogLevel::INFO, "Parsed CCCS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
+    return std::shared_ptr<CCCS>(new CCCS({t1, t2, t3, t4}, cccs_id, name, value));
+}
+
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
@@ -131,6 +139,7 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
     // std::vector<std::unique_ptr<Component>> components;
     std::shared_ptr<Circuit> circuit(new Circuit());
     std::string line;
+    int curr_id = 0;
     while (std::getline(file, line)) {
         logger_->log(line + "\n");
         line = str_tolower(line);
@@ -150,7 +159,7 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
         }
 
         if (line[0] == 'v') {
-            circuit->add_component(parseVsource(line));
+            circuit->add_component(parseVsource(line, curr_id));
         } else if (line[0] == 'i') {
             circuit->add_component(parseIsource(line));
         } else if (line[0] == 'r') {
@@ -161,6 +170,8 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             circuit->add_component(parseInductor(line));
         } else if (line[0] == 'g') {
             circuit->add_component(parseVCCS(line));
+        } else if (line[0] == 'f') {
+            circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
         } else {
             logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
             continue;

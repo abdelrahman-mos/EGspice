@@ -20,8 +20,13 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     int num_inductors = circuit->numInductors();
     for (int i = 0; i < num_vsources; i++) {
         auto curr_vsource = vsources[i];
-        double current = (*outputs)[num_nodes-num_inductors+curr_vsource->vsource_id][0];
-        message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+        double current = (*outputs)[num_nodes-num_inductors+curr_vsource->id][0];
+        if (typeid(*curr_vsource) == typeid(CCCS)) {
+            auto terminals = curr_vsource->get_terminals();
+            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+        } else {
+            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+        }
     }
 
     for (int i = 0; i < num_inductors; i++) {
