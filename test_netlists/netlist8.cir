@@ -1,0 +1,9 @@
+*
+V1 vin 0 1
+R1 vin 0 1k
+E1 vb 0 vin 0 0.5
+Rout vb vc 3
+R2 vc 0 1k
+C1 vc 0 1uF
+.op
+.ac dec 10 1 10k

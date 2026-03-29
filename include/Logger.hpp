@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <string>
 #include <mutex>
 #include <chrono>
@@ -39,6 +40,9 @@ class Logger {
 
 public:
     Logger(const std::string filename) {
+        if (std::filesystem::exists(filename) && std::filesystem::is_regular_file(filename)) {
+            std::filesystem::remove(filename);
+        }
         log_file_.open(filename, std::ios::app);
         if (!log_file_.is_open()) {
             throw std::runtime_error("Could not open log file!");

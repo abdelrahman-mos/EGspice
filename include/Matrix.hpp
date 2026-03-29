@@ -58,10 +58,50 @@ public:
         Matrix<T> result(this->numRows(), this->numCols());
         for (size_t i = 0; i < this->numRows(); i++) {
             for (size_t j = 0; j < this->numCols(); j++) {
-                result[i][j] = *(this)[i][j] * num;
+                result[i][j] = (*this)[i][j] * num;
             }
         }
         return result;
+    }
+
+    void concat_cols(const Matrix<T>& other) {
+        if (this->numRows() != other.numRows()) {
+            throw std::runtime_error("Matrices do not have matching dimensions");
+        }
+
+        for (size_t i = 0; i < other.numRows(); i++) {
+            (*this)[i].insert((*this)[i].end(), other[i].begin(), other[i].end());
+        }
+    }
+
+    void concat_rows(const Matrix<T>& other) {
+        if (this->numCols() != other.numCols()) {
+            throw std::runtime_error("Matrices do not have matching dimensions");
+        }
+
+        for (size_t i = 0; i < other.numRows(); i++) {
+            this->data.push_back(other[i]);
+        }
+    }
+
+    void emplace_at(const std::vector<T>& vec, size_t row) {
+        if (this->numCols() != vec.size()) {
+            throw std::runtime_error("Cannot emplace vector of unmatching dimensions");
+        }
+
+        this->data[row] = vec;
+    }
+
+    Matrix<T> transpose() {
+        size_t cols = this->numCols();
+        size_t rows = this->numRows();
+        Matrix<T> output(this->numCols(), this->numRows());
+        for (size_t i = 0; i < rows; i++) {
+            for (size_t j = 0; j < cols; j++) {
+                output[j][i] = (*this)[i][j];
+            }
+        }
+        return output;
     }
 
     static std::shared_ptr<Matrix<T>> back_substitution(std::shared_ptr<Matrix<T>> coeff, std::shared_ptr<Matrix<T>> free_term) {
@@ -133,7 +173,7 @@ public:
         return output;
     }
 
-    void ressize_matrix(int new_rows, int new_cols) {
+    void resize_matrix(int new_rows, int new_cols) {
         data.resize(new_rows);
         for (size_t i = 0; i < data.size(); i++) {
             data[i].resize(new_cols);

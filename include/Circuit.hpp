@@ -95,6 +95,13 @@ public:
         components_.push_back(component);
     }
 
+    void add_component(std::shared_ptr<CCVS> component) {
+        num_vsources += 2;
+        get_and_update_terminals(component);
+        vsources_.push_back(component);
+        components_.push_back(component);
+    }
+
     void add_component(std::shared_ptr<Inductor> component) {
         num_inductors++;
         get_and_update_terminals(component);
@@ -130,7 +137,7 @@ public:
         for (const auto& component : components_) {
             if (typeid(*component) == typeid(Vsource)) {
                 Vsource* curr_vsource = dynamic_cast<Vsource*>(component.get());
-                std::cout << "id: " << curr_vsource->vsource_id << std::endl;
+                std::cout << "id: " << curr_vsource->id << std::endl;
             }
             component->stamp(circuit_matrix, output_matrix, num_vsources, num_inductors);
         }

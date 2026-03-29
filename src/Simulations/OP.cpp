@@ -1,7 +1,7 @@
 #include "../../include/Circuit.hpp"
 #include "../../include/Command.hpp"
 
-void OP::report_op(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
+void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
     std::string message = "OP Results:\n";
     auto node_map = circuit->nodeMap();
     for (auto& curr_node : node_map) {
@@ -18,10 +18,21 @@ void OP::report_op(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<doub
     int num_nodes = circuit->numNodes();
     int num_vsources = circuit->numVsources();
     int num_inductors = circuit->numInductors();
-    for (int i = 0; i < num_vsources; i++) {
-        auto curr_vsource = vsources[i];
-        double current = (*outputs)[num_nodes-num_inductors+curr_vsource->vsource_id][0];
-        message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+    for (int i = 0, j=0; i < num_vsources; i++) {
+        auto curr_vsource = vsources[i-j];
+        int stamp_index = num_nodes-num_inductors+curr_vsource->id;
+        double current = (*outputs)[stamp_index][0];
+        auto terminals = curr_vsource->get_terminals();
+        if (typeid(*curr_vsource) == typeid(CCCS)) {
+            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+        } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+            current = (*outputs)[stamp_index+1][0];
+            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+            j++;
+        } else {
+            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+        }
     }
 
     for (int i = 0; i < num_inductors; i++) {
@@ -38,6 +49,6 @@ void OP::run(std::shared_ptr<Circuit> circuit) {
     auto circuit_matrix = circuit->get_matrix();
     auto output_matrix = circuit->get_output_matrix();
     auto outputs = Matrix<double>::solve_matrix(circuit_matrix, output_matrix);
-    report_op(circuit, outputs);
+    report(circuit, outputs);
     return;
 }
