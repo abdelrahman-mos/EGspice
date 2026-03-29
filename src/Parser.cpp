@@ -92,6 +92,15 @@ std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line, int& cccs_id) {
     return std::shared_ptr<CCCS>(new CCCS({t1, t2, t3, t4}, cccs_id, name, value));
 }
 
+std::shared_ptr<VCVS> Parser::parseVCVS(const std::string& line, int& vcvs_id) {
+    std::istringstream iss(line);
+    std::string name, t1, t2, t3, t4, str_value;
+    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
+    double value = value_to_double(str_value);
+    logger_->log(LogLevel::INFO, "Parsed VCVS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
+    return std::shared_ptr<VCVS>(new VCVS({t1, t2, t3, t4}, vcvs_id, name, value));
+}
+
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
@@ -172,6 +181,8 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             circuit->add_component(parseVCCS(line));
         } else if (line[0] == 'f') {
             circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
+        } else if (line[0] == 'e') {
+            circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id)));
         } else {
             logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
             continue;
