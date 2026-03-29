@@ -9,6 +9,10 @@
 class Simulator {
     std::unordered_map<std::string, std::string> inputs;
     std::shared_ptr<Circuit> circuit;
+    std::shared_ptr<Matrix<double>> circuit_matrix;
+    std::shared_ptr<Matrix<double>> output_matrix;
+    std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix_ac;
+    std::shared_ptr<Matrix<std::complex<double>>> output_matrix_ac;
     std::unique_ptr<Parser> parser;
     std::shared_ptr<Logger> logger_;
 public:
@@ -31,7 +35,11 @@ public:
         for (const auto& command : commands) {
             if (!command) continue;
             std::cout << "running command " << command->name() << std::endl;
-            command->run(circuit);
+            if (typeid(*command) == typeid(AC)) {
+                command->run(circuit, circuit_matrix_ac, output_matrix_ac);
+            } else {
+                command->run(circuit, circuit_matrix, output_matrix);
+            }
         }
     }
 };

@@ -44,11 +44,23 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     logger_->log(message + "\n");
 }
 
-void OP::run(std::shared_ptr<Circuit> circuit) {
-    circuit->stamp_circuit();
-    auto circuit_matrix = circuit->get_matrix();
-    auto output_matrix = circuit->get_output_matrix();
-    auto outputs = Matrix<double>::solve_matrix(circuit_matrix, output_matrix);
+void OP::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term) {
+    size_t num_nodes = circuit->numNodes();
+    size_t num_vsources = circuit->numVsources();
+    size_t num_inductors = circuit->numInductors();
+    if ((coeff == nullptr) || first_point) {
+        coeff = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, num_nodes+num_vsources+num_inductors);
+        free_term = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, 1);
+    }
+    auto components = circuit->components();
+    for (const auto& component : components) {
+        component->stamp(coeff, free_term, num_vsources, num_inductors);
+    }
+}
+
+void OP::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
+    stamp(circuit, coeff, free_term);
+    auto outputs = Matrix<double>::solve_matrix(coeff, free_term);
     report(circuit, outputs);
     return;
 }
