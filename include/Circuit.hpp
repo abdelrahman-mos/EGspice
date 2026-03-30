@@ -125,9 +125,7 @@ public:
 
     void add_subckt(std::shared_ptr<Subckt> subckt);
 
-    void flatten() {
-        return;
-    }
+    void flatten();
 };
 
 #endif

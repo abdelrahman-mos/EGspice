@@ -238,7 +238,7 @@ std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::strin
 
 void Parser::assign_subckts(std::shared_ptr<Circuit> circuit) {
     for (auto& curr_subckt : circuit->subckts_instances()) {
-        std::string subckt_name = curr_subckt->subct_name();
+        std::string subckt_name = curr_subckt->subckt_name();
         auto subckts_map = circuit->subckts_map();
         if (subckts_map.find(subckt_name) == subckts_map.end()) {
             logger_->log(LogLevel::ERROR, "Undefined subckt " + subckt_name);

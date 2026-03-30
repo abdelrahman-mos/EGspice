@@ -18,3 +18,12 @@ void Circuit::add_subckt(std::shared_ptr<Subckt> subckt) {
     std::cout << "added subckt " << subckt->name() << " to map" << std::endl;
     subckts_.push_back(subckt);
 }
+
+void Circuit::flatten() {
+    for (auto& curr_subckt_instance : subckts_instances_) {
+        std::cout << curr_subckt_instance->name() << " : " << curr_subckt_instance->subckt_name() << std::endl;
+        auto;
+        // subckt is parsed with 
+    }
+    return;
+}
