@@ -6,6 +6,7 @@ Circuit::Circuit()  {
     num_nodes = 0;
     num_inductors = 0;
     num_vsources = 0;
+    curr_node = 1;
 }
 
 std::vector<std::shared_ptr<Subckt>>& Circuit::subckts() {

@@ -31,6 +31,7 @@ public:
 
     void run() {
         circuit = parser->parse(inputs.at(InputDataNames::INPUT_NETLIST));
+        circuit->flatten();
         auto& commands = circuit->commands();
         for (const auto& command : commands) {
             if (!command) continue;

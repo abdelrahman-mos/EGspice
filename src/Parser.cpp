@@ -242,7 +242,7 @@ std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
         logger_->log(LogLevel::ERROR, "Could not open file: " + filename);
         exit(1);
     }
-    parse(file);
+    return parse(file);
 }
 
 std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {

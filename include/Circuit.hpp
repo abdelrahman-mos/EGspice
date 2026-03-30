@@ -13,12 +13,21 @@ class Subckt;
 
 class Circuit
 {
-    std::unordered_map<std::string, int> node_map;
     std::vector<std::unique_ptr<Command>> commands_;
     std::vector<std::shared_ptr<Subckt>> subckts_;
 
+protected:
+    std::unordered_map<std::string, int> node_map;
+    std::vector<std::shared_ptr<Component>> components_;
+    std::vector<std::shared_ptr<Vsource>> vsources_;
+    std::vector<std::shared_ptr<Inductor>> inductors_;
+    std::vector<std::shared_ptr<SubcktInstance>> subckts_instances_;
+    size_t num_nodes;
+    size_t num_vsources;
+    size_t num_inductors;
+    int curr_node;
+
     void get_and_update_terminals(std::shared_ptr<Component> component) {
-        static int curr_node = 1;
         std::vector<std::string> terminals = component->get_terminals();
         std::vector<int> terminals_int;
         for (auto terminal : terminals) {
@@ -33,15 +42,6 @@ class Circuit
         component->update_terminals(terminals_int);
         num_nodes = curr_node-1;
     }
-
-protected:
-    std::vector<std::shared_ptr<Component>> components_;
-    std::vector<std::shared_ptr<Vsource>> vsources_;
-    std::vector<std::shared_ptr<Inductor>> inductors_;
-    std::vector<std::shared_ptr<SubcktInstance>> subckts_instances_;
-    size_t num_nodes;
-    size_t num_vsources;
-    size_t num_inductors;
 public:
     Circuit();
 
