@@ -110,6 +110,29 @@ std::shared_ptr<CCVS> Parser::parseCCVS(const std::string& line, int& ccvs_id) {
     return std::shared_ptr<CCVS>(new CCVS({t1, t2, t3, t4}, ccvs_id++, name, value));
 }
 
+std::shared_ptr<SubcktInstance> Parser::parseSubcktInstance(const std::string& line) {
+    std::istringstream iss(line);
+    std::string curr;
+    std::vector<std::string> subckt_definition;
+    while(iss >> curr) {
+        subckt_definition.push_back(curr);
+    }
+    std::vector<std::string> terminals;
+    size_t subckt_definition_size = subckt_definition.size();
+    for (size_t i = 1; i < subckt_definition_size-1; i++) {
+        terminals.push_back(subckt_definition[i]);
+    }
+    std::string name = subckt_definition[0];
+    std::string subckt_name = subckt_definition[subckt_definition_size-1];
+    std::string message = "Parsed Subckt Instance: " + name + " ";
+    for (auto& terminal : terminals) {
+        message += terminal + " ";
+    }
+    message += subckt_name;
+    logger_->log(LogLevel::INFO, message);
+    return std::shared_ptr<SubcktInstance>(new SubcktInstance(name, terminals, subckt_name));
+}
+
 std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
@@ -133,6 +156,22 @@ std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     return std::unique_ptr<AC>(new AC("ac", fstart, fend, numpoints, type, logger_));
 }
 
+bool Parser::is_subckt(const std::string& line) {
+    std::istringstream iss(line);
+    std::string command;
+    iss >> command;
+    if (command == ".subckt") return true;
+    return false;
+}
+
+bool Parser::is_ends(const std::string& line) {
+    std::istringstream iss(line);
+    std::string command;
+    iss >> command;
+    if (command == ".ends") return true;
+    return false;
+}
+
 std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     std::istringstream iss(line);
     std::string command;
@@ -140,21 +179,73 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
     command.erase(0, 1);
     if (command == "op") {
         return std::unique_ptr<OP>(new OP("op", logger_));
-    } else if (command == "ac")
-    {
+    } else if (command == "ac") {
         return parseAC(iss);
     }
     logger_->log(LogLevel::ERROR, "Unsupported command " + command);
     return nullptr;
 }
 
-std::shared_ptr<Circuit> Parser::parse(std::string filename) {
+std::vector<std::string> parseSubcktHeader(const std::string& header_line) {
+    std::istringstream iss(header_line);
+    std::string curr;
+    std::vector<std::string> subckt_header;
+    while(iss >> curr) subckt_header.push_back(curr);
+    return subckt_header;
+}
+
+void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line, int& curr_id) {
+    if (line[0] == 'v') {
+        circuit->add_component(parseVsource(line, curr_id));
+    } else if (line[0] == 'i') {
+        circuit->add_component(parseIsource(line));
+    } else if (line[0] == 'r') {
+        circuit->add_component(parseResistor(line));
+    } else if (line[0] == 'c') {
+        circuit->add_component(parseCapacitor(line));
+    } else if (line[0] == 'l') {
+        circuit->add_component(parseInductor(line));
+    } else if (line[0] == 'g') {
+        circuit->add_component(parseVCCS(line));
+    } else if (line[0] == 'f') {
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
+    } else if (line[0] == 'e') {
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id)));
+    } else if (line[0] == 'h') {
+        circuit->add_component(parseCCVS(line, curr_id));
+    } else if (line[0] == 'x') {
+        circuit->add_component(parseSubcktInstance(line));
+    } else {
+        logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
+    }
+}
+
+std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::string& curr_line) {
+    std::vector<std::string> subckt_header = parseSubcktHeader(curr_line);
+    std::string subckt_name = subckt_header[1];
+    std::vector<std::string> terminals(subckt_header.begin()+2, subckt_header.end());
+    auto subckt = std::make_shared<Subckt>(subckt_name, terminals);
+    std::string line;
+    int curr_id = 0;
+    while(std::getline(file, line)) {
+        logger_->log(line + "\n");
+        line = str_tolower(line);
+        if (is_ends(line)) break;
+        parseAndAddDevice(subckt, line, curr_id);
+    }
+    return subckt;
+}
+
+std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         logger_->log(LogLevel::ERROR, "Could not open file: " + filename);
         exit(1);
     }
-    // std::vector<std::unique_ptr<Component>> components;
+    parse(file);
+}
+
+std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
     std::shared_ptr<Circuit> circuit(new Circuit());
     std::string line;
     int curr_id = 0;
@@ -168,6 +259,11 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             continue; // Skip comments and empty lines
         }
 
+        if (is_subckt(line)) {
+            circuit->add_subckt(parseSubckt(file, line));
+            continue;
+        }
+
         if (line[0] == '.') {
             auto command = parseCommand(line);
             if (command) {
@@ -176,28 +272,7 @@ std::shared_ptr<Circuit> Parser::parse(std::string filename) {
             continue;
         }
 
-        if (line[0] == 'v') {
-            circuit->add_component(parseVsource(line, curr_id));
-        } else if (line[0] == 'i') {
-            circuit->add_component(parseIsource(line));
-        } else if (line[0] == 'r') {
-            circuit->add_component(parseResistor(line));
-        } else if (line[0] == 'c') {
-            circuit->add_component(parseCapacitor(line));
-        } else if (line[0] == 'l') {
-            circuit->add_component(parseInductor(line));
-        } else if (line[0] == 'g') {
-            circuit->add_component(parseVCCS(line));
-        } else if (line[0] == 'f') {
-            circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
-        } else if (line[0] == 'e') {
-            circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id)));
-        } else if (line[0] == 'h') {
-            circuit->add_component(parseCCVS(line, curr_id));
-        } else {
-            logger_->log(LogLevel::ERROR, "Unsupported component " + line[0]);
-            continue;
-        }
+        parseAndAddDevice(circuit, line, curr_id);
 
     }
     file.close();

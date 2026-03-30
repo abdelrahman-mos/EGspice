@@ -9,17 +9,13 @@
 #include "Command.hpp"
 #include "Matrix.hpp"
 
+class Subckt;
+
 class Circuit
 {
-protected:
-    std::vector<std::shared_ptr<Component>> components_;
-    std::vector<std::shared_ptr<Vsource>> vsources_;
-    std::vector<std::shared_ptr<Inductor>> inductors_;
-    std::vector<std::unique_ptr<Command>> commands_;
-    size_t num_nodes;
     std::unordered_map<std::string, int> node_map;
-    size_t num_vsources;
-    size_t num_inductors;
+    std::vector<std::unique_ptr<Command>> commands_;
+    std::vector<std::shared_ptr<Subckt>> subckts_;
 
     void get_and_update_terminals(std::shared_ptr<Component> component) {
         static int curr_node = 1;
@@ -38,13 +34,16 @@ protected:
         num_nodes = curr_node-1;
     }
 
+protected:
+    std::vector<std::shared_ptr<Component>> components_;
+    std::vector<std::shared_ptr<Vsource>> vsources_;
+    std::vector<std::shared_ptr<Inductor>> inductors_;
+    std::vector<std::shared_ptr<SubcktInstance>> subckts_instances_;
+    size_t num_nodes;
+    size_t num_vsources;
+    size_t num_inductors;
 public:
-    Circuit() {
-        node_map = {{"0", 0}};
-        num_nodes = 0;
-        num_inductors = 0;
-        num_vsources = 0;
-    }
+    Circuit();
 
     int numNodes() const {
         return num_nodes;
@@ -74,9 +73,15 @@ public:
         return inductors_;
     }
 
+    std::vector<std::shared_ptr<SubcktInstance>>& subckts_instances() {
+        return subckts_instances_;
+    }
+
     std::vector<std::unique_ptr<Command>>& commands() {
         return commands_;
     }
+
+    std::vector<std::shared_ptr<Subckt>>& subckts();
 
     void add_component(std::shared_ptr<Component> component) {
         get_and_update_terminals(component);
@@ -104,8 +109,19 @@ public:
         components_.push_back(component);
     }
 
+    void add_component(std::shared_ptr<SubcktInstance> subckt) {
+        get_and_update_terminals(subckt);
+        subckts_instances_.push_back(subckt);
+    }
+
     void add_command(std::unique_ptr<Command> command) {
         commands_.push_back(std::move(command));
+    }
+
+    void add_subckt(std::shared_ptr<Subckt> subckt);
+
+    void flatten() {
+        return;
     }
 };
 

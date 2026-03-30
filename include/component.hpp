@@ -7,6 +7,8 @@
 #include <complex>
 #include "Matrix.hpp"
 
+class Subckt;
+
 class Component
 {
 protected:
@@ -111,6 +113,14 @@ public:
     CCVS(std::vector<std::string> terminals, int cccs_id, double ac_val, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) override;
+};
+
+class SubcktInstance : public Component {
+    std::string subckt_name_;
+    std::shared_ptr<Subckt> subckt_;
+public:
+    SubcktInstance(std::string name = "", std::vector<std::string> terminals = {}, std::string subckt_name = "") : Component(terminals, name, 0.0), subckt_name_(subckt_name) {}
+    void set_subckt(std::shared_ptr<Subckt> subckt);
 };
 
 #endif
