@@ -14,5 +14,7 @@ std::vector<std::shared_ptr<Subckt>>& Circuit::subckts() {
 }
 
 void Circuit::add_subckt(std::shared_ptr<Subckt> subckt) {
-    subckts_.push_back(std::move(subckt));
+    subckts_map_[subckt->name()] = subckt;
+    std::cout << "added subckt " << subckt->name() << " to map" << std::endl;
+    subckts_.push_back(subckt);
 }

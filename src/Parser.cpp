@@ -236,10 +236,22 @@ std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::strin
     return subckt;
 }
 
+void Parser::assign_subckts(std::shared_ptr<Circuit> circuit) {
+    for (auto& curr_subckt : circuit->subckts_instances()) {
+        std::string subckt_name = curr_subckt->subct_name();
+        auto subckts_map = circuit->subckts_map();
+        if (subckts_map.find(subckt_name) == subckts_map.end()) {
+            logger_->log(LogLevel::ERROR, "Undefined subckt " + subckt_name);
+            throw std::runtime_error("Undefined subckt name");
+        }
+        curr_subckt->set_subckt(subckts_map[subckt_name]);
+    }
+}
+
 std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        logger_->log(LogLevel::ERROR, "Could not open file: " + filename);
+         logger_->log(LogLevel::ERROR, "Could not open file: " + filename);
         exit(1);
     }
     return parse(file);
@@ -276,5 +288,6 @@ std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
 
     }
     file.close();
+    assign_subckts(circuit);
     return circuit;
 }

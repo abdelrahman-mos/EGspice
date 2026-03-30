@@ -120,6 +120,9 @@ class SubcktInstance : public Component {
     std::shared_ptr<Subckt> subckt_;
 public:
     SubcktInstance(std::string name = "", std::vector<std::string> terminals = {}, std::string subckt_name = "") : Component(terminals, name, 0.0), subckt_name_(subckt_name) {}
+    std::string subct_name() const {
+        return subckt_name_;
+    }
     void set_subckt(std::shared_ptr<Subckt> subckt);
 };
 

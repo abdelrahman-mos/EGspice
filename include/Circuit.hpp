@@ -15,6 +15,7 @@ class Circuit
 {
     std::vector<std::unique_ptr<Command>> commands_;
     std::vector<std::shared_ptr<Subckt>> subckts_;
+    std::unordered_map<std::string, std::shared_ptr<Subckt>> subckts_map_;
 
 protected:
     std::unordered_map<std::string, int> node_map;
@@ -59,6 +60,10 @@ public:
 
     std::unordered_map<std::string, int> nodeMap() const {
         return node_map;
+    }
+
+    std::unordered_map<std::string, std::shared_ptr<Subckt>> subckts_map() {
+        return subckts_map_;
     }
 
     std::vector<std::shared_ptr<Component>>& components() {

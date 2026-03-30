@@ -24,10 +24,11 @@ class Subckt : public Circuit
 public:
     Subckt(std::string name, std::vector<std::string> terminals) : Circuit(), subckt_name(name), terminal_names(terminals) {
         update_subckt_terminals();
-        for (auto& curr_node : node_map) {
-            std::cout << curr_node.first << " : " << curr_node.second << std::endl;    
-        }
     };
+
+    std::string name() const {
+        return subckt_name;
+    }
 };
 
 
