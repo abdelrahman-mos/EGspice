@@ -110,18 +110,37 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
     logger_->log(message + "\n");
 }
 
-void AC::run(std::shared_ptr<Circuit> circuit) {
-    circuit->stamp_circuit(1.0);
-    auto circuit_matrix_ac = circuit->get_ac_matrix();
-    size_t num_rows = circuit_matrix_ac->numRows();
+void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) {
+    if ((coeff == nullptr) || first_point) {
+        size_t num_nodes = circuit->numNodes();
+        size_t num_vsources = circuit->numVsources();
+        size_t num_inductors = circuit->numInductors();
+        coeff = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
+        free_term = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
+        std::cout << "initialized matrices" << std::endl;
+        for (const auto& component : circuit->components()) {
+            component->stamp(coeff, free_term, num_vsources, freq);
+        }
+        first_point = false;
+    } else {
+        for (const auto& component : circuit->components()) {
+            // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
+            if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
+                component->stamp(coeff, free_term, circuit->numVsources(), freq);
+            }
+        }
+    }
+}
+
+void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
+    stamp(circuit, coeff, free_term, 1.0);
+    size_t num_rows = coeff->numRows();
     size_t num_points = frequency_points.size();
     auto outputs_mat = std::make_shared<Matrix<std::complex<double>>>(num_points, num_rows);
     for (size_t i = 0; i < num_points; i++) {
         double freq = frequency_points[i];
-        circuit->stamp_circuit(freq);
-        auto circuit_matrix_ac = circuit->get_ac_matrix();
-        auto output_matrix_ac = circuit->get_ac_output_matrix();
-        auto outputs = Matrix<std::complex<double>>::solve_matrix(circuit_matrix_ac, output_matrix_ac);
+        stamp(circuit, coeff, free_term, freq);
+        auto outputs = Matrix<std::complex<double>>::solve_matrix(coeff, free_term);
         outputs_mat->emplace_at(outputs->transpose()[0], i);
     }
     report(circuit, outputs_mat);

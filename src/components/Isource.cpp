@@ -24,3 +24,7 @@ void Isource::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix
         (*output_matrix)[node_2-1][0] -= ac_val;
     }
 }
+
+std::shared_ptr<Component> Isource::clone() const {
+    return std::make_shared<Isource>(*this);
+}

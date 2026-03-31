@@ -9,10 +9,10 @@
 #include "Command.hpp"
 #include "Circuit.hpp"
 #include "Logger.hpp"
+#include "Subckt.hpp"
 #include <regex>
 
 class Parser {
-    std::string filename;
     std::shared_ptr<Vsource> parseVsource(const std::string& line, int& vsource_id);
     std::shared_ptr<Resistor> parseResistor(const std::string& line);
     std::shared_ptr<Isource> parseIsource(const std::string& line);
@@ -22,12 +22,18 @@ class Parser {
     std::shared_ptr<CCCS> parseCCCS(const std::string& line, int& cccs_id);
     std::shared_ptr<VCVS> parseVCVS(const std::string& line, int& vcvs_id);
     std::shared_ptr<CCVS> parseCCVS(const std::string& line, int& ccvs_id);
+    std::shared_ptr<SubcktInstance> parseSubcktInstance(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
     std::unique_ptr<Command> parseAC(std::istringstream& iss);
+    std::shared_ptr<Subckt> parseSubckt(std::istream& file, const std::string& curr_line);
+    void parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line, int& curr_id);
     std::shared_ptr<Logger> logger_;
+    std::shared_ptr<Circuit> parse(std::ifstream& file);
+    bool is_subckt(const std::string& line);
+    bool is_ends(const std::string& line);
 public:
     Parser(std::shared_ptr<Logger> logger) : logger_(logger) {}
-    std::shared_ptr<Circuit> parse(std::string filename);
+    std::shared_ptr<Circuit> parse(const std::string& filename);
 };
 
 #endif /* PARSER_HPP */

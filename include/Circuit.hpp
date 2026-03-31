@@ -8,25 +8,29 @@
 #include "component.hpp"
 #include "Command.hpp"
 #include "Matrix.hpp"
+#include "Logger.hpp"
+
+class Subckt;
 
 class Circuit
 {
+    std::vector<std::unique_ptr<Command>> commands_;
+    std::vector<std::shared_ptr<Subckt>> subckts_;
+    std::unordered_map<std::string, std::shared_ptr<Subckt>> subckts_map_;
+
+protected:
+    std::unordered_map<std::string, int> node_map;
     std::vector<std::shared_ptr<Component>> components_;
     std::vector<std::shared_ptr<Vsource>> vsources_;
     std::vector<std::shared_ptr<Inductor>> inductors_;
-    std::vector<std::unique_ptr<Command>> commands_;
-    std::shared_ptr<Matrix<double>> circuit_matrix;
-    std::shared_ptr<Matrix<double>> output_matrix;
-    std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix_ac;
-    std::shared_ptr<Matrix<std::complex<double>>> output_matrix_ac;
+    std::vector<std::shared_ptr<SubcktInstance>> subckts_instances_;
+    std::shared_ptr<Logger> logger_;
     size_t num_nodes;
-    std::unordered_map<std::string, int> node_map;
     size_t num_vsources;
     size_t num_inductors;
-    bool freq_first_point;
+    int curr_node;
 
     void get_and_update_terminals(std::shared_ptr<Component> component) {
-        static int curr_node = 1;
         std::vector<std::string> terminals = component->get_terminals();
         std::vector<int> terminals_int;
         for (auto terminal : terminals) {
@@ -41,15 +45,8 @@ class Circuit
         component->update_terminals(terminals_int);
         num_nodes = curr_node-1;
     }
-
 public:
-    Circuit() {
-        node_map = {{"0", 0}};
-        freq_first_point = true;
-        num_nodes = 0;
-        num_inductors = 0;
-        num_vsources = 0;
-    }
+    Circuit(std::shared_ptr<Logger> logger);
 
     int numNodes() const {
         return num_nodes;
@@ -67,6 +64,10 @@ public:
         return node_map;
     }
 
+    std::unordered_map<std::string, std::shared_ptr<Subckt>> subckts_map() {
+        return subckts_map_;
+    }
+
     std::vector<std::shared_ptr<Component>>& components() {
         return components_;
     }
@@ -79,9 +80,15 @@ public:
         return inductors_;
     }
 
+    std::vector<std::shared_ptr<SubcktInstance>>& subckts_instances() {
+        return subckts_instances_;
+    }
+
     std::vector<std::unique_ptr<Command>>& commands() {
         return commands_;
     }
+
+    std::vector<std::shared_ptr<Subckt>>& subckts();
 
     void add_component(std::shared_ptr<Component> component) {
         get_and_update_terminals(component);
@@ -109,58 +116,19 @@ public:
         components_.push_back(component);
     }
 
+    void add_component(std::shared_ptr<SubcktInstance> subckt) {
+        get_and_update_terminals(subckt);
+        subckts_instances_.push_back(subckt);
+    }
+
     void add_command(std::unique_ptr<Command> command) {
         commands_.push_back(std::move(command));
     }
 
-    std::shared_ptr<Matrix<double>> get_matrix() {
-        return circuit_matrix;
-    }
-
-    std::shared_ptr<Matrix<double>> get_output_matrix() {
-        return output_matrix;
-    }
-
-    std::shared_ptr<Matrix<std::complex<double>>> get_ac_matrix() {
-        return circuit_matrix_ac;
-    }
-
-    std::shared_ptr<Matrix<std::complex<double>>> get_ac_output_matrix() {
-        return output_matrix_ac;
-    }
-
-    void stamp_circuit() {
-        if (circuit_matrix == nullptr) {
-            circuit_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, num_nodes+num_vsources+num_inductors);
-            output_matrix = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, 1);
-        }
-        for (const auto& component : components_) {
-            if (typeid(*component) == typeid(Vsource)) {
-                Vsource* curr_vsource = dynamic_cast<Vsource*>(component.get());
-                std::cout << "id: " << curr_vsource->id << std::endl;
-            }
-            component->stamp(circuit_matrix, output_matrix, num_vsources, num_inductors);
-        }
-    }
-
-    void stamp_circuit(double frequency) {
-        if ((circuit_matrix_ac == nullptr) || (freq_first_point == true)) {
-            circuit_matrix_ac = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
-            output_matrix_ac = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
-            for (const auto& component : components_) {
-                component->stamp(circuit_matrix_ac, output_matrix_ac, num_vsources, frequency);
-            }
-            freq_first_point = false;
-        } else {
-            for (const auto& component : components_) {
-                // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
-                if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
-                    component->stamp(circuit_matrix_ac, output_matrix_ac, num_vsources, frequency);
-                }
-            }
-        }
-    }
+    void add_subckt(std::shared_ptr<Subckt> subckt);
+    void assign_subckts();
+    void flatten();
+    void flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, std::string parent_name);
 };
-
 
 #endif

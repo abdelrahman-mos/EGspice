@@ -34,3 +34,7 @@ void Inductor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matri
         (*circuit_matrix)[node_2-1][node_1-1] += std::complex<double>(0.0, -1.0/(2.0*M_PI*frequency*value));
     }
 }
+
+std::shared_ptr<Component> Inductor::clone() const {
+    return std::make_shared<Inductor>(*this);
+}

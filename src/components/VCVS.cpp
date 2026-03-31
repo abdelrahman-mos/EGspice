@@ -54,3 +54,7 @@ void VCVS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, s
         (*circuit_matrix)[stamp_index][node_4-1] += ac_val;
     }
 }
+
+std::shared_ptr<Component> VCVS::clone() const {
+    return std::make_shared<VCVS>(*this);
+}

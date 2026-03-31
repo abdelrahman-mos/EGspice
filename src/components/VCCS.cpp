@@ -64,3 +64,7 @@ void VCCS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, s
         }
     }
 }
+
+std::shared_ptr<Component> VCCS::clone() const {
+    return std::make_shared<VCCS>(*this);
+}

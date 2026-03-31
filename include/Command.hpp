@@ -23,14 +23,27 @@ public:
         return name_;
     }
     
-    virtual void run(std::shared_ptr<Circuit> circuit) {
+    virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
+        return;
+    }
+    virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
         return;
     }
 };
 
 class Simulation : public Command {
+protected:
+    bool first_point;
 public:
-    Simulation(std::string name, std::shared_ptr<Logger> logger) : Command(name, logger) {}
+    Simulation(std::string name, std::shared_ptr<Logger> logger) : Command(name, logger) {
+        first_point = true;
+    }
+    virtual void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term) {
+        return;
+    }
+    virtual void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) {
+        return;
+    }
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
         return;
     }
@@ -42,8 +55,9 @@ public:
 class OP : public Simulation {
 public:
     OP(std::string name, std::shared_ptr<Logger> logger) : Simulation(name, logger) {}
+    void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term) override;
     void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) override;
-    void run(std::shared_ptr<Circuit> circuit) override;
+    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) override;
 };
 
 enum class AC_TYPE {
@@ -66,8 +80,10 @@ public:
     AC(std::string name, double fstart, double fend, size_t numpoints, AC_TYPE type, std::shared_ptr<Logger> logger) : Simulation(name, logger), fstart(fstart),
      fend(fend), numpoints(numpoints), type(type) {
         expand_freq();
+        first_point = true;
     }
-    void run(std::shared_ptr<Circuit> circuit) override;
+    void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) override;
+    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) override;
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) override;
 };
 

@@ -34,3 +34,7 @@ void Vsource::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix
 
     (*output_matrix)[stamp_index][0] += ac_val;
 }
+
+std::shared_ptr<Component> Vsource::clone() const {
+    return std::make_shared<Vsource>(*this);
+}
