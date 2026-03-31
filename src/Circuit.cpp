@@ -53,7 +53,7 @@ void Circuit::flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, co
     new_parent_name += subckt_instance->name();
     auto flattened_components = subckt->flattened_components(subckt_instance, new_parent_name);
     for (auto& curr_component : flattened_components) {
-        std::cout << "curr component name: " << curr_component->name() << std::endl;
+        add_component(curr_component);
     }
     for (auto& curr_subckt_instance : subckts_instances) {
         flatten_subckt(curr_subckt_instance, new_parent_name);
@@ -61,7 +61,7 @@ void Circuit::flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, co
 }
 
 void Circuit::flatten() {
-    std::cout << "flattening circuit" << std::endl;
+    logger_->log(LogLevel::INFO, "Flattening Netlist");
     for (auto& curr_subckt_instance : subckts_instances_) {
         std::cout << curr_subckt_instance->name() << " : " << curr_subckt_instance->subckt_name() << std::endl;
         flatten_subckt(curr_subckt_instance, "");
