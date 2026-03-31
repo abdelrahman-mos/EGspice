@@ -16,3 +16,7 @@ void Capacitor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matr
         (*circuit_matrix)[node_2-1][node_1-1] += std::complex<double>(0.0, -2.0*M_PI*frequency*value);
     }
 }
+
+std::shared_ptr<Component> Capacitor::clone() const {
+    return std::make_shared<Capacitor>(*this);
+}

@@ -9,6 +9,10 @@ X1 vin vout1 my_subckt
 X2 vout1 vout my_subckt
 .ends my_subckt2
 
+.subckt my_subckt3 vin vout
+X1 vin vout1 my_subckt2
+.ends my_subckt3
+
 V1 vin 0 1
-X1 vin vout my_subckt2
+X1 vin vout my_subckt3
 .ac dec 10 1 10k

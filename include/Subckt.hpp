@@ -29,6 +29,17 @@ public:
     std::string name() const {
         return subckt_name;
     }
+
+    std::vector<std::shared_ptr<Component>> flattened_components(std::shared_ptr<SubcktInstance> subckt_instance, std::string parent_name) {
+        std::vector<std::shared_ptr<Component>> output;
+        for (auto& curr_component : components_) {
+            auto new_component = curr_component->clone();
+            std::string new_name = parent_name + "." + new_component->name();
+            new_component->set_name(new_name);
+            output.push_back(new_component);
+        }
+        return output;
+    } 
 };
 
 

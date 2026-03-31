@@ -54,3 +54,7 @@ void CCCS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, s
         (*circuit_matrix)[stamp_index][node_4-1] -= 1;
     }
 }
+
+std::shared_ptr<Component> CCCS::clone() const {
+    return std::make_shared<CCCS>(*this);
+}

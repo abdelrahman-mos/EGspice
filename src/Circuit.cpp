@@ -48,12 +48,14 @@ void Circuit::flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, co
     std::cout << "subckt name: " << subckt_instance->name() << ", parent name: " << parent_name << std::endl;
     auto subckt = subckt_instance->parent_subckt();
     auto subckts_instances = subckt->subckts_instances();
+    std::string new_parent_name = parent_name;
+    if (new_parent_name != "") new_parent_name += ".";
+    new_parent_name += subckt_instance->name();
+    auto flattened_components = subckt->flattened_components(subckt_instance, new_parent_name);
+    for (auto& curr_component : flattened_components) {
+        std::cout << "curr component name: " << curr_component->name() << std::endl;
+    }
     for (auto& curr_subckt_instance : subckts_instances) {
-        std::string new_parent_name = parent_name;
-        if (new_parent_name != "") {
-            new_parent_name += ".";
-        }
-        new_parent_name += subckt_instance->name();
         flatten_subckt(curr_subckt_instance, new_parent_name);
     }
 }

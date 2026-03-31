@@ -34,3 +34,7 @@ void Resistor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matri
         (*circuit_matrix)[node_2-1][node_1-1] -= 1.0/ac_val;
     }
 }
+
+std::shared_ptr<Component> Resistor::clone() const {
+    return std::make_shared<Resistor>(*this);
+}

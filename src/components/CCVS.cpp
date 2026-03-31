@@ -62,3 +62,7 @@ void CCVS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, s
 
     (*circuit_matrix)[stamp_index+1][stamp_index] -= ac_val;
 }
+
+std::shared_ptr<Component> CCVS::clone() const {
+    return std::make_shared<CCVS>(*this);
+}
