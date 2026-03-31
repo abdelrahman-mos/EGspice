@@ -22,7 +22,7 @@ class Subckt : public Circuit
         num_nodes = curr_node-1;
     }
 public:
-    Subckt(std::string name, std::vector<std::string> terminals) : Circuit(), subckt_name(name), terminal_names(terminals) {
+    Subckt(std::string name, std::vector<std::string> terminals, std::shared_ptr<Logger> logger) : Circuit(logger), subckt_name(name), terminal_names(terminals) {
         update_subckt_terminals();
     };
 

@@ -8,6 +8,7 @@
 #include "component.hpp"
 #include "Command.hpp"
 #include "Matrix.hpp"
+#include "Logger.hpp"
 
 class Subckt;
 
@@ -23,6 +24,7 @@ protected:
     std::vector<std::shared_ptr<Vsource>> vsources_;
     std::vector<std::shared_ptr<Inductor>> inductors_;
     std::vector<std::shared_ptr<SubcktInstance>> subckts_instances_;
+    std::shared_ptr<Logger> logger_;
     size_t num_nodes;
     size_t num_vsources;
     size_t num_inductors;
@@ -44,7 +46,7 @@ protected:
         num_nodes = curr_node-1;
     }
 public:
-    Circuit();
+    Circuit(std::shared_ptr<Logger> logger);
 
     int numNodes() const {
         return num_nodes;
@@ -124,8 +126,9 @@ public:
     }
 
     void add_subckt(std::shared_ptr<Subckt> subckt);
-
+    void assign_subckts();
     void flatten();
+    void flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, std::string parent_name);
 };
 
 #endif

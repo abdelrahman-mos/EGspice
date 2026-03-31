@@ -31,7 +31,6 @@ class Parser {
     std::shared_ptr<Circuit> parse(std::ifstream& file);
     bool is_subckt(const std::string& line);
     bool is_ends(const std::string& line);
-    void assign_subckts(std::shared_ptr<Circuit> circuit);
 public:
     Parser(std::shared_ptr<Logger> logger) : logger_(logger) {}
     std::shared_ptr<Circuit> parse(const std::string& filename);

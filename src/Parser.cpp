@@ -224,7 +224,7 @@ std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::strin
     std::vector<std::string> subckt_header = parseSubcktHeader(curr_line);
     std::string subckt_name = subckt_header[1];
     std::vector<std::string> terminals(subckt_header.begin()+2, subckt_header.end());
-    auto subckt = std::make_shared<Subckt>(subckt_name, terminals);
+    auto subckt = std::make_shared<Subckt>(subckt_name, terminals, logger_);
     std::string line;
     int curr_id = 0;
     while(std::getline(file, line)) {
@@ -234,18 +234,6 @@ std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::strin
         parseAndAddDevice(subckt, line, curr_id);
     }
     return subckt;
-}
-
-void Parser::assign_subckts(std::shared_ptr<Circuit> circuit) {
-    for (auto& curr_subckt : circuit->subckts_instances()) {
-        std::string subckt_name = curr_subckt->subckt_name();
-        auto subckts_map = circuit->subckts_map();
-        if (subckts_map.find(subckt_name) == subckts_map.end()) {
-            logger_->log(LogLevel::ERROR, "Undefined subckt " + subckt_name);
-            throw std::runtime_error("Undefined subckt name");
-        }
-        curr_subckt->set_subckt(subckts_map[subckt_name]);
-    }
 }
 
 std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
@@ -258,7 +246,7 @@ std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
 }
 
 std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
-    std::shared_ptr<Circuit> circuit(new Circuit());
+    std::shared_ptr<Circuit> circuit(new Circuit(logger_));
     std::string line;
     int curr_id = 0;
     while (std::getline(file, line)) {
@@ -288,6 +276,6 @@ std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
 
     }
     file.close();
-    assign_subckts(circuit);
+    circuit->assign_subckts();
     return circuit;
 }
