@@ -65,24 +65,6 @@ void Circuit::flatten() {
     for (auto& curr_subckt_instance : subckts_instances_) {
         std::cout << curr_subckt_instance->name() << " : " << curr_subckt_instance->subckt_name() << std::endl;
         flatten_subckt(curr_subckt_instance, "");
-        // We need to find a way to flatten the circuit, subckts can also contain other subckts, either we stop assigning node numbers at element parsing,
-        // we can then start appending each subckt's inner components with their parents name, then go through each element and encode its terminals,
-        // or we find a way to include the previously encoded terminals with the encoded ones in the subckt.
-        // we also need to find a way to map the instance terminals to the inner subckt terminals, for example:
-        /*
-        .subckt my_subckt in out gnd
-        r1 in out 1k
-        c1 out gnd 1u
-        .ends my_subckt
-        x1 my_input my_output 0
-        */
-       //the previous subckt instance should be replaced with the following:
-       /*
-       x1.r1 my_input my_output 1k
-       x1.c1 my_output 0 1u
-       */
-      // If we have any internal nodes they should be replaced by <subckt_instance_name>.<internal_node_name>. Which means that we won't replace
-      // internal nodes
     }
     return;
 }
