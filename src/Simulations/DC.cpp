@@ -1,7 +1,7 @@
 #include "../../include/Circuit.hpp"
 #include "../../include/Command.hpp"
 
-void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
+void DC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
     std::string message = "OP Results:\n";
     auto node_map = circuit->nodeMap();
     for (auto& curr_node : node_map) {
@@ -44,23 +44,40 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     logger_->log(message + "\n");
 }
 
-void OP::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term) {
-    size_t num_nodes = circuit->numNodes();
-    size_t num_vsources = circuit->numVsources();
-    size_t num_inductors = circuit->numInductors();
-    if ((coeff == nullptr) || first_point) {
-        coeff = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, num_nodes+num_vsources+num_inductors);
-        free_term = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, 1);
-        first_point = false;
+void DC::expand_points() {
+    for (double curr_voltage = start_outer; curr_voltage < end_outer; curr_voltage+=step_outer) {
+        outer_points.push_back(curr_voltage);
     }
-    auto components = circuit->components();
-    for (const auto& component : components) {
-        component->stamp(coeff, free_term, num_vsources, num_inductors);
+
+    if (inner_vsource_id == -1) return;
+    for (double curr_voltage = start_inner; curr_voltage < end_inner; curr_voltage+=step_inner) {
+        inner_points.push_back(curr_voltage);
     }
 }
 
-void OP::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
-    stamp(circuit, coeff, free_term);
+void DC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term, double outer_value, double inner_value) {
+    size_t num_vsources = circuit->numVsources();
+    size_t num_inductors = circuit->numInductors();
+    if ((coeff == nullptr) || first_point) {
+        size_t num_nodes = circuit->numNodes();
+        coeff = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, num_nodes+num_vsources+num_inductors);
+        free_term = std::make_shared<Matrix<double>>(num_nodes+num_vsources+num_inductors, 1);
+        for (const auto& component : circuit->components()) {
+            component->stamp(coeff, free_term, num_vsources, num_inductors);
+        }
+        first_point = false;
+    } else {
+        for (const auto& curr_vsource : circuit->vsources()) {
+            // in repitition, only stamp changing voltages
+            if ((curr_vsource->id == outer_vsource_id) || (curr_vsource->id == inner_vsource_id)) {
+                curr_vsource->stamp(coeff, free_term, num_vsources, num_inductors);
+            }
+        }
+    }
+}
+
+void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
+    stamp(circuit, coeff, free_term, 0.0, 0.0);
     auto outputs = Matrix<double>::solve_matrix(coeff, free_term);
     report(circuit, outputs);
     return;

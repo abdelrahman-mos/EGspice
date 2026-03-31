@@ -133,7 +133,7 @@ std::shared_ptr<SubcktInstance> Parser::parseSubcktInstance(const std::string& l
     return std::shared_ptr<SubcktInstance>(new SubcktInstance(name, terminals, subckt_name));
 }
 
-std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
+std::unique_ptr<AC> Parser::parseAC(std::istringstream& iss) {
     std::string type_str, numpoints_str, fstart_str, fend_str;
     iss >> type_str >> numpoints_str >> fstart_str >> fend_str;
     AC_TYPE type;
@@ -154,6 +154,10 @@ std::unique_ptr<Command> Parser::parseAC(std::istringstream& iss) {
     double fstart = value_to_double(fstart_str);
     double fend = value_to_double(fend_str);
     return std::unique_ptr<AC>(new AC("ac", fstart, fend, numpoints, type, logger_));
+}
+
+std::unique_ptr<DC> Parser::parseDC(std::istringstream& iss) {
+    return nullptr;
 }
 
 bool Parser::is_subckt(const std::string& line) {
@@ -181,6 +185,8 @@ std::unique_ptr<Command> Parser::parseCommand(const std::string& line) {
         return std::unique_ptr<OP>(new OP("op", logger_));
     } else if (command == "ac") {
         return parseAC(iss);
+    } else if (command == "dc") {
+        return parseDC(iss);
     }
     logger_->log(LogLevel::ERROR, "Unsupported command " + command);
     return nullptr;

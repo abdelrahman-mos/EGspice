@@ -58,6 +58,7 @@ public:
     Vsource(std::vector<std::string> terminals, int vsource_id, std::string name = "", double value = 0.0) : Component(terminals, name, value), id(vsource_id) {}
     Vsource(std::vector<std::string> terminals, int vsource_id, double ac_val, std::string name = "", double value = 0.0) : Component(terminals, ac_val, name, value), id(vsource_id) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, int num_vsources, int num_inductors) override;
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, double temp_value, int num_vsources, int num_inductors);
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) override;
     std::shared_ptr<Component> clone() const override;
 };

@@ -117,7 +117,6 @@ void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::com
         size_t num_inductors = circuit->numInductors();
         coeff = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
         free_term = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
-        std::cout << "initialized matrices" << std::endl;
         for (const auto& component : circuit->components()) {
             component->stamp(coeff, free_term, num_vsources, freq);
         }
@@ -125,7 +124,7 @@ void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::com
     } else {
         for (const auto& component : circuit->components()) {
             // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
-            if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
+            if (std::dynamic_pointer_cast<Inductor>(component) || std::dynamic_pointer_cast<Capacitor>(component)) {
                 component->stamp(coeff, free_term, circuit->numVsources(), freq);
             }
         }

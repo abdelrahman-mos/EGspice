@@ -44,6 +44,9 @@ public:
     virtual void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) {
         return;
     }
+    virtual void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term, double outer_value, double inner_value) {
+        return;
+    }
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
         return;
     }
@@ -85,6 +88,28 @@ public:
     void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) override;
     void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) override;
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) override;
+};
+
+class DC : public Simulation {
+    double start_outer;
+    double end_outer;
+    double step_outer;
+    double start_inner;
+    double end_inner;
+    double step_inner;
+    int inner_vsource_id;
+    int outer_vsource_id;
+    std::vector<double> outer_points;
+    std::vector<double> inner_points;
+    void expand_points();
+public:
+    DC(std::string name, double start_outer, double end_outer, double step_outer, int outer_vsource_id, std::shared_ptr<Logger> logger, 
+        double start_inner = INFINITY, double end_inner = INFINITY, double step_inner = INFINITY, int inner_vsource_id = -1) : 
+        Simulation(name, logger), start_outer(start_outer), end_outer(end_outer), step_outer(step_outer), start_inner(start_inner), 
+        end_inner(end_inner), step_inner(step_inner), inner_vsource_id(inner_vsource_id), outer_vsource_id(outer_vsource_id) {}
+    void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term, double outer_value, double inner_value) override;
+    void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) override;
+    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) override;
 };
 
 #endif
