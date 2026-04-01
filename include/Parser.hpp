@@ -24,7 +24,8 @@ class Parser {
     std::shared_ptr<CCVS> parseCCVS(const std::string& line, int& ccvs_id);
     std::shared_ptr<SubcktInstance> parseSubcktInstance(const std::string& line);
     std::unique_ptr<Command> parseCommand(const std::string& line);
-    std::unique_ptr<Command> parseAC(std::istringstream& iss);
+    std::unique_ptr<AC> parseAC(std::istringstream& iss);
+    std::unique_ptr<DC> parseDC(std::istringstream& iss);
     std::shared_ptr<Subckt> parseSubckt(std::istream& file, const std::string& curr_line);
     void parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line, int& curr_id);
     std::shared_ptr<Logger> logger_;

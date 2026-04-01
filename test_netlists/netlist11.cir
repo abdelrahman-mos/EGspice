@@ -1,0 +1,8 @@
+*
+V1 vin 0 1
+R1 vin vout 1k
+R2 vout 0 1k
+V2 vin2 0 1
+R3 vin2 vout2 1k
+R4 vout2 0 1k
+.dc V1 0 1 0.1 V2 1 2 0.1

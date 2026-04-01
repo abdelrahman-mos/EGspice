@@ -17,21 +17,27 @@ void Inductor::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared
     (*output_matrix)[stamp_index][0] += 0.0;
 }
 
-void Inductor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) {
+void Inductor::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
+    int num_vsources, double frequency, double prev_frequency) {
     size_t node_1 = terminals_int[0];
     size_t node_2 = terminals_int[1];
+
+    std::complex<double> conductance = std::complex<double>(0.0, 1.0/(2.0*M_PI*frequency*value));
+    if (prev_frequency != 0.0) {
+        conductance -= std::complex<double>(0.0, 1.0/(2.0*M_PI*prev_frequency*value));
+    }
     
     if (node_1 != 0) {
-        (*circuit_matrix)[node_1-1][node_1-1] += std::complex<double>(0.0, 1.0/(2.0*M_PI*frequency*value));
+        (*circuit_matrix)[node_1-1][node_1-1] += conductance;
     }
 
     if (node_2 != 0) {
-        (*circuit_matrix)[node_2-1][node_2-1] += std::complex<double>(0.0, 1.0/(2.0*M_PI*frequency*value));
+        (*circuit_matrix)[node_2-1][node_2-1] += conductance;
     }
 
     if ((node_1 != 0) && (node_2 != 0)) {
-        (*circuit_matrix)[node_1-1][node_2-1] += std::complex<double>(0.0, -1.0/(2.0*M_PI*frequency*value));
-        (*circuit_matrix)[node_2-1][node_1-1] += std::complex<double>(0.0, -1.0/(2.0*M_PI*frequency*value));
+        (*circuit_matrix)[node_1-1][node_2-1] -= conductance;
+        (*circuit_matrix)[node_2-1][node_1-1] -= conductance;
     }
 }
 

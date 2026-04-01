@@ -32,7 +32,8 @@ void VCCS::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr
     }
 }
 
-void VCCS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) {
+void VCCS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
+    int num_vsources, double frequency, double prev_frequency) {
     // current between nodes 1 and 2 (pq)
     size_t node_1 = terminals_int[0];
     size_t node_2 = terminals_int[1];

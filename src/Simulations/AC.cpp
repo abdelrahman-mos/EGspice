@@ -59,19 +59,20 @@ void AC::expand_freq() {
 }
 
 void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
-    std::string message = "AC Results:\n";
+    std::stringstream message;
+    message << "AC Results:\n";
     auto node_map = circuit->nodeMap();
     size_t num_points = frequency_points.size();
     for (size_t curr_point = 0; curr_point < num_points; curr_point++) {
-        message += "\nFREQ: " + std::to_string(frequency_points[curr_point]) + "\n";
+        message << "\nFREQ: " << to_spice_engineering(frequency_points[curr_point]) << "\n";
         for (auto& curr_node : node_map) {
             int node_num = curr_node.second;
             std::complex<double> node_value = 0.0;
             if (node_num != 0) {
                 node_value = (*outputs)[curr_point][node_num-1];
             }
-            message += "\tABS(V( " + curr_node.first + " )) = " + std::to_string(std::abs(node_value)) + "V";
-            message += "\tPHASE(V( " + curr_node.first + " )) = " + std::to_string(std::arg(node_value)) + "rad\n";
+            message << "\tABS(V( " << curr_node.first << " )) = " << to_spice_engineering(std::abs(node_value)) << "V";
+            message << "\tPHASE(V( " << curr_node.first << " )) = " << to_spice_engineering(std::arg(node_value)) << "rad\n";
         }
 
         auto vsources = circuit->vsources();
@@ -85,61 +86,64 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
             auto current = (*outputs)[curr_point][stamp_index];
             auto terminals = curr_vsource->get_terminals();
             if (typeid(*curr_vsource) == typeid(CCCS)) {
-                message += "\tABS(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::abs(current)) + "A";
-                message += "\tPHASE(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                message << "\tABS(I( " << terminals[2] << ", " + terminals[3] << " )) = " + to_spice_engineering(std::abs(current)) << "A";
+                message << "\tPHASE(I( " << terminals[2] << ", " + terminals[3] << " )) = " + to_spice_engineering(std::arg(current)) << "rad\n";
             } else if (typeid(*curr_vsource) == typeid(CCVS)) {
-                message += "\tABS(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::abs(current)) + "A";
-                message += "\tPHASE(I( " + terminals[2] + ", " + terminals[3] + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                message << "\tABS(I( " << terminals[2] << ", " << terminals[3] << " )) = " << to_spice_engineering(std::abs(current)) << "A";
+                message << "\tPHASE(I( " << terminals[2] << ", " << terminals[3] << " )) = " << to_spice_engineering(std::arg(current)) << "rad\n";
                 current = (*outputs)[stamp_index+1][0];
-                message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
-                message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                message << "\tABS(I( " << curr_vsource->name() << " )) = " << to_spice_engineering(std::abs(current)) << "A";
+                message << "\tPHASE(I( " << curr_vsource->name() << " )) = " << to_spice_engineering(std::arg(current)) << "rad\n";
                 j++;
             } else {
-                message += "\tABS(I( " + curr_vsource->name() + " )) = " + std::to_string(std::abs(current)) + "A";
-                message += "\tPHASE(I( " + curr_vsource->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+                message << "\tABS(I( " << curr_vsource->name() << " )) = " << to_spice_engineering(std::abs(current)) << "A";
+                message << "\tPHASE(I( " << curr_vsource->name() << " )) = " << to_spice_engineering(std::arg(current)) << "rad\n";
             }
         }
 
         for (int i = 0; i < num_inductors; i++) {
             auto curr_inductor = inductors[i];
             auto current = (*outputs)[num_nodes+num_vsources-1+curr_inductor->inductor_id][0];
-            message += "\tABS(I( " + curr_inductor->name() + " )) = " + std::to_string(std::abs(current)) + "A";
-            message += "\tPHASE(I( " + curr_inductor->name() + " )) = " + std::to_string(std::arg(current)) + "rad\n";
+            message << "\tABS(I( " << curr_inductor->name() << " )) = " << to_spice_engineering(std::abs(current)) << "A";
+            message << "\tPHASE(I( " << curr_inductor->name() << " )) = " << to_spice_engineering(std::arg(current)) << "rad\n";
         }
     }
-    logger_->log(message + "\n");
+    message << "\n";
+    logger_->log(message.str());
 }
 
-void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) {
+void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, 
+    std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq, double prev_freq) {
     if ((coeff == nullptr) || first_point) {
         size_t num_nodes = circuit->numNodes();
         size_t num_vsources = circuit->numVsources();
         size_t num_inductors = circuit->numInductors();
         coeff = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
         free_term = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
-        std::cout << "initialized matrices" << std::endl;
         for (const auto& component : circuit->components()) {
-            component->stamp(coeff, free_term, num_vsources, freq);
+            component->stamp(coeff, free_term, num_vsources, freq, prev_freq);
         }
         first_point = false;
     } else {
         for (const auto& component : circuit->components()) {
             // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
-            if ((typeid(*component) == typeid(Inductor)) || (typeid(*component) == typeid(Capacitor))) {
-                component->stamp(coeff, free_term, circuit->numVsources(), freq);
+            if (std::dynamic_pointer_cast<Inductor>(component) || std::dynamic_pointer_cast<Capacitor>(component)) {
+                component->stamp(coeff, free_term, circuit->numVsources(), freq, prev_freq);
             }
         }
     }
 }
 
 void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
-    stamp(circuit, coeff, free_term, 1.0);
+    stamp(circuit, coeff, free_term, 1.0, 0.0);
     size_t num_rows = coeff->numRows();
     size_t num_points = frequency_points.size();
     auto outputs_mat = std::make_shared<Matrix<std::complex<double>>>(num_points, num_rows);
+    double prev_freq = 1.0;
     for (size_t i = 0; i < num_points; i++) {
         double freq = frequency_points[i];
-        stamp(circuit, coeff, free_term, freq);
+        stamp(circuit, coeff, free_term, freq, prev_freq);
+        prev_freq = freq;
         auto outputs = Matrix<std::complex<double>>::solve_matrix(coeff, free_term);
         outputs_mat->emplace_at(outputs->transpose()[0], i);
     }

@@ -1,20 +1,23 @@
 *
 .subckt my_subckt vin vout
-R1 vin vout 1k
-C1 vout 0 1uF
+R1 vin vout1 1k
+C1 vout1 0 1uF
+E1 vout 0 vout1 0 1
 .ends my_subckt
 
 .subckt my_subckt2 vin vout
 R1 vin vout1 1k
 C1 vout1 0 1uF
-X3 vout1 vout2 my_subckt
-X4 vout2 vout my_subckt
+E1 vout2 0 vout1 0 1
+X3 vout2 vout3 my_subckt
+X4 vout3 vout my_subckt
 .ends my_subckt2
 
 .subckt my_subckt3 vin vout
 R1 vin vout1 1k
 C1 vout1 0 1uF
-X2 vout1 vout my_subckt2
+E1 vout2 0 vout1 0 1
+X2 vout2 vout my_subckt2
 .ends my_subckt3
 
 V1 vin 0 1
