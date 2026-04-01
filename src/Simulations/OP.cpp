@@ -2,7 +2,8 @@
 #include "../../include/Command.hpp"
 
 void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
-    std::string message = "OP Results:\n";
+    std::stringstream message;
+    message << std::scientific << "OP Results:\n";
     auto node_map = circuit->nodeMap();
     for (auto& curr_node : node_map) {
         int node_num = curr_node.second;
@@ -10,7 +11,7 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
         if (node_num != 0) {
             node_value = (*outputs)[node_num-1][0];
         }
-        message += "\tV( " + curr_node.first + " ) = " + std::to_string(node_value) + "V\n";
+        message << "\tV( " << curr_node.first << " ) = " << to_spice_engineering(node_value) << "V\n";
     }
 
     auto vsources = circuit->vsources();
@@ -24,24 +25,25 @@ void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
         double current = (*outputs)[stamp_index][0];
         auto terminals = curr_vsource->get_terminals();
         if (typeid(*curr_vsource) == typeid(CCCS)) {
-            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+            message << "\tI( " << terminals[2] << ", " << terminals[3] << " ) = " << to_spice_engineering(current) << "A\n";
         } else if (typeid(*curr_vsource) == typeid(CCVS)) {
-            message += "\tI( " + terminals[2] + ", " + terminals[3] + " ) = " + std::to_string(current) + "A\n";
+            message << "\tI( " << terminals[2] << ", " << terminals[3] << " ) = " << to_spice_engineering(current) << "A\n";
             current = (*outputs)[stamp_index+1][0];
-            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+            message << "\tI( " << curr_vsource->name() << " ) = " << to_spice_engineering(current) << "A\n";
             j++;
         } else {
-            message += "\tI( " + curr_vsource->name() + " ) = " + std::to_string(current) + "A\n";
+            message << "\tI( " << curr_vsource->name() << " ) = " << to_spice_engineering(current) << "A\n";
         }
     }
 
     for (int i = 0; i < num_inductors; i++) {
         auto curr_inductor = inductors[i];
         double current = (*outputs)[num_nodes+num_vsources-1+curr_inductor->inductor_id][0];
-        message += "\tI( " + curr_inductor->name() + " ) = " + std::to_string(current) + "A\n";
+        message << "\tI( " << curr_inductor->name() << " ) = " << to_spice_engineering(current) << "A\n";
     }
-
-    logger_->log(message + "\n");
+    
+    message << "\n";
+    logger_->log(message.str());
 }
 
 void OP::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>& coeff, std::shared_ptr<Matrix<double>>& free_term) {

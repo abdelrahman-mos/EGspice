@@ -157,7 +157,35 @@ std::unique_ptr<AC> Parser::parseAC(std::istringstream& iss) {
 }
 
 std::unique_ptr<DC> Parser::parseDC(std::istringstream& iss) {
-    return nullptr;
+    std::vector<std::string> split_command;
+    std::string curr;
+    while (iss >> curr) split_command.push_back(curr);
+    size_t cmd_size = split_command.size();
+    if ((cmd_size < 4) || ((cmd_size > 4) && (cmd_size < 8)) || (cmd_size > 8)) {
+        std::string msg = "Incorrect DC command: ";
+        for (auto& curr_cmd : split_command) msg += curr_cmd;
+        logger_->log(LogLevel::ERROR, msg);
+        return nullptr;
+    }
+
+    std::string outer_name = split_command[0];
+    double outer_start = value_to_double(split_command[1]);
+    double outer_end = value_to_double(split_command[2]);
+    double outer_step = value_to_double(split_command[3]);
+    if (cmd_size == 4) {
+        logger_->log(LogLevel::INFO, "Parsed DC command: " + split_command[0] + " " + split_command[1] + " " + split_command[2] 
+            + " " + split_command[3]);
+        return std::unique_ptr<DC>(new DC("dc", outer_start, outer_end, outer_step, outer_name, logger_));
+    } else {
+        std::string inner_name = split_command[4];
+        double inner_start = value_to_double(split_command[5]);
+        double inner_end = value_to_double(split_command[6]);
+        double inner_step = value_to_double(split_command[7]);
+        logger_->log(LogLevel::INFO, "Parsed DC command: " + split_command[0] + " " + split_command[1] + " " + split_command[2] + " " 
+            + split_command[3] + " " + split_command[4] + " " + split_command[5] + " " + split_command[6] + " " + split_command[7]);
+        return std::unique_ptr<DC>( new DC("dc", outer_start, outer_end, outer_step, outer_name, logger_, 
+            inner_start, inner_end, inner_step, inner_name));
+    }
 }
 
 bool Parser::is_subckt(const std::string& line) {

@@ -37,6 +37,10 @@ public:
         return name_;
     }
 
+    double get_value() const {
+        return value;
+    }
+
     void set_name(std::string new_name) {
         name_ = new_name;
     }
@@ -63,7 +67,7 @@ public:
         Component(terminals, ac_val, name, value), id(vsource_id) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
-    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, double temp_value, 
+    void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, double temp_value, double prev_value,
         int num_vsources, int num_inductors);
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
         int num_vsources, double frequency, double prev_frequency=0.0) override;
