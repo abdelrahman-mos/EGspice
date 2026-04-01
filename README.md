@@ -1,5 +1,5 @@
 # EGspice
-open source spice simulator in C
+open source spice simulator in C++
 
 ## Building
 Just run `make` then run using `build/EGspice <netlist_name>`
