@@ -110,7 +110,8 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
     logger_->log(message + "\n");
 }
 
-void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq) {
+void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, 
+    std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq, double prev_freq) {
     if ((coeff == nullptr) || first_point) {
         size_t num_nodes = circuit->numNodes();
         size_t num_vsources = circuit->numVsources();
@@ -118,27 +119,29 @@ void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::com
         coeff = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, num_nodes+num_vsources);
         free_term = std::make_shared<Matrix<std::complex<double>>>(num_nodes+num_vsources, 1);
         for (const auto& component : circuit->components()) {
-            component->stamp(coeff, free_term, num_vsources, freq);
+            component->stamp(coeff, free_term, num_vsources, freq, prev_freq);
         }
         first_point = false;
     } else {
         for (const auto& component : circuit->components()) {
             // in repitition, stamp only devices that will update values in the matrix instead of stamping all devices
             if (std::dynamic_pointer_cast<Inductor>(component) || std::dynamic_pointer_cast<Capacitor>(component)) {
-                component->stamp(coeff, free_term, circuit->numVsources(), freq);
+                component->stamp(coeff, free_term, circuit->numVsources(), freq, prev_freq);
             }
         }
     }
 }
 
 void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
-    stamp(circuit, coeff, free_term, 1.0);
+    stamp(circuit, coeff, free_term, 1.0, 0.0);
     size_t num_rows = coeff->numRows();
     size_t num_points = frequency_points.size();
     auto outputs_mat = std::make_shared<Matrix<std::complex<double>>>(num_points, num_rows);
+    double prev_freq = 1.0;
     for (size_t i = 0; i < num_points; i++) {
         double freq = frequency_points[i];
-        stamp(circuit, coeff, free_term, freq);
+        stamp(circuit, coeff, free_term, freq, prev_freq);
+        prev_freq = freq;
         auto outputs = Matrix<std::complex<double>>::solve_matrix(coeff, free_term);
         outputs_mat->emplace_at(outputs->transpose()[0], i);
     }

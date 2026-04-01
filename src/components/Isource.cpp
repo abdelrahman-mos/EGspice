@@ -12,7 +12,8 @@ void Isource::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_
     }
 }
 
-void Isource::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) {
+void Isource::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
+    int num_vsources, double frequency, double prev_frequency) {
     int node_1 = terminals_int[0];
     int node_2 = terminals_int[1];
 

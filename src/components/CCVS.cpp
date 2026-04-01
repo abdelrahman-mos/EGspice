@@ -31,7 +31,8 @@ void CCVS::stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr
     (*circuit_matrix)[stamp_index+1][stamp_index] -= value;
 }
 
-void CCVS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, int num_vsources, double frequency) {
+void CCVS::stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
+    int num_vsources, double frequency, double prev_frequency) {
     size_t stamp_index = circuit_matrix->numRows() - num_vsources + id;
     // current between nodes 1 and 2 (pq)
     size_t node_1 = terminals_int[0];
