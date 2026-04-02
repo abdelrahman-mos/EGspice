@@ -56,20 +56,21 @@ double value_to_double(std::string str_value) {
     return value;
 }
 
-std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsource_id) {
+std::shared_ptr<IndependentSource> Parser::parseIndepenedentSource(const std::string& line, int vsource_id) {
     std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
+    std::string name, t1, t2;
     std::string temp;
     std::vector<std::string> line_split;
     double value, ac_val = 0.0;
     bool found_val = false;
+    std::string source = "Isource";
+    if (vsource_id != -1) source = "Vsource";
     while (iss >> temp) {
         line_split.push_back(temp);
     }
-    // iss >> name >> t1 >> t2 >> str_value;
     size_t line_size = line_split.size();
     if ((line_size < 4) || (line_size > 6)) {
-        std::string message = "Incorrect Voltage Source definition: ";
+        std::string message = "Incorrect " + source + " definition: ";
         for (auto& curr : line_split) message += curr + " ";
         logger_->log(LogLevel::ERROR, message);
         throw std::runtime_error(message);
@@ -84,7 +85,7 @@ std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsou
             found_val = true;
             continue;
         } else if (val_split.size() != 2) {
-            std::string message = "Incorrect Voltage Source parameter: " + line_split[i];
+            std::string message = "Incorrect " + source + " parameter: " + line_split[i];
             logger_->log(LogLevel::ERROR, message);
             throw std::runtime_error(message);
         }
@@ -96,19 +97,13 @@ std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsou
             ac_val = value_to_double(val_split[1]);
         }
     }
-    std::string message = "Parsed Vsource: ";
+    std::string message = "Parsed " + source + ": ";
     for (auto& curr : line_split) message += curr + " ";
     logger_->log(LogLevel::INFO, message);
-    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, ac_val, name, value));
-}
-
-std::shared_ptr<Isource> Parser::parseIsource(const std::string& line) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Isource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Isource>(new Isource({t1, t2}, name, value));
+    if (vsource_id == -1) {
+        return std::shared_ptr<Isource>(new Isource({t1, t2}, ac_val, name, value));
+    }
+    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id, ac_val, name, value));
 }
 
 std::shared_ptr<Resistor> Parser::parseResistor(const std::string& line) {
@@ -148,31 +143,31 @@ std::shared_ptr<VCCS> Parser::parseVCCS(const std::string& line) {
     return std::shared_ptr<VCCS>(new VCCS({t1, t2, t3, t4}, name, value));
 }
 
-std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line, int& cccs_id) {
+std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line, int cccs_id) {
     std::istringstream iss(line);
     std::string name, t1, t2, t3, t4, str_value;
     iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed CCCS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<CCCS>(new CCCS({t1, t2, t3, t4}, cccs_id++, name, value));
+    return std::shared_ptr<CCCS>(new CCCS({t1, t2, t3, t4}, cccs_id, name, value));
 }
 
-std::shared_ptr<VCVS> Parser::parseVCVS(const std::string& line, int& vcvs_id) {
+std::shared_ptr<VCVS> Parser::parseVCVS(const std::string& line, int vcvs_id) {
     std::istringstream iss(line);
     std::string name, t1, t2, t3, t4, str_value;
     iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed VCVS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<VCVS>(new VCVS({t1, t2, t3, t4}, vcvs_id++, name, value));
+    return std::shared_ptr<VCVS>(new VCVS({t1, t2, t3, t4}, vcvs_id, name, value));
 }
 
-std::shared_ptr<CCVS> Parser::parseCCVS(const std::string& line, int& ccvs_id) {
+std::shared_ptr<CCVS> Parser::parseCCVS(const std::string& line, int ccvs_id) {
     std::istringstream iss(line);
     std::string name, t1, t2, t3, t4, str_value;
     iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
     double value = value_to_double(str_value);
     logger_->log(LogLevel::INFO, "Parsed CCVS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<CCVS>(new CCVS({t1, t2, t3, t4}, ccvs_id++, name, value));
+    return std::shared_ptr<CCVS>(new CCVS({t1, t2, t3, t4}, ccvs_id, name, value));
 }
 
 std::shared_ptr<SubcktInstance> Parser::parseSubcktInstance(const std::string& line) {
@@ -295,9 +290,9 @@ std::vector<std::string> parseSubcktHeader(const std::string& header_line) {
 
 void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line, int& curr_id) {
     if (line[0] == 'v') {
-        circuit->add_component(parseVsource(line, curr_id));
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseIndepenedentSource(line, curr_id++)));
     } else if (line[0] == 'i') {
-        circuit->add_component(parseIsource(line));
+        circuit->add_component(parseIndepenedentSource(line));
     } else if (line[0] == 'r') {
         circuit->add_component(parseResistor(line));
     } else if (line[0] == 'c') {
@@ -307,11 +302,11 @@ void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::stri
     } else if (line[0] == 'g') {
         circuit->add_component(parseVCCS(line));
     } else if (line[0] == 'f') {
-        circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id++)));
     } else if (line[0] == 'e') {
-        circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id)));
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id++)));
     } else if (line[0] == 'h') {
-        circuit->add_component(parseCCVS(line, curr_id));
+        circuit->add_component(parseCCVS(line, curr_id++));
     } else if (line[0] == 'x') {
         circuit->add_component(parseSubcktInstance(line));
     } else {
