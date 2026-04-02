@@ -9,21 +9,49 @@ std::string str_tolower(std::string s)
     return s;
 }
 
+std::vector<std::string> split(std::string str, std::string delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while((pos_end = str.find(delimiter, pos_start)) != std::string::npos) {
+        token = str.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(str.substr(pos_start));
+    return res;
+}
+
 double value_to_double(std::string str_value) {
-    std::string output = std::regex_replace(str_value, std::regex("[Aa]+", std::regex_constants::extended), "a");
-    output = std::regex_replace(output, std::regex("[Ff]+", std::regex_constants::extended), "f");
-    output = std::regex_replace(output, std::regex("(Amp|H|V|OHM)$", std::regex_constants::extended | std::regex_constants::icase), "");
-    output = std::regex_replace(output, std::regex("(MEG)", std::regex_constants::extended | std::regex_constants::icase), "e6");
-    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
-    output = std::regex_replace(output, std::regex("(G)", std::regex_constants::extended | std::regex_constants::icase), "e9");
-    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
-    output = std::regex_replace(output, std::regex("(K)", std::regex_constants::extended | std::regex_constants::icase), "e3");
-    output = std::regex_replace(output, std::regex("(m)", std::regex_constants::extended | std::regex_constants::icase), "e-3");
-    output = std::regex_replace(output, std::regex("(u)", std::regex_constants::extended | std::regex_constants::icase), "e-6");
-    output = std::regex_replace(output, std::regex("(n)", std::regex_constants::extended | std::regex_constants::icase), "e-9");
-    output = std::regex_replace(output, std::regex("(p)", std::regex_constants::extended | std::regex_constants::icase), "e-12");
-    output = std::regex_replace(output, std::regex("(f)", std::regex_constants::extended | std::regex_constants::icase), "e-15");
-    output = std::regex_replace(output, std::regex("(a)", std::regex_constants::extended | std::regex_constants::icase), "e-18");
+    // to be pre-compiled only once
+    static std::regex atto_amp_reg = std::regex("[Aa]+", std::regex_constants::extended);
+    static std::regex femto_farrad_reg = std::regex("[Ff]+", std::regex_constants::extended);
+    static std::regex postfix_reg = std::regex("(Amp|H|V|OHM)$", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex meg_reg = std::regex("(MEG)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex tera_reg = std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex giga_reg = std::regex("(G)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex kilo_reg = std::regex("(K)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex milli_reg = std::regex("(m)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex micro_reg = std::regex("(u)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex nano_reg = std::regex("(n)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex pico_reg = std::regex("(p)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex femto_reg = std::regex("(f)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex atto_reg = std::regex("(a)", std::regex_constants::extended | std::regex_constants::icase);
+    std::string output = std::regex_replace(str_value, atto_amp_reg, "a");
+    output = std::regex_replace(output, femto_farrad_reg, "f");
+    output = std::regex_replace(output, postfix_reg, "");
+    output = std::regex_replace(output, meg_reg, "e6");
+    output = std::regex_replace(output, tera_reg, "e12");
+    output = std::regex_replace(output, giga_reg, "e9");
+    output = std::regex_replace(output, kilo_reg, "e3");
+    output = std::regex_replace(output, milli_reg, "e-3");
+    output = std::regex_replace(output, micro_reg, "e-6");
+    output = std::regex_replace(output, nano_reg, "e-9");
+    output = std::regex_replace(output, pico_reg, "e-12");
+    output = std::regex_replace(output, femto_reg, "e-15");
+    output = std::regex_replace(output, atto_reg, "e-18");
     double value = std::stod(output);
     return value;
 }
@@ -31,10 +59,47 @@ double value_to_double(std::string str_value) {
 std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsource_id) {
     std::istringstream iss(line);
     std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Vsource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, name, value));
+    std::string temp;
+    std::vector<std::string> line_split;
+    double value, ac_val = 0.0;
+    bool found_val = false;
+    while (iss >> temp) {
+        line_split.push_back(temp);
+    }
+    // iss >> name >> t1 >> t2 >> str_value;
+    size_t line_size = line_split.size();
+    if ((line_size < 4) || (line_size > 6)) {
+        std::string message = "Incorrect Voltage Source definition: ";
+        for (auto& curr : line_split) message += curr + " ";
+        logger_->log(LogLevel::ERROR, message);
+        throw std::runtime_error(message);
+    }
+    name = line_split[0];
+    t1 = line_split[1];
+    t2 = line_split[2];
+    for (size_t i = 3; i < line_split.size(); i++) {
+        auto val_split = split(line_split[i], "=");
+        if ((val_split.size() == 1) && (i == 3)) {
+            value = value_to_double(val_split[0]);
+            found_val = true;
+            continue;
+        } else if (val_split.size() != 2) {
+            std::string message = "Incorrect Voltage Source parameter: " + line_split[i];
+            logger_->log(LogLevel::ERROR, message);
+            throw std::runtime_error(message);
+        }
+
+        if (val_split[0] == "dc") {
+            value = value_to_double(val_split[1]);
+            found_val = true;
+        } else if (val_split[0] == "ac") {
+            ac_val = value_to_double(val_split[1]);
+        }
+    }
+    std::string message = "Parsed Vsource: ";
+    for (auto& curr : line_split) message += curr + " ";
+    logger_->log(LogLevel::INFO, message);
+    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, ac_val, name, value));
 }
 
 std::shared_ptr<Isource> Parser::parseIsource(const std::string& line) {
@@ -280,12 +345,14 @@ std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
 }
 
 std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
+    static std::regex equal_reg(R"(\s*=\s*)");
     std::shared_ptr<Circuit> circuit(new Circuit(logger_));
     std::string line;
     int curr_id = 0;
     while (std::getline(file, line)) {
         logger_->log(line + "\n");
         line = str_tolower(line);
+        line = std::regex_replace(line, equal_reg, "=");
         while(line.begin() != line.end() && std::isspace(*line.begin())) {
             line.erase(line.begin());
         }
