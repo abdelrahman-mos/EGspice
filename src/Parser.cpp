@@ -9,105 +9,168 @@ std::string str_tolower(std::string s)
     return s;
 }
 
+std::vector<std::string> split(std::string str, std::string delimiter) {
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while((pos_end = str.find(delimiter, pos_start)) != std::string::npos) {
+        token = str.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(str.substr(pos_start));
+    return res;
+}
+
 double value_to_double(std::string str_value) {
-    std::string output = std::regex_replace(str_value, std::regex("[Aa]+", std::regex_constants::extended), "a");
-    output = std::regex_replace(output, std::regex("[Ff]+", std::regex_constants::extended), "f");
-    output = std::regex_replace(output, std::regex("(Amp|H|V|OHM)$", std::regex_constants::extended | std::regex_constants::icase), "");
-    output = std::regex_replace(output, std::regex("(MEG)", std::regex_constants::extended | std::regex_constants::icase), "e6");
-    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
-    output = std::regex_replace(output, std::regex("(G)", std::regex_constants::extended | std::regex_constants::icase), "e9");
-    output = std::regex_replace(output, std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase), "e12");
-    output = std::regex_replace(output, std::regex("(K)", std::regex_constants::extended | std::regex_constants::icase), "e3");
-    output = std::regex_replace(output, std::regex("(m)", std::regex_constants::extended | std::regex_constants::icase), "e-3");
-    output = std::regex_replace(output, std::regex("(u)", std::regex_constants::extended | std::regex_constants::icase), "e-6");
-    output = std::regex_replace(output, std::regex("(n)", std::regex_constants::extended | std::regex_constants::icase), "e-9");
-    output = std::regex_replace(output, std::regex("(p)", std::regex_constants::extended | std::regex_constants::icase), "e-12");
-    output = std::regex_replace(output, std::regex("(f)", std::regex_constants::extended | std::regex_constants::icase), "e-15");
-    output = std::regex_replace(output, std::regex("(a)", std::regex_constants::extended | std::regex_constants::icase), "e-18");
+    // to be pre-compiled only once
+    static std::regex atto_amp_reg = std::regex("[Aa]+", std::regex_constants::extended);
+    static std::regex femto_farrad_reg = std::regex("[Ff]+", std::regex_constants::extended);
+    static std::regex postfix_reg = std::regex("(Amp|H|V|OHM)$", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex meg_reg = std::regex("(MEG)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex tera_reg = std::regex("(T)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex giga_reg = std::regex("(G)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex kilo_reg = std::regex("(K)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex milli_reg = std::regex("(m)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex micro_reg = std::regex("(u)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex nano_reg = std::regex("(n)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex pico_reg = std::regex("(p)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex femto_reg = std::regex("(f)", std::regex_constants::extended | std::regex_constants::icase);
+    static std::regex atto_reg = std::regex("(a)", std::regex_constants::extended | std::regex_constants::icase);
+    std::string output = std::regex_replace(str_value, atto_amp_reg, "a");
+    output = std::regex_replace(output, femto_farrad_reg, "f");
+    output = std::regex_replace(output, postfix_reg, "");
+    output = std::regex_replace(output, meg_reg, "e6");
+    output = std::regex_replace(output, tera_reg, "e12");
+    output = std::regex_replace(output, giga_reg, "e9");
+    output = std::regex_replace(output, kilo_reg, "e3");
+    output = std::regex_replace(output, milli_reg, "e-3");
+    output = std::regex_replace(output, micro_reg, "e-6");
+    output = std::regex_replace(output, nano_reg, "e-9");
+    output = std::regex_replace(output, pico_reg, "e-12");
+    output = std::regex_replace(output, femto_reg, "e-15");
+    output = std::regex_replace(output, atto_reg, "e-18");
     double value = std::stod(output);
     return value;
 }
 
-std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line, int& vsource_id) {
+componentData Parser::parseComponentData(const std::string& line, int num_terminals) {
     std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Vsource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Vsource>(new Vsource({t1, t2}, vsource_id++, name, value));
+    std::string name, tmp;
+    std::vector<std::string> terminals;
+    std::vector<std::string> line_split;
+    double value = 0.0, ac_val = INFINITY;
+    while (iss >> tmp) {
+        line_split.push_back(tmp);
+    }
+    size_t line_size = line_split.size();
+    size_t min_size = num_terminals + 2; // V1 t1 t2 val // E1 t1 t2 t3 t4 val -> num_terminals + 2
+    size_t max_size = num_terminals + 4; // V1 t1 t2 ac=ac_val dc=dc_val // E1 t1 t2 t3 t4 ac=ac_val dc=dc_val
+    if ((line_size < min_size) || (line_size > max_size)) {
+        std::string message = "Incorrect component definition: ";
+        for (auto& curr : line_split) message += curr + " ";
+        logger_->log(LogLevel::ERROR, message);
+        throw std::runtime_error(message);
+    }
+    name = line_split[0];
+    size_t i;
+    for (i = 1; i <= num_terminals; i++) terminals.push_back(line_split[i]);
+    for (; i < line_split.size(); i++) {
+        auto val_split = split(line_split[i], "=");
+        if ((val_split.size() == 1) && (i == num_terminals+1)) {
+            value = value_to_double(val_split[0]);
+            continue;
+        } else if (val_split.size() != 2) {
+            std::string message = "Incorrect parameter: " + line_split[i];
+            logger_->log(LogLevel::ERROR, message);
+            throw std::runtime_error(message);
+        }
+
+        if (val_split[0] == "dc") {
+            value = value_to_double(val_split[1]);
+        } else if (val_split[0] == "ac") {
+            ac_val = value_to_double(val_split[1]);
+        }
+    }
+    return {name, terminals, value, ac_val};
+}
+
+std::shared_ptr<Vsource> Parser::parseVsource(const std::string& line) {
+    auto data = parseComponentData(line, 2);
+    std::string message = "Parsed Vsource: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    if (data.ac_val != INFINITY) return std::make_shared<Vsource>(data.terminals, data.ac_val, data.name, data.value);
+    return std::make_shared<Vsource>(data.terminals, data.name, data.value);
 }
 
 std::shared_ptr<Isource> Parser::parseIsource(const std::string& line) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Isource: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Isource>(new Isource({t1, t2}, name, value));
+    auto data = parseComponentData(line, 2);
+    std::string message = "Parsed Isource: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    if (data.ac_val != INFINITY) return std::make_shared<Isource>(data.terminals, data.ac_val, data.name, data.value);
+    return std::make_shared<Isource>(data.terminals, data.name, data.value);
 }
 
 std::shared_ptr<Resistor> Parser::parseResistor(const std::string& line) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Resistor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Resistor>(new Resistor({t1, t2}, name, value));
+    auto data = parseComponentData(line, 2);
+    std::string message = "Parsed Resistor: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    if (data.ac_val != INFINITY) return std::make_shared<Resistor>(data.terminals, data.ac_val, data.name, data.value);
+    return std::make_shared<Resistor>(data.terminals, data.name, data.value);
 }
 
 std::shared_ptr<Capacitor> Parser::parseCapacitor(const std::string& line) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Capacitor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Capacitor>(new Capacitor({t1, t2}, name, value));
+    auto data = parseComponentData(line, 2);
+    std::string message = "Parsed Capacitor: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<Capacitor>(data.terminals, data.name, data.value);
 }
 
 std::shared_ptr<Inductor> Parser::parseInductor(const std::string& line) {
     static int inductor_id = 0;
-    std::istringstream iss(line);
-    std::string name, t1, t2, str_value;
-    iss >> name >> t1 >> t2 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed Inductor: " + name + " " + t1 + " " + t2 + " " + str_value);
-    return std::shared_ptr<Inductor>(new Inductor({t1, t2}, inductor_id++, name, value));
+    auto data = parseComponentData(line, 2);
+    std::string message = "Parsed Inductor: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<Inductor>(data.terminals, inductor_id++, data.name, data.value);
 }
 
 std::shared_ptr<VCCS> Parser::parseVCCS(const std::string& line) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, t3, t4, str_value;
-    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed VCCS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<VCCS>(new VCCS({t1, t2, t3, t4}, name, value));
+    auto data = parseComponentData(line, 4);
+    std::string message = "Parsed VCCS: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<VCCS>(data.terminals, data.name, data.value);
 }
 
-std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line, int& cccs_id) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, t3, t4, str_value;
-    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed CCCS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<CCCS>(new CCCS({t1, t2, t3, t4}, cccs_id++, name, value));
+std::shared_ptr<CCCS> Parser::parseCCCS(const std::string& line) {
+    auto data = parseComponentData(line, 4);
+    std::string message = "Parsed CCCS: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<CCCS>(data.terminals, data.name, data.value);
 }
 
-std::shared_ptr<VCVS> Parser::parseVCVS(const std::string& line, int& vcvs_id) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, t3, t4, str_value;
-    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed VCVS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<VCVS>(new VCVS({t1, t2, t3, t4}, vcvs_id++, name, value));
+std::shared_ptr<VCVS> Parser::parseVCVS(const std::string& line) {
+    auto data = parseComponentData(line, 4);
+    std::string message = "Parsed VCVS: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<VCVS>(data.terminals, data.name, data.value);
 }
 
-std::shared_ptr<CCVS> Parser::parseCCVS(const std::string& line, int& ccvs_id) {
-    std::istringstream iss(line);
-    std::string name, t1, t2, t3, t4, str_value;
-    iss >> name >> t1 >> t2 >> t3 >> t4 >> str_value;
-    double value = value_to_double(str_value);
-    logger_->log(LogLevel::INFO, "Parsed CCVS: " + name + " " + t1 + " " + t2 + " " + t3 + " " + t4 + " " + str_value);
-    return std::shared_ptr<CCVS>(new CCVS({t1, t2, t3, t4}, ccvs_id++, name, value));
+std::shared_ptr<CCVS> Parser::parseCCVS(const std::string& line) {
+    auto data = parseComponentData(line, 4);
+    std::string message = "Parsed CCVS: ";
+    message += line;
+    logger_->log(LogLevel::INFO, message);
+    return std::make_shared<CCVS>(data.terminals, data.name, data.value);
 }
 
 std::shared_ptr<SubcktInstance> Parser::parseSubcktInstance(const std::string& line) {
@@ -228,9 +291,9 @@ std::vector<std::string> parseSubcktHeader(const std::string& header_line) {
     return subckt_header;
 }
 
-void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line, int& curr_id) {
+void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::string& line) {
     if (line[0] == 'v') {
-        circuit->add_component(parseVsource(line, curr_id));
+        circuit->add_component(parseVsource(line));
     } else if (line[0] == 'i') {
         circuit->add_component(parseIsource(line));
     } else if (line[0] == 'r') {
@@ -242,11 +305,11 @@ void Parser::parseAndAddDevice(std::shared_ptr<Circuit> circuit, const std::stri
     } else if (line[0] == 'g') {
         circuit->add_component(parseVCCS(line));
     } else if (line[0] == 'f') {
-        circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line, curr_id)));
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseCCCS(line)));
     } else if (line[0] == 'e') {
-        circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line, curr_id)));
+        circuit->add_component(std::static_pointer_cast<Vsource>(parseVCVS(line)));
     } else if (line[0] == 'h') {
-        circuit->add_component(parseCCVS(line, curr_id));
+        circuit->add_component(parseCCVS(line));
     } else if (line[0] == 'x') {
         circuit->add_component(parseSubcktInstance(line));
     } else {
@@ -260,12 +323,11 @@ std::shared_ptr<Subckt> Parser::parseSubckt(std::istream& file, const std::strin
     std::vector<std::string> terminals(subckt_header.begin()+2, subckt_header.end());
     auto subckt = std::make_shared<Subckt>(subckt_name, terminals, logger_);
     std::string line;
-    int curr_id = 0;
     while(std::getline(file, line)) {
         logger_->log(line + "\n");
         line = str_tolower(line);
         if (is_ends(line)) break;
-        parseAndAddDevice(subckt, line, curr_id);
+        parseAndAddDevice(subckt, line);
     }
     return subckt;
 }
@@ -280,12 +342,13 @@ std::shared_ptr<Circuit> Parser::parse(const std::string& filename) {
 }
 
 std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
+    static std::regex equal_reg(R"(\s*=\s*)");
     std::shared_ptr<Circuit> circuit(new Circuit(logger_));
     std::string line;
-    int curr_id = 0;
     while (std::getline(file, line)) {
         logger_->log(line + "\n");
         line = str_tolower(line);
+        line = std::regex_replace(line, equal_reg, "=");
         while(line.begin() != line.end() && std::isspace(*line.begin())) {
             line.erase(line.begin());
         }
@@ -306,7 +369,7 @@ std::shared_ptr<Circuit> Parser::parse(std::ifstream& file) {
             continue;
         }
 
-        parseAndAddDevice(circuit, line, curr_id);
+        parseAndAddDevice(circuit, line);
 
     }
     file.close();

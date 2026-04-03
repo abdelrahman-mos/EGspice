@@ -20,6 +20,7 @@ E1 vout2 0 vout1 0 1
 X2 vout2 vout my_subckt2
 .ends my_subckt3
 
-V1 vin 0 1
+V1 vin 0 1 ac=1
 X1 vin vout my_subckt3
+.op
 .ac dec 10 1 10k

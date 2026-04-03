@@ -1,5 +1,5 @@
 *
-V1 vin 0 1
+V1 vin 0 1 ac = 1
 R1 vin v1 1k
 R2 v1 0 1k
 H1 vb 0 vin v1 5

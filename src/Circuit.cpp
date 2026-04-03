@@ -7,6 +7,7 @@ Circuit::Circuit(std::shared_ptr<Logger> logger) {
     num_inductors = 0;
     num_vsources = 0;
     curr_node = 1;
+    curr_id = 0;
     logger_ = logger;
 }
 
@@ -16,7 +17,6 @@ std::vector<std::shared_ptr<Subckt>>& Circuit::subckts() {
 
 void Circuit::add_subckt(std::shared_ptr<Subckt> subckt) {
     subckts_map_[subckt->name()] = subckt;
-    std::cout << "added subckt " << subckt->name() << " to map" << std::endl;
     subckts_.push_back(subckt);
 }
 
@@ -53,7 +53,13 @@ void Circuit::flatten_subckt(std::shared_ptr<SubcktInstance> subckt_instance, co
     new_parent_name += subckt_instance->name();
     auto flattened_components = subckt->flattened_components(subckt_instance, new_parent_name);
     for (auto& curr_component : flattened_components) {
-        add_component(curr_component);
+        if (auto curr_ccvs = std::dynamic_pointer_cast<CCVS>(curr_component)) {
+            add_component(curr_ccvs);
+        } else if (auto curr_vsource = std::dynamic_pointer_cast<Vsource>(curr_component)) {
+            add_component(curr_vsource);
+        } else {
+            add_component(curr_component);
+        }
     }
     for (auto& curr_subckt_instance : subckts_instances) {
         flatten_subckt(curr_subckt_instance, new_parent_name);

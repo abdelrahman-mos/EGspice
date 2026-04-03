@@ -1,5 +1,5 @@
 *
-V1 vin 0 1
+V1 vin 0 1 ac=1
 R1 vin 0 1k
 E1 vb 0 vin 0 0.5
 Rout vb vc 3
