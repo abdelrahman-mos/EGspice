@@ -31,7 +31,7 @@ public:
     }
 
     // written by ai
-    std::string to_spice_engineering(double value, int precision = 5) {
+    static std::string to_spice_engineering(double value, int precision = 5) {
         // 1. Handle exact zero gracefully (No suffix needed)
         if (value == 0.0) {
             std::ostringstream zero_stream;

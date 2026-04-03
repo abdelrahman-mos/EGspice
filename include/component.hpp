@@ -58,20 +58,13 @@ public:
     }
 };
 
-class IndependentSource : public Component {
-public:
-    IndependentSource(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : Component(terminals, name, value) {}
-    IndependentSource(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
-        Component(terminals, ac_val, name, value) {}
-};
-
-class Vsource : public IndependentSource {
+class Vsource : public Component {
 public:
     int id;
-    Vsource(std::vector<std::string> terminals, int vsource_id, std::string name = "", double value = 0.0) : 
-        IndependentSource(terminals, name, value), id(vsource_id) {}
-    Vsource(std::vector<std::string> terminals, int vsource_id, double ac_val, std::string name = "", double value = 0.0) : 
-        IndependentSource(terminals, ac_val, name, value), id(vsource_id) {}
+    Vsource(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : 
+        Component(terminals, name, value) {}
+    Vsource(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
+        Component(terminals, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, double temp_value, double prev_value,
@@ -79,14 +72,15 @@ public:
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
         int num_vsources, double frequency, double prev_frequency=0.0) override;
     std::shared_ptr<Component> clone() const override;
+    void set_id(int new_id) { id = new_id; }
 };
 
-class Isource : public IndependentSource
+class Isource : public Component
 {
 public:
-    Isource(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : IndependentSource(terminals, name, value) {}
+    Isource(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : Component(terminals, name, value) {}
     Isource(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
-        IndependentSource(terminals, ac_val, name, value) {}
+        Component(terminals, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
@@ -141,9 +135,9 @@ public:
 
 class CCCS : public Vsource {
 public:
-    CCCS(std::vector<std::string> terminals, int cccs_id, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, name, value) {}
-    CCCS(std::vector<std::string> terminals, int cccs_id, double ac_val, std::string name = "", double value = 0.0) : 
-        Vsource(terminals, cccs_id, ac_val, name, value) {}
+    CCCS(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : Vsource(terminals, name, value) {}
+    CCCS(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
+        Vsource(terminals, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
@@ -153,9 +147,9 @@ public:
 
 class VCVS : public Vsource {
 public:
-    VCVS(std::vector<std::string> terminals, int cccs_id, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, name, value) {}
-    VCVS(std::vector<std::string> terminals, int cccs_id, double ac_val, std::string name = "", double value = 0.0) : 
-        Vsource(terminals, cccs_id, ac_val, name, value) {}
+    VCVS(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : Vsource(terminals, name, value) {}
+    VCVS(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
+        Vsource(terminals, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 
@@ -165,9 +159,9 @@ public:
 
 class CCVS : public Vsource {
 public:
-    CCVS(std::vector<std::string> terminals, int cccs_id, std::string name = "", double value = 0.0) : Vsource(terminals, cccs_id, name, value) {}
-    CCVS(std::vector<std::string> terminals, int cccs_id, double ac_val, std::string name = "", double value = 0.0) : 
-        Vsource(terminals, cccs_id, ac_val, name, value) {}
+    CCVS(std::vector<std::string> terminals, std::string name = "", double value = 0.0) : Vsource(terminals, name, value) {}
+    CCVS(std::vector<std::string> terminals, double ac_val, std::string name = "", double value = 0.0) : 
+        Vsource(terminals, ac_val, name, value) {}
     void stamp(std::shared_ptr<Matrix<double>> circuit_matrix, std::shared_ptr<Matrix<double>> output_matrix, 
         int num_vsources, int num_inductors) override;
     void stamp(std::shared_ptr<Matrix<std::complex<double>>> circuit_matrix, std::shared_ptr<Matrix<std::complex<double>>> output_matrix, 

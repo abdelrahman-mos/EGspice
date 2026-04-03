@@ -35,7 +35,7 @@ public:
         auto& commands = circuit->commands();
         for (const auto& command : commands) {
             if (!command) continue;
-            std::cout << "running command " << command->name() << std::endl;
+            logger_->log(LogLevel::INFO, "running command " + command->name());
             if (typeid(*command) == typeid(AC)) {
                 command->run(circuit, circuit_matrix_ac, output_matrix_ac);
             } else {

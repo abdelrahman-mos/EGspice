@@ -72,6 +72,11 @@ public:
             auto flattened_nodes = flatten_component_nodes(subckt_instance, parent_name, curr_component);
             new_component->set_name(new_name);
             new_component->set_terminals(flattened_nodes);
+            auto nodes = flattened_nodes[0];
+            for (auto& node : flattened_nodes) {
+                nodes += " " + node;
+            }
+            logger_->log(LogLevel::INFO, "Flattened component " + new_name + " " + nodes + " " + Command::to_spice_engineering(new_component->get_value()));
             output.push_back(new_component);
         }
         return output;

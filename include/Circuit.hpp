@@ -29,6 +29,7 @@ protected:
     size_t num_vsources;
     size_t num_inductors;
     int curr_node;
+    int curr_id;
 
     void get_and_update_terminals(std::shared_ptr<Component> component) {
         std::vector<std::string> terminals = component->get_terminals();
@@ -98,6 +99,7 @@ public:
     void add_component(std::shared_ptr<Vsource> component) {
         num_vsources++;
         get_and_update_terminals(component);
+        component->set_id(curr_id++);
         vsources_.push_back(component);
         components_.push_back(component);
     }
@@ -105,6 +107,7 @@ public:
     void add_component(std::shared_ptr<CCVS> component) {
         num_vsources += 2;
         get_and_update_terminals(component);
+        component->set_id(curr_id++);
         vsources_.push_back(component);
         components_.push_back(component);
     }
