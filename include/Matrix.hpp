@@ -37,8 +37,7 @@ public:
 
     Matrix<T> operator*(const Matrix<T>& mul) {
         if (this->numCols() != mul.numRows()) {
-            std::cout << "Cannot multiply, dimensions don't match" << std::endl;
-            return nullptr;
+            throw std::runtime_error("Matrices do not have matching dimensions");
         }
 
         Matrix<T> result(this->numRows(), mul.numCols());
@@ -49,6 +48,34 @@ public:
                     sum += (*this)[i][k] * mul[k][j];
                 }
                 result[i][j] = sum;
+            }
+        }
+        return result;
+    }
+
+    Matrix<T> operator+(const Matrix<T>& other) {
+        if ((this->numCols() != other.numCols()) || (this->numRows() != other.numRows())) {
+            throw std::runtime_error("Matrices do not have matching dimensions");
+        }
+
+        Matrix<T> result(this->numRows(), this->numCols());
+        for (size_t i = 0; i < this->numRows(); i++) {
+            for (size_t j = 0; j < this->numCols(); j++) {
+                result[i][j] = (*this)[i][j] + other[i][j];
+            }
+        }
+        return result;
+    }
+
+    Matrix<T> operator-(const Matrix<T>& other) {
+        if ((this->numCols() != other.numCols()) || (this->numRows() != other.numRows())) {
+            throw std::runtime_error("Matrices do not have matching dimensions");
+        }
+
+        Matrix<T> result(this->numRows(), this->numCols());
+        for (size_t i = 0; i < this->numRows(); i++) {
+            for (size_t j = 0; j < this->numCols(); j++) {
+                result[i][j] = (*this)[i][j] - other[i][j];
             }
         }
         return result;
@@ -125,8 +152,7 @@ public:
 
             if (std::abs((*coeff)[pivot][i]) < MX_ATOL) {
                 if (det) *det = 0.0;
-                std::cout << "matrix is singular, cannot solve" << std::endl;
-                exit(1);
+                throw std::runtime_error("matrix is singular, cannot solve");
             }
 
             if (pivot != i) {
@@ -158,12 +184,10 @@ public:
 
     static std::shared_ptr<Matrix<T>> solve_matrix(std::shared_ptr<Matrix<T>> A, std::shared_ptr<Matrix<T>> B) {
         if (A->numRows() != A->numCols()) {
-            std::cout << "Matrix A is not square." << std::endl;
-            exit(1);
+            throw std::runtime_error("Matrix A must be square.");
         }
         if (A->numRows() != B->numRows()) {
-            std::cout << "Matrix A and Matrix B don't have matching dimensions" << std::endl;
-            exit(1);
+            throw std::runtime_error("Matrix A and B don't have the same number of rows, cannot solve.");
         }
         auto coeff_matrix = std::make_shared<Matrix<T>>(*A);
         auto free_terms = std::make_shared<Matrix<T>>(*B);

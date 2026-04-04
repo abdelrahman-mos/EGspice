@@ -1,5 +1,9 @@
 #include "../../include/Circuit.hpp"
 #include "../../include/Command.hpp"
+#include "../../include/Utils.hpp"
+
+#define VABSTOL 1e-9
+#define VRELTOL 1e-2
 
 void OP::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
     std::stringstream message;
@@ -61,9 +65,25 @@ void OP::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>
     }
 }
 
+bool any_fail(std::shared_ptr<Matrix<double>> outputs, std::shared_ptr<Matrix<double>> errors) {
+    for (size_t i = 0; i < errors->numRows(); i++) {
+        if (!Utils::diff_err(VABSTOL, VRELTOL, (*outputs)[i][0], (*errors)[i][0])) return true;
+    }
+    return false;
+}
+
 void OP::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
     stamp(circuit, coeff, free_term);
     auto outputs = Matrix<double>::solve_matrix(coeff, free_term);
+    auto residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+    auto errors = Matrix<double>::solve_matrix(coeff, residual);
+    while (any_fail(outputs, errors)) {
+        for (size_t j = 0; j < errors->numRows(); j++) {
+            (*outputs)[j][0] += (*errors)[j][0];
+        }
+        residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+        errors = Matrix<double>::solve_matrix(coeff, residual);
+    }
     report(circuit, outputs);
     return;
 }
