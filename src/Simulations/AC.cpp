@@ -1,5 +1,9 @@
 #include "../../include/Command.hpp"
 #include "../../include/Circuit.hpp"
+#include "../../include/Utils.hpp"
+
+#define VABSTOL 1e-9
+#define VRELTOL 1e-2
 
 void AC::expand_freq_dec() {
     double log_start = std::log10(fstart);
@@ -145,6 +149,15 @@ void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::compl
         stamp(circuit, coeff, free_term, freq, prev_freq);
         prev_freq = freq;
         auto outputs = Matrix<std::complex<double>>::solve_matrix(coeff, free_term);
+        auto residual = std::make_shared<Matrix<std::complex<double>>>((*free_term) - (*coeff) * (*outputs));
+        auto errors = Matrix<std::complex<double>>::solve_matrix(coeff, residual);
+        while (any_fail(outputs, errors)) {
+            for (size_t j = 0; j < errors->numRows(); j++) {
+                (*outputs)[j][0] += (*errors)[j][0];
+            }
+            residual = std::make_shared<Matrix<std::complex<double>>>((*free_term) - (*coeff) * (*outputs));
+            errors = Matrix<std::complex<double>>::solve_matrix(coeff, residual);
+        }
         outputs_mat->emplace_at(outputs->transpose()[0], i);
     }
     report(circuit, outputs_mat);

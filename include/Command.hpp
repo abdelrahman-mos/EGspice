@@ -6,6 +6,10 @@
 #include <memory>
 #include "Logger.hpp"
 #include "Matrix.hpp"
+#include "Utils.hpp"
+
+#define VABSTOL 1e-9
+#define VRELTOL 1e-2
 
 class Circuit;
 
@@ -77,6 +81,20 @@ public:
 class Simulation : public Command {
 protected:
     bool first_point;
+
+    bool any_fail(std::shared_ptr<Matrix<double>> outputs, std::shared_ptr<Matrix<double>> errors) {
+        for (size_t i = 0; i < errors->numRows(); i++) {
+            if (!Utils::diff_err(VABSTOL, VRELTOL, (*outputs)[i][0], (*errors)[i][0])) return true;
+        }
+        return false;
+    }
+
+    bool any_fail(std::shared_ptr<Matrix<std::complex<double>>> outputs, std::shared_ptr<Matrix<std::complex<double>>> errors) {
+        for (size_t i = 0; i < errors->numRows(); i++) {
+            if (!Utils::diff_err(VABSTOL, VRELTOL, (*outputs)[i][0], (*errors)[i][0])) return true;
+        }
+        return false;
+    }
 public:
     Simulation(std::string name, std::shared_ptr<Logger> logger) : Command(name, logger) {
         first_point = true;

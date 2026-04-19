@@ -145,6 +145,15 @@ void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> c
                 double curr_inner_voltage = inner_points[j];
                 stamp(circuit, coeff, free_term, curr_outer_voltage, prev_outer_val, curr_inner_voltage, prev_inner_val);
                 auto outputs = Matrix<double>::solve_matrix(coeff, free_term);
+                auto residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+                auto errors = Matrix<double>::solve_matrix(coeff, residual);
+                while (any_fail(outputs, errors)) {
+                    for (size_t j = 0; j < errors->numRows(); j++) {
+                        (*outputs)[j][0] += (*errors)[j][0];
+                    }
+                    residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+                    errors = Matrix<double>::solve_matrix(coeff, residual);
+                }
                 outputs_mat->emplace_at(outputs->transpose()[0], curr_idx++);
                 prev_inner_val = curr_inner_voltage;
                 prev_outer_val = curr_outer_voltage;
@@ -152,6 +161,15 @@ void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> c
         } else {
             stamp(circuit, coeff, free_term, curr_outer_voltage, prev_outer_val, 0.0, prev_inner_val);
             auto outputs = Matrix<double>::solve_matrix(coeff, free_term);
+            auto residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+            auto errors = Matrix<double>::solve_matrix(coeff, residual);
+            while (any_fail(outputs, errors)) {
+                for (size_t j = 0; j < errors->numRows(); j++) {
+                    (*outputs)[j][0] += (*errors)[j][0];
+                }
+                residual = std::make_shared<Matrix<double>>((*free_term) - (*coeff) * (*outputs));
+                errors = Matrix<double>::solve_matrix(coeff, residual);
+            }
             outputs_mat->emplace_at(outputs->transpose()[0], i);
         }
         prev_outer_val = curr_outer_voltage;
