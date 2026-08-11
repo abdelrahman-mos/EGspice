@@ -1,0 +1,70 @@
+[2026-08-11 12:31:11] [INFO] EGspice: Egyptian SPICE simulator
+[2026-08-11 12:31:11] [INFO] Run command: /home/z0053jek/cpp_projects/EGspice/build//EGspice /home/z0053jek/cpp_projects/EGspice/test/test_netlists/netlist10.cir
+*
+V1 vin 0 1
+[2026-08-11 12:31:11] [INFO] Parsed Vsource: v1 vin 0 1
+R1 vin vout 1k
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r1 vin vout 1k
+R2 vout 0 1k
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r2 vout 0 1k
+.dc V1 0 1 0.1
+[2026-08-11 12:31:11] [INFO] Parsed DC command: v1 0 1 0.1
+[2026-08-11 12:31:11] [INFO] Flattening Netlist
+[2026-08-11 12:31:11] [INFO] running command dc
+DC Results:
+v1 = 0.00000V
+	V( vout ) = 0.00000V
+	V( vin ) = 0.00000V
+	V( 0 ) = 0.00000V
+	I( v1 ) = 0.00000A
+v1 = 100.00000mV
+	V( vout ) = 50.00000mV
+	V( vin ) = 100.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -50.00000uA
+v1 = 200.00000mV
+	V( vout ) = 100.00000mV
+	V( vin ) = 200.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -100.00000uA
+v1 = 300.00000mV
+	V( vout ) = 150.00000mV
+	V( vin ) = 300.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -150.00000uA
+v1 = 400.00000mV
+	V( vout ) = 200.00000mV
+	V( vin ) = 400.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -200.00000uA
+v1 = 500.00000mV
+	V( vout ) = 250.00000mV
+	V( vin ) = 500.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -250.00000uA
+v1 = 600.00000mV
+	V( vout ) = 300.00000mV
+	V( vin ) = 600.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -300.00000uA
+v1 = 700.00000mV
+	V( vout ) = 350.00000mV
+	V( vin ) = 700.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -350.00000uA
+v1 = 800.00000mV
+	V( vout ) = 400.00000mV
+	V( vin ) = 800.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -400.00000uA
+v1 = 900.00000mV
+	V( vout ) = 450.00000mV
+	V( vin ) = 900.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -450.00000uA
+v1 = 1000.00000mV
+	V( vout ) = 500.00000mV
+	V( vin ) = 1000.00000mV
+	V( 0 ) = 0.00000V
+	I( v1 ) = -500.00000uA
+

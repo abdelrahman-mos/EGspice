@@ -1,0 +1,24 @@
+[2026-08-11 12:31:11] [INFO] EGspice: Egyptian SPICE simulator
+[2026-08-11 12:31:11] [INFO] Run command: /home/z0053jek/cpp_projects/EGspice/build//EGspice /home/z0053jek/cpp_projects/EGspice/test/test_netlists/netlist2.cir
+*
+V1 va 0 32V
+[2026-08-11 12:31:11] [INFO] Parsed Vsource: v1 va 0 32v
+R1 va vb 2
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r1 va vb 2
+R3 vb 0 8
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r3 vb 0 8
+R2 vb vc 4
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r2 vb vc 4
+V2 vc 0 20
+[2026-08-11 12:31:11] [INFO] Parsed Vsource: v2 vc 0 20
+.op
+[2026-08-11 12:31:11] [INFO] Flattening Netlist
+[2026-08-11 12:31:11] [INFO] running command op
+OP Results:
+	V( vc ) = 20.00000V
+	V( vb ) = 24.00000V
+	V( va ) = 32.00000V
+	V( 0 ) = 0.00000V
+	I( v1 ) = -4.00000A
+	I( v2 ) = 1000.00000mA
+

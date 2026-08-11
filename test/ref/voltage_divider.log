@@ -1,0 +1,25 @@
+[2026-08-11 12:31:11] [INFO] EGspice: Egyptian SPICE simulator
+[2026-08-11 12:31:11] [INFO] Run command: /home/z0053jek/cpp_projects/EGspice/build//EGspice /home/z0053jek/cpp_projects/EGspice/test/test_netlists/voltage_divider.cir
+*
+    * this is the next voltage source
+V1 1 0 10
+[2026-08-11 12:31:11] [INFO] Parsed Vsource: v1 1 0 10
+* first resistor
+R1 1 2 1000
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r1 1 2 1000
+    ** second resistor
+R2 2 0 1000
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r2 2 0 1000
+
+* analyses
+.OP
+.option gmin = 1e-12 abstol= 1e-5 reltol    = 12e-2 aex
+[2026-08-11 12:31:11] [ERROR] Unsupported command option
+[2026-08-11 12:31:11] [INFO] Flattening Netlist
+[2026-08-11 12:31:11] [INFO] running command op
+OP Results:
+	V( 2 ) = 5.00000V
+	V( 1 ) = 10.00000V
+	V( 0 ) = 0.00000V
+	I( v1 ) = -5.00000mA
+

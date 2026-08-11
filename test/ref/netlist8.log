@@ -1,0 +1,358 @@
+[2026-08-11 12:31:11] [INFO] EGspice: Egyptian SPICE simulator
+[2026-08-11 12:31:11] [INFO] Run command: /home/z0053jek/cpp_projects/EGspice/build//EGspice /home/z0053jek/cpp_projects/EGspice/test/test_netlists/netlist8.cir
+*
+V1 vin 0 1 ac=1
+[2026-08-11 12:31:11] [INFO] Parsed Vsource: v1 vin 0 1 ac=1
+R1 vin 0 1k
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r1 vin 0 1k
+E1 vb 0 vin 0 0.5
+[2026-08-11 12:31:11] [INFO] Parsed VCVS: e1 vb 0 vin 0 0.5
+Rout vb vc 3
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: rout vb vc 3
+R2 vc 0 1k
+[2026-08-11 12:31:11] [INFO] Parsed Resistor: r2 vc 0 1k
+C1 vc 0 1uF
+[2026-08-11 12:31:11] [INFO] Parsed Capacitor: c1 vc 0 1uf
+.op
+.ac dec 10 1 10k
+[2026-08-11 12:31:11] [INFO] Flattening Netlist
+[2026-08-11 12:31:11] [INFO] running command op
+OP Results:
+	V( vc ) = 498.50449mV
+	V( vb ) = 500.00000mV
+	V( vin ) = 1.00000V
+	V( 0 ) = 0.00000V
+	I( v1 ) = -1.00000mA
+	I( e1 ) = -498.50449uA
+
+[2026-08-11 12:31:11] [INFO] running command ac
+AC Results:
+
+FREQ: 1.00000
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -18.79318urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.51433uA	PHASE(I( e1 )) = -3.13533rad
+
+FREQ: 1.25893
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -23.65921urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.52008uA	PHASE(I( e1 )) = -3.13371rad
+
+FREQ: 1.58489
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -29.78518urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.52920uA	PHASE(I( e1 )) = -3.13166rad
+
+FREQ: 1.99526
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -37.49732urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.54366uA	PHASE(I( e1 )) = -3.12909rad
+
+FREQ: 2.51189
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -47.20632urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.56657uA	PHASE(I( e1 )) = -3.12586rad
+
+FREQ: 3.16228
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -59.42924urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.60288uA	PHASE(I( e1 )) = -3.12179rad
+
+FREQ: 3.98107
+	ABS(V( vc )) = 498.50449mV	PHASE(V( vc )) = -74.81698urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.66042uA	PHASE(I( e1 )) = -3.11666rad
+
+FREQ: 5.01187
+	ABS(V( vc )) = 498.50448mV	PHASE(V( vc )) = -94.18900urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.75159uA	PHASE(I( e1 )) = -3.11021rad
+
+FREQ: 6.30957
+	ABS(V( vc )) = 498.50448mV	PHASE(V( vc )) = -118.57693urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 498.89607uA	PHASE(I( e1 )) = -3.10209rad
+
+FREQ: 7.94328
+	ABS(V( vc )) = 498.50448mV	PHASE(V( vc )) = -149.27951urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 499.12496uA	PHASE(I( e1 )) = -3.09187rad
+
+FREQ: 10.00000
+	ABS(V( vc )) = 498.50448mV	PHASE(V( vc )) = -187.93176urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 499.48752uA	PHASE(I( e1 )) = -3.07903rad
+
+FREQ: 12.58925
+	ABS(V( vc )) = 498.50447mV	PHASE(V( vc )) = -236.59207urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 500.06159uA	PHASE(I( e1 )) = -3.06289rad
+
+FREQ: 15.84893
+	ABS(V( vc )) = 498.50446mV	PHASE(V( vc )) = -297.85176urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 500.97008uA	PHASE(I( e1 )) = -3.04264rad
+
+FREQ: 19.95262
+	ABS(V( vc )) = 498.50445mV	PHASE(V( vc )) = -374.97315urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 502.40659uA	PHASE(I( e1 )) = -3.01725rad
+
+FREQ: 25.11886
+	ABS(V( vc )) = 498.50443mV	PHASE(V( vc )) = -472.06321urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 504.67491uA	PHASE(I( e1 )) = -2.98553rad
+
+FREQ: 31.62278
+	ABS(V( vc )) = 498.50440mV	PHASE(V( vc )) = -594.29235urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 508.24923uA	PHASE(I( e1 )) = -2.94605rad
+
+FREQ: 39.81072
+	ABS(V( vc )) = 498.50435mV	PHASE(V( vc )) = -748.16969urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 513.86322uA	PHASE(I( e1 )) = -2.89723rad
+
+FREQ: 50.11872
+	ABS(V( vc )) = 498.50427mV	PHASE(V( vc )) = -941.88973urad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 522.63728uA	PHASE(I( e1 )) = -2.83746rad
+
+FREQ: 63.09573
+	ABS(V( vc )) = 498.50414mV	PHASE(V( vc )) = -1.18577mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 536.24922uA	PHASE(I( e1 )) = -2.76534rad
+
+FREQ: 79.43282
+	ABS(V( vc )) = 498.50393mV	PHASE(V( vc )) = -1.49279mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 557.14187uA	PHASE(I( e1 )) = -2.68017rad
+
+FREQ: 100.00000
+	ABS(V( vc )) = 498.50361mV	PHASE(V( vc )) = -1.87932mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 588.73765uA	PHASE(I( e1 )) = -2.58249rad
+
+FREQ: 125.89254
+	ABS(V( vc )) = 498.50309mV	PHASE(V( vc )) = -2.36592mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 635.60430uA	PHASE(I( e1 )) = -2.47473rad
+
+FREQ: 158.48932
+	ABS(V( vc )) = 498.50228mV	PHASE(V( vc )) = -2.97851mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 703.51601uA	PHASE(I( e1 )) = -2.36127rad
+
+FREQ: 199.52623
+	ABS(V( vc )) = 498.50098mV	PHASE(V( vc )) = -3.74971mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 799.41656uA	PHASE(I( e1 )) = -2.24786rad
+
+FREQ: 251.18864
+	ABS(V( vc )) = 498.49893mV	PHASE(V( vc )) = -4.72060mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 931.39556uA	PHASE(I( e1 )) = -2.14028rad
+
+FREQ: 316.22777
+	ABS(V( vc )) = 498.49568mV	PHASE(V( vc )) = -5.94285mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 1.10884mA	PHASE(I( e1 )) = -2.04302rad
+
+FREQ: 398.10717
+	ABS(V( vc )) = 498.49054mV	PHASE(V( vc )) = -7.48156mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 1.34287mA	PHASE(I( e1 )) = -1.95859rad
+
+FREQ: 501.18723
+	ABS(V( vc )) = 498.48238mV	PHASE(V( vc )) = -9.41862mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 1.64699mA	PHASE(I( e1 )) = -1.88770rad
+
+FREQ: 630.95734
+	ABS(V( vc )) = 498.46944mV	PHASE(V( vc )) = -11.85714mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 2.03804mA	PHASE(I( e1 )) = -1.82974rad
+
+FREQ: 794.32823
+	ABS(V( vc )) = 498.44895mV	PHASE(V( vc )) = -14.92684mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 2.53716mA	PHASE(I( e1 )) = -1.78347rad
+
+FREQ: 1.00000K
+	ABS(V( vc )) = 498.41648mV	PHASE(V( vc )) = -18.79096mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 3.17106mA	PHASE(I( e1 )) = -1.74742rad
+
+FREQ: 1.25893K
+	ABS(V( vc )) = 498.36502mV	PHASE(V( vc )) = -23.65479mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 3.97348mA	PHASE(I( e1 )) = -1.72021rad
+
+FREQ: 1.58489K
+	ABS(V( vc )) = 498.28351mV	PHASE(V( vc )) = -29.77637mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 4.98695mA	PHASE(I( e1 )) = -1.70066rad
+
+FREQ: 1.99526K
+	ABS(V( vc )) = 498.15439mV	PHASE(V( vc )) = -37.47976mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 6.26500mA	PHASE(I( e1 )) = -1.68787rad
+
+FREQ: 2.51189K
+	ABS(V( vc )) = 497.94997mV	PHASE(V( vc )) = -47.17131mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 7.87473mA	PHASE(I( e1 )) = -1.68124rad
+
+FREQ: 3.16228K
+	ABS(V( vc )) = 497.62649mV	PHASE(V( vc )) = -59.35943mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 9.89994mA	PHASE(I( e1 )) = -1.68044rad
+
+FREQ: 3.98107K
+	ABS(V( vc )) = 497.11511mV	PHASE(V( vc )) = -74.67785mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 12.44468mA	PHASE(I( e1 )) = -1.68543rad
+
+FREQ: 5.01187K
+	ABS(V( vc )) = 496.30783mV	PHASE(V( vc )) = -93.91194mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 15.63687mA	PHASE(I( e1 )) = -1.69645rad
+
+FREQ: 6.30957K
+	ABS(V( vc )) = 495.03641mV	PHASE(V( vc )) = -118.02582mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 19.63157mA	PHASE(I( e1 )) = -1.71404rad
+
+FREQ: 7.94328K
+	ABS(V( vc )) = 493.04120mV	PHASE(V( vc )) = -148.18523mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 24.61219mA	PHASE(I( e1 )) = -1.73902rad
+
+FREQ: 10.00000K
+	ABS(V( vc )) = 489.92784mV	PHASE(V( vc )) = -185.76502mrad
+	ABS(V( vb )) = 500.00000mV	PHASE(V( vb )) = 0.00000rad
+	ABS(V( vin )) = 1.00000V	PHASE(V( vin )) = 0.00000rad
+	ABS(V( 0 )) = 0.00000V	PHASE(V( 0 )) = 0.00000rad
+	ABS(I( v1 )) = 1.00000mA	PHASE(I( v1 )) = 3.14159rad
+	ABS(I( e1 )) = 30.78697mA	PHASE(I( e1 )) = -1.77248rad
+
