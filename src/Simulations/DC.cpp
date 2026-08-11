@@ -64,8 +64,42 @@ void DC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     logger_->log(message.str());
 }
 
-void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
-    return;
+std::string generate_header(int num_variables, int num_inner_points) {
+    std::string message = "";
+    std::time_t now = std::time(nullptr);
+    std::string curr_time = std::ctime(&now);
+    message += "Title: EGspice DC Sweep Simulation\n";
+    message += "Date: " + curr_time;
+    message += "Plotname: DC Analysis\n"; 
+    message += "Flags: real\n";
+    message += "No. variables: " + std::to_string(num_variables) + "\n";
+    message += "No. points: " + std::to_string(num_inner_points) + "\n";
+    return message;
+}
+
+void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::string outputs_file_name) {
+    std::ofstream output_file;
+    std::string output_filename = outputs_file_name + ".dc.raw";
+    size_t num_inner_points = inner_points.size();
+    size_t num_outer_points = outer_points.size();
+    output_file.open(output_filename);
+    if (!output_file.is_open()) {
+        std::string err_message = "Could not open " + output_filename + " file!";
+        throw std::runtime_error(err_message);
+    }
+    auto vsources = circuit->vsources();
+    auto inductors = circuit->inductors();
+    int num_nodes = circuit->numNodes();
+    int num_vsources = circuit->numVsources();
+    int num_inductors = circuit->numInductors();
+    std::string header;
+    if (inner_vsource_name != "") {
+        header = generate_header(num_nodes+num_vsources+num_inductors, num_inner_points);
+    } else {
+        header = generate_header(num_nodes+num_vsources+num_inductors, num_outer_points);
+    }
+    output_file << header;
+    output_file.close();
 }
 
 void DC::expand_points() {
@@ -116,7 +150,7 @@ void DC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>>
     }
 }
 
-void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
+void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term, std::string outputs_file_name) {
     bool found_outer = false;
     bool found_inner = false;
     for (const auto& curr_vsource : circuit->vsources()) {
@@ -179,5 +213,5 @@ void DC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> c
         prev_outer_val = curr_outer_voltage;
     }
     report(circuit, outputs_mat);
-    return;
+    report_raw(circuit, outputs_mat, outputs_file_name);
 }

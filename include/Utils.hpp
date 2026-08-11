@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <complex>
+#include <ctime>
 
 class Utils
 {
@@ -31,6 +32,14 @@ public:
         // use box tolerance here too
         if (std::abs(err.real()) > abstol + reltol * std::abs(voltage.real())) return false;
         return (std::abs(err.imag()) <= abstol + reltol * std::abs(voltage.imag()));
+    }
+
+    static std::string get_current_time() {
+        auto now = std::chrono::system_clock::now();
+        std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+        char buffer[64];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
+        return std::string(buffer);
     }
 };
 

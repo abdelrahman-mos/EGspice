@@ -27,9 +27,7 @@ run: $(TARGET)
 
 clean:
 	rm -rf build
-	rm *.log
-	rm *.op*
-	rm *.ac*
+	rm -f *.log *.op* *.ac* *.dc*
 
 install: $(TARGET)
 	@echo "Installing EGspice to /usr/local/bin..."

@@ -116,8 +116,8 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
     logger_->log(message.str());
 }
 
-void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
-    
+void AC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs, std::string outputs_file_name) {
+    return;
 }
 
 void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, 
@@ -142,7 +142,7 @@ void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::com
     }
 }
 
-void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
+void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term, std::string outputs_file_name) {
     stamp(circuit, coeff, free_term, 1.0, 0.0);
     size_t num_rows = coeff->numRows();
     size_t num_points = frequency_points.size();
