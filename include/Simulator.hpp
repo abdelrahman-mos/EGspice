@@ -37,7 +37,9 @@ public:
             if (!command) continue;
             logger_->log(LogLevel::INFO, "running command " + command->name());
             if (typeid(*command) == typeid(AC)) {
-                command->run(circuit, circuit_matrix_ac, output_matrix_ac);
+                command->run(circuit, circuit_matrix_ac, output_matrix_ac, inputs.at(InputDataNames::OUTPUT_FILE_NAME));
+            } else if (typeid(*command) == typeid(DC)) {
+                command->run(circuit, circuit_matrix, output_matrix, inputs.at(InputDataNames::OUTPUT_FILE_NAME));
             } else {
                 command->run(circuit, circuit_matrix, output_matrix);
             }

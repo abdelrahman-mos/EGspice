@@ -64,6 +64,10 @@ void DC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     logger_->log(message.str());
 }
 
+void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
+    return;
+}
+
 void DC::expand_points() {
     // step will always be entered as an absolute value
     double start_voltage = (start_outer < end_outer) ? start_outer : end_outer;

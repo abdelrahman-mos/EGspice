@@ -116,6 +116,10 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
     logger_->log(message.str());
 }
 
+void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
+    
+}
+
 void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, 
     std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq, double prev_freq) {
     if ((coeff == nullptr) || first_point) {
