@@ -93,12 +93,22 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     int num_vsources = circuit->numVsources();
     int num_inductors = circuit->numInductors();
     std::string header;
-    if (inner_vsource_name != "") {
+    if (num_outer_points != 0) {
         header = generate_header(num_nodes+num_vsources+num_inductors, num_inner_points);
     } else {
         header = generate_header(num_nodes+num_vsources+num_inductors, num_outer_points);
     }
+
     output_file << header;
+    for (size_t curr_point_outer = 0; curr_point_outer < num_outer_points; curr_point_outer++) {
+        if (num_outer_points != 0) {
+            for (size_t curr_point_inner = 0; curr_point_inner < num_inner_points; curr_point_inner++) {
+                //TODO: implement this
+                continue;
+            }
+        }
+    }
+
     output_file.close();
 }
 
