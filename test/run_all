@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ ! -d $BUILD_DIR ]; then
+    echo "NO BUILD EXISTS, EXITING..."
+    exit 1
+fi
+
+BUILD="$BUILD_DIR/EGspice"
+
+for net in $PWD/test/test_netlists/*; do
+    echo "Running netlist $net"
+    if [ ! -e $net ]; then
+        echo "netlist $net does not exist"
+        continue
+    fi
+    $BUILD $net
+done
