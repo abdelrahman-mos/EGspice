@@ -42,6 +42,49 @@ void DC::report_curr_idx(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matri
     }
 }
 
+void DC::report_curr_idx_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::ofstream& output_file, 
+    size_t curr_idx, size_t curr_point, std::string independent_node) {
+    auto node_map = circuit->nodeMap();
+    int independent_node_num = node_map.at(independent_node);
+    output_file << "\t" << curr_point << "\t" << (*outputs)[curr_idx][independent_node_num-1] << "\n";
+    for (auto& curr_node : node_map) {
+        int node_num = curr_node.second;
+        double node_value = 0.0;
+        if ((node_num != 0) && (node_num != independent_node_num)) {
+            node_value = (*outputs)[curr_idx][node_num-1];
+        }
+        output_file << " \t\t" << node_value << "\n";
+    }
+
+    auto vsources = circuit->vsources();
+    auto inductors = circuit->inductors();
+    int num_nodes = circuit->numNodes();
+    int num_vsources = circuit->numVsources();
+    int num_inductors = circuit->numInductors();
+    for (int i = 0, j=0; i < num_vsources; i++) {
+        auto curr_vsource = vsources[i-j];
+        int stamp_index = num_nodes-num_inductors+curr_vsource->id;
+        double current = (*outputs)[curr_idx][stamp_index];
+        auto terminals = curr_vsource->get_terminals();
+        if (typeid(*curr_vsource) == typeid(CCCS)) {
+            output_file << " \t\t" << current << "\n";
+        } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+            output_file <<" \t\t" << current << "\n";
+            current = (*outputs)[curr_idx][stamp_index+1];
+            output_file << " \t\t" << current << "\n";
+            j++;
+        } else {
+            output_file << " \t\t" << current << "\n";
+        }
+    }
+
+    for (int i = 0; i < num_inductors; i++) {
+        auto curr_inductor = inductors[i];
+        double current = (*outputs)[curr_idx][num_nodes+num_vsources-1+curr_inductor->inductor_id];
+        output_file << " \t\t" << current << "\n";
+    }
+}
+
 void DC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) {
     std::stringstream message;
     message << "DC Results:\n";
@@ -182,20 +225,24 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     }
 
     header += variables_header;
+    output_file << std::scientific;
 
     if (!inner_exists) {
         output_file << header;
+        output_file << "Values:\n";
     }
 
     size_t curr_idx = 0;
     for (size_t curr_point_outer = 0; curr_point_outer < num_outer_points; curr_point_outer++) {
         if (inner_exists) {
             output_file << header;
+            output_file << "Values:\n";
             for (size_t curr_point_inner = 0; curr_point_inner < num_inner_points; curr_point_inner++) {
-                output_file << "Values:\n";
-                output_file << "\t" << curr_point_inner << "\tV(" << independent_node << ")\n";
-                continue;
+                report_curr_idx_raw(circuit, outputs, output_file, curr_idx, curr_point_inner, independent_node);
+                curr_idx++;
             }
+        } else {
+            report_curr_idx_raw(circuit, outputs, output_file, curr_idx++, curr_point_outer, independent_node);
         }
     }
 
