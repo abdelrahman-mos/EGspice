@@ -82,6 +82,7 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     std::string output_filename = outputs_file_name + ".dc.raw";
     size_t num_inner_points = inner_points.size();
     size_t num_outer_points = outer_points.size();
+    bool inner_exists = num_inner_points != 0;
     output_file.open(output_filename);
     if (!output_file.is_open()) {
         std::string err_message = "Could not open " + output_filename + " file!";
@@ -93,15 +94,84 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     int num_vsources = circuit->numVsources();
     int num_inductors = circuit->numInductors();
     std::string header;
-    if (num_outer_points != 0) {
+    if (inner_exists) {
         header = generate_header(num_nodes+num_vsources+num_inductors, num_inner_points);
     } else {
         header = generate_header(num_nodes+num_vsources+num_inductors, num_outer_points);
     }
+    // output_file << header;
+    auto node_map = circuit->nodeMap();
+    int outer_node_idx = -1;
+    int inner_node_idx = -1;
+    std::string variables_header;
+    variables_header += "Variables:\n";
+    std::shared_ptr<Vsource> outer_vsource;
+    std::shared_ptr<Vsource> inner_vsource;
+    std::string independent_node;
 
-    output_file << header;
+    for (auto& curr_vsource : vsources) {
+        if (curr_vsource->name() == outer_vsource_name) {
+            outer_vsource = curr_vsource;
+            if ((!inner_exists) || (inner_vsource != nullptr)) break;
+        }
+        if (inner_exists && (curr_vsource->name() == inner_vsource_name)) {
+            inner_vsource = curr_vsource;
+            if (outer_vsource != nullptr) break;
+        }
+    }
+
+    if (outer_vsource == nullptr) {
+        logger_->log(LogLevel::ERROR, "Incorrect value for vsource name in DC " + outer_vsource_name);
+        throw std::runtime_error("Incorrect value for vsource name in DC");
+    }
+    if (inner_exists && (inner_vsource == nullptr)) {
+        logger_->log(LogLevel::ERROR, "Incorrect value for vsource name in DC " + inner_vsource_name);
+        throw std::runtime_error("Incorrect value for vsource name in DC");
+    }
+
+    auto outer_terminals = outer_vsource->get_terminals();
+    for (auto& curr_node : node_map) {
+        if (curr_node.first == outer_terminals[0]) {
+            outer_node_idx = curr_node.second;
+            if (!inner_exists) {
+                independent_node = curr_node.first;
+                break;
+            } else if (inner_node_idx != -1) break;
+        }
+        if (inner_exists && (curr_node.first == inner_vsource->get_terminals()[0])) {
+            inner_node_idx = curr_node.second;
+            independent_node = curr_node.first;
+            if (outer_node_idx != -1) break;
+        }
+    }
+
+    if (outer_node_idx == -1) {
+        logger_->log(LogLevel::ERROR, "Cannot find node " + outer_vsource->get_terminals()[0]);
+        throw std::runtime_error("Incorrect value for node name in DC");
+    }
+    if (inner_exists && (inner_node_idx == -1)) {
+        logger_->log(LogLevel::ERROR, "Cannot find node " + outer_vsource->get_terminals()[0]);
+        throw std::runtime_error("Incorrect value for node name in DC");
+    }
+
+    variables_header += "\t0\tV(" + independent_node + ")\tvoltage\n";
+    int idx = 1;
+    for (auto& curr_node : node_map) {
+        if (curr_node.first != independent_node) {
+            variables_header += "\t" + std::to_string(idx++) + "\tV(" + curr_node.first + ")\tvoltage\n";
+        }
+    }
+
+    header += variables_header;
+
+    if (!inner_exists) {
+        output_file << header;
+    }
+
     for (size_t curr_point_outer = 0; curr_point_outer < num_outer_points; curr_point_outer++) {
-        if (num_outer_points != 0) {
+
+        if (inner_exists) {
+            output_file << header;
             for (size_t curr_point_inner = 0; curr_point_inner < num_inner_points; curr_point_inner++) {
                 //TODO: implement this
                 continue;
