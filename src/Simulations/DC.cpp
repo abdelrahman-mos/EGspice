@@ -95,9 +95,9 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     int num_inductors = circuit->numInductors();
     std::string header;
     if (inner_exists) {
-        header = generate_header(num_nodes+num_vsources+num_inductors, num_inner_points);
+        header = generate_header(num_nodes+num_vsources+num_inductors+1, num_inner_points);
     } else {
-        header = generate_header(num_nodes+num_vsources+num_inductors, num_outer_points);
+        header = generate_header(num_nodes+num_vsources+num_inductors+1, num_outer_points);
     }
     // output_file << header;
     auto node_map = circuit->nodeMap();
@@ -162,18 +162,38 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
         }
     }
 
+    for (int i = 0, j=0; i < num_vsources; i++) {
+        auto curr_vsource = vsources[i-j];
+        auto terminals = curr_vsource->get_terminals();
+        if (typeid(*curr_vsource) == typeid(CCCS)) {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + terminals[2] + ", " + terminals[3] + ")\tcurrent\n";
+        } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + terminals[2] + ", " + terminals[3] + ")\tcurrent\n";
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_vsource->name() + ")\tcurrent\n";
+            j++;
+        } else {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_vsource->name() + ")\tcurrent\n";
+        }
+    }
+
+    for (int i = 0; i < num_inductors; i++) {
+        auto curr_inductor = inductors[i];
+        variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_inductor->name() + ")\tcurrent\n";
+    }
+
     header += variables_header;
 
     if (!inner_exists) {
         output_file << header;
     }
 
+    size_t curr_idx = 0;
     for (size_t curr_point_outer = 0; curr_point_outer < num_outer_points; curr_point_outer++) {
-
         if (inner_exists) {
             output_file << header;
             for (size_t curr_point_inner = 0; curr_point_inner < num_inner_points; curr_point_inner++) {
-                //TODO: implement this
+                output_file << "Values:\n";
+                output_file << "\t" << curr_point_inner << "\tV(" << independent_node << ")\n";
                 continue;
             }
         }
