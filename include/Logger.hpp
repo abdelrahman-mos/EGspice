@@ -7,7 +7,7 @@
 #include <string>
 #include <mutex>
 #include <chrono>
-#include <ctime>
+#include "Utils.hpp"
 
 enum class LogLevel {
     INFO,
@@ -19,14 +19,6 @@ enum class LogLevel {
 class Logger {
     std::ofstream log_file_;
     std::mutex mutex_;
-
-    std::string get_current_time() {
-        auto now = std::chrono::system_clock::now();
-        std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-        char buffer[64];
-        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
-        return std::string(buffer);
-    }
 
     std::string level_to_string(LogLevel level) {
         switch (level)
@@ -61,7 +53,7 @@ public:
     void log(LogLevel level, const std::string& message) {
 
         // format message: [2026-03-25 17:15:22] [INFO] This is a message
-        std::string log_entry = "[" + get_current_time() + "] [" + level_to_string(level) + "] " + message + "\n";
+        std::string log_entry = "[" + Utils::get_current_time() + "] [" + level_to_string(level) + "] " + message + "\n";
         log(log_entry);
     }
 

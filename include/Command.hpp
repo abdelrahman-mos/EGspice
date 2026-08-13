@@ -26,11 +26,14 @@ public:
     std::string name() const {
         return name_;
     }
-    
+
     virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) {
         return;
     }
-    virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) {
+    virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term, std::string outputs_file_name) {
+        return;
+    }
+    virtual void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term, std::string outputs_file_name) {
         return;
     }
 
@@ -116,6 +119,12 @@ public:
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) {
         return;
     }
+    virtual void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::string outputs_file_name) {
+        return;
+    }
+    virtual void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs, std::string outputs_file_name) {
+        return;
+    }
 };
 
 class OP : public Simulation {
@@ -149,8 +158,9 @@ public:
         first_point = true;
     }
     void stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, std::shared_ptr<Matrix<std::complex<double>>>& free_term, double freq, double prev_freq=0.0) override;
-    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term) override;
+    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> coeff, std::shared_ptr<Matrix<std::complex<double>>> free_term, std::string outputs_file_name) override;
     virtual void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs) override;
+    virtual void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs, std::string outputs_file_name) override;
 };
 
 class DC : public Simulation {
@@ -176,7 +186,9 @@ public:
         double outer_value, double prev_outer_value, double inner_value, double prev_inner_value) override;
     void report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs) override;
     void report_curr_idx(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::stringstream& message, size_t curr_idx, std::string pre_text = "");
-    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term) override;
+    void report_curr_idx_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::ofstream& output_file, size_t curr_idx, size_t curr_point, std::string independent_node);
+    virtual void report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::string outputs_file_name) override;
+    void run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> coeff, std::shared_ptr<Matrix<double>> free_term, std::string outputs_file_name) override;
 };
 
 #endif
