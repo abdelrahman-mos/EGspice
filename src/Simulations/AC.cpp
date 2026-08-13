@@ -117,7 +117,90 @@ void AC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::co
 }
 
 void AC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>> outputs, std::string outputs_file_name) {
-    return;
+    std::ofstream output_file;
+    std::string output_filename = outputs_file_name + ".ac.raw";
+    auto node_map = circuit->nodeMap();
+    size_t num_points = frequency_points.size();
+    output_file.open(output_filename);
+    if (!output_file.is_open()) {
+        std::string err_message = "Could not open " + output_filename + " file!";
+        throw std::runtime_error(err_message);
+    }
+    auto vsources = circuit->vsources();
+    auto inductors = circuit->inductors();
+    int num_nodes = circuit->numNodes();
+    int num_vsources = circuit->numVsources();
+    int num_inductors = circuit->numInductors();
+    std::string header;
+    header = Utils::generate_header("AC", "complex", num_nodes+num_vsources+num_inductors+2, num_points);
+    std::string variables_header;
+    variables_header += "Variables:\n";
+    variables_header += "\t0\tfrequency\tfrequency\n";
+    int idx = 1;
+    for (auto& curr_node : node_map) {
+        variables_header += "\t" + std::to_string(idx++) + "\tV(" + curr_node.first + ")\tvoltage\n";
+    }
+
+    for (int i = 0, j = 0; i < num_vsources; i++) {
+        auto curr_vsource = vsources[i-j];
+        size_t stamp_index = num_nodes-num_inductors+curr_vsource->id;
+        auto terminals = curr_vsource->get_terminals();
+        if (typeid(*curr_vsource) == typeid(CCCS)) {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + terminals[2] + "," + terminals[3] + ")\tcurrent\n";
+        } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + terminals[2] + "," + terminals[3] + ")\tcurrent\n";
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_vsource->name() + ")\tcurrent\n";
+            j++;
+        } else {
+            variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_vsource->name() + ")\tcurrent\n";
+        }
+    }
+
+    for (int i = 0; i < num_inductors; i++) {
+        auto curr_inductor = inductors[i];
+        variables_header += "\t" + std::to_string(idx++) + "\tI(" + curr_inductor->name() + ")\tcurrent\n";
+    }
+
+    header += variables_header;
+    output_file << std::scientific;
+    output_file << header;
+    output_file << "Values:\n";
+
+    for (size_t curr_point = 0; curr_point < num_points; curr_point++) {
+        output_file << "\t" << curr_point << "\t" << frequency_points[curr_point] << "\n";
+        for (auto& curr_node : node_map) {
+            int node_num = curr_node.second;
+            std::complex<double> node_value = 0.0;
+            if (node_num != 0) {
+                node_value = (*outputs)[curr_point][node_num-1];
+            }
+            output_file << "\t\t" << std::real(node_value) << "," << std::imag(node_value) << "\n";
+        }
+
+        for (int i = 0, j = 0; i < num_vsources; i++) {
+            auto curr_vsource = vsources[i-j];
+            size_t stamp_index = num_nodes-num_inductors+curr_vsource->id;
+            auto current = (*outputs)[curr_point][stamp_index];
+            auto terminals = curr_vsource->get_terminals();
+            if (typeid(*curr_vsource) == typeid(CCCS)) {
+                output_file << "\t\t" << std::real(current) << "," << std::imag(current) << "\n";
+            } else if (typeid(*curr_vsource) == typeid(CCVS)) {
+                output_file << "\t\t" << std::real(current) << "," << std::imag(current) << "\n";
+                current = (*outputs)[stamp_index+1][0];
+                output_file << "\t\t" << std::real(current) << "," << std::imag(current) << "\n";
+                j++;
+            } else {
+                output_file << "\t\t" << std::real(current) << "," << std::imag(current) << "\n";
+            }
+        }
+
+        for (int i = 0; i < num_inductors; i++) {
+            auto curr_inductor = inductors[i];
+            auto current = (*outputs)[num_nodes+num_vsources-1+curr_inductor->inductor_id][0];
+            output_file << "\t\t" << std::real(current) << "," << std::imag(current) << "\n";
+        }
+    }
+    output_file.close();
 }
 
 void AC::stamp(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::complex<double>>>& coeff, 
@@ -165,5 +248,6 @@ void AC::run(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<std::compl
         outputs_mat->emplace_at(outputs->transpose()[0], i);
     }
     report(circuit, outputs_mat);
+    report_raw(circuit, outputs_mat, outputs_file_name);
     return;
 }

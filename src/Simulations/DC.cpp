@@ -107,19 +107,6 @@ void DC::report(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>
     logger_->log(message.str());
 }
 
-std::string generate_header(int num_variables, int num_inner_points) {
-    std::string message = "";
-    std::time_t now = std::time(nullptr);
-    std::string curr_time = std::ctime(&now);
-    message += "Title: EGspice DC Sweep Simulation\n";
-    message += "Date: " + curr_time;
-    message += "Plotname: DC Analysis\n"; 
-    message += "Flags: real\n";
-    message += "No. variables: " + std::to_string(num_variables) + "\n";
-    message += "No. points: " + std::to_string(num_inner_points) + "\n";
-    return message;
-}
-
 void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<double>> outputs, std::string outputs_file_name) {
     std::ofstream output_file;
     std::string output_filename = outputs_file_name + ".dc.raw";
@@ -138,9 +125,9 @@ void DC::report_raw(std::shared_ptr<Circuit> circuit, std::shared_ptr<Matrix<dou
     int num_inductors = circuit->numInductors();
     std::string header;
     if (inner_exists) {
-        header = generate_header(num_nodes+num_vsources+num_inductors+1, num_inner_points);
+        header = Utils::generate_header("DC", "real", num_nodes+num_vsources+num_inductors+1, num_inner_points);
     } else {
-        header = generate_header(num_nodes+num_vsources+num_inductors+1, num_outer_points);
+        header = Utils::generate_header("DC", "real", num_nodes+num_vsources+num_inductors+1, num_outer_points);
     }
     // output_file << header;
     auto node_map = circuit->nodeMap();

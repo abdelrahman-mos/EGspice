@@ -41,6 +41,19 @@ public:
         std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now_c));
         return std::string(buffer);
     }
+
+    static std::string generate_header(std::string analysis, std::string data_type, int num_variables, int num_points) {
+        std::string message = "";
+        std::time_t now = std::time(nullptr);
+        std::string curr_time = std::ctime(&now);
+        message += "Title: EGspice" + analysis + "Sweep Simulation\n";
+        message += "Date: " + curr_time;
+        message += "Plotname:" + analysis + "Analysis\n"; 
+        message += "Flags:" + data_type + "\n";
+        message += "No. variables: " + std::to_string(num_variables) + "\n";
+        message += "No. points: " + std::to_string(num_points) + "\n";
+        return message;
+    }
 };
 
 
